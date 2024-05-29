@@ -1,0 +1,335 @@
+.home-page {
+    display: flex;
+    height: 100vh;
+    overflow-x: hidden; 
+}
+
+.menu-background {
+    width: 281px;
+    height: 100%;
+    flex-shrink: 0;
+    background: #2B79DA;
+}
+
+.content-background {
+    width: calc(100% - 281px); 
+    height: 100%;
+    flex-shrink: 0;
+    background: #D2E1FC;
+    
+}
+
+
+@media screen and (max-width: 1280px) {
+    .menu-background {
+        display: none; 
+    }
+
+    .content-background {
+        width: 100%; 
+    }
+}
+
+
+.menu-options div {
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+    padding: 15px 0; 
+    text-align: center;
+    font-family: Inter;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease; 
+}
+
+.menu-option {
+    text-decoration: none;
+    display: inline-block;
+    color: #FFF;
+}
+
+.menu-options div:hover .menu-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 224px;
+    height: 54px;
+    align-items: center;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: #FFF;
+    color: #2B79DA; 
+}
+
+
+.logo {
+    width: 132px;
+    height: 132px;
+    border-radius: 10px;
+    background: #D9D9D9;
+    margin-top: 30px; 
+}
+
+.logout-button {
+    color: #2B79DA; 
+    width: 134px;
+    height: 54px;
+    border-radius: 10px;
+    background: #FFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Inter;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: normal;
+    position: absolute;
+    bottom: 20px; 
+    left: 3.5%; 
+    text-decoration: none;
+}
+
+.logout-button:hover {
+    background: none;
+    color: white;
+    border: 1px solid #FFF;
+}
+
+.welcome-message {
+    padding-top: 50px;
+}
+
+.welcome-message,
+.info-message {
+    color: #575757;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    padding-left: 50px;
+    text-align: left;
+
+    max-width: 529px; 
+    height: 38px; 
+    overflow: hidden; 
+}
+
+.notify svg {
+    display: flex;
+    margin: auto;
+}
+
+.custom-rectangle {
+    width: 100%;
+    max-width: 1539px; 
+    height: 258px;
+    flex-shrink: 0;
+    border-radius: 37px;
+    background: #FFF;
+    margin: 20px auto; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rectangle-content {
+    text-align: center;
+}
+
+.rectangle-title {
+    color: #FFF;
+    font-family: Inter;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    margin-bottom: 10px; 
+}
+
+.rectangle-subtitle {
+    color: #FFF;
+    font-family: Inter;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    margin-bottom: 20px; 
+}
+
+.rectangle-button {
+    width: 190px;
+    height: 55px;
+    border-radius: 8px;
+    border: 1px solid #FFF;
+    background-color: transparent;
+    color: #FFF;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    padding: 15px;
+}
+
+.rectangle-button:hover {
+    background-color: #FFF;
+    color: #000;
+}
+
+
+
+.custom-rectangle {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('https://cdn.discordapp.com/attachments/1237937590917664779/1243240615232143370/5559852_1.png?ex=6657590c&is=6656078c&hm=d3f4c46b9dbf3c17ca4325cbff5f97475a863828dc09126d2bdc17a0d9627c64&');
+    background-size: cover;
+    background-position: center;
+}
+
+.rectangle-content {
+    text-align: center;
+    color: #FFF;
+}
+
+.rectangle-title {
+    font-size: 24px;
+    font-weight: 700; 
+}
+
+.rectangle-subtitle {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.rectangle-button {
+    width: 190px;
+    height: 55px;
+    border-radius: 8px;
+    border: 1px solid #FFF;
+    background-color: transparent;
+    color: #FFF;
+    font-family: Inter;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.rectangle-button:hover {
+    background-color: #FFF;
+    color: #2B79DA;
+}
+
+.square-label  {
+    text-decoration: none;
+    color: #575757;
+    text-align: center;
+    font-family: Inter;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    text-transform: uppercase;
+    padding-top: 50%;
+}
+
+.second-rectangle {
+    width: 1539px;
+    height: 437px;
+    flex-shrink: 0;
+    border-radius: 37px;
+    background: #FFF;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 20px auto; 
+}
+
+.second-rectangle-title {
+    color: #575757;
+    font-family: Inter;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    margin-bottom: 20px;
+}
+
+.square-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.square-labels {
+    padding-top: 46%;
+}
+
+.square {
+    text-decoration: none;
+    width: 278px;
+    height: 278px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background-image: url('https://cdn.discordapp.com/attachments/1237937590917664779/1243286510887764028/old-books-arrangement-with-copy-space_23-2148898331.png?ex=665783cb&is=6656324b&hm=2c2262089b5a458f970a6d65d5dfc1fd3b05ef5de487be282e5f94ed10b51aa3&');
+    background-size: cover;
+    background-position: center;
+    margin: 0 10px;
+}
+
+.square:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0,0,0, 0.2);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 500px;
+    max-width: 80%;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.notify {
+    background: none;
+    border: none;
+    cursor: pointer;
+}

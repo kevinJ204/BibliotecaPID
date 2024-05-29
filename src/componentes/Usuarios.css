@@ -1,0 +1,286 @@
+
+
+.page-title {
+    color: #575757;
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    display: flex;
+    margin-left: 50px;
+    margin-top: 50px;
+}
+
+.search-add {
+    margin-top: 13px;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 100px;
+    left: 50px;
+}
+
+.search-container {
+    position: relative;
+    margin-left: 280px;
+}
+
+.search-box {
+    width: 313px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: #FFF;
+    padding-left: 50px;
+    border: none;
+}
+
+.search-box onlick{
+    border: none;
+}
+
+.search-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.add-button {
+    border: none;
+    width: 159px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    color: #FFF;
+    font-family: 'Gotham Pro', sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.add-button {
+    background: #2B79DA;
+}
+
+.add-button:hover{
+    background: #0a2444;
+}
+
+.delete-button:hover svg {
+    color: red;
+}
+
+.delete-button {
+    border: none;
+}
+
+.edit-button {
+    border: none;
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 24px;
+        text-align: center;
+    }
+
+    .search-box {
+        height: 40px;
+    }
+
+    .add-button,
+    .delete-button {
+        height: 40px;
+        font-size: 16px;
+    }
+}
+
+
+
+.table-background {
+    width: 1539px;
+    height: 721px;
+    flex-shrink: 0;
+    border-radius: 37px;
+    background: #FFF;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin: 90px auto;
+}
+
+
+
+.modal {
+    
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal input,select{
+    margin-top: 10px;
+    width: 313px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: #f0f0f0;
+    padding-left: 50px;
+    border: none;
+}
+
+.modal-content {
+    margin-bottom: 20px;
+}
+
+.modal button {
+    border: none;
+    width: 159px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    color: #575757;
+    font-family: 'Gotham Pro', sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    cursor: pointer;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+.modal button:hover{
+    color: white;
+    background-color: #575757;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color: #999;
+    font-size: 20px;
+}
+
+.close:hover {
+    color: #555;
+}
+
+
+.table-background table th {
+    padding-top: 30px;
+    padding-right: 250px;
+    color: #575757;
+    font-family: Inter;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+.table-background table th:first-child {
+    padding-left: 0;
+}
+
+.table-background table th:last-child {
+    padding-right: 0;
+}
+
+.table-background table td {
+    padding: 10px;
+    text-align: center;
+    color: #575757;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.table-background table td:first-child {
+    text-align: left;
+}
+
+.table-background table td:last-child {
+    text-align: right;
+}
+
+.table-row.selected {
+    background-color: #0000;
+  }
+
+
+
+.table-row-text {
+    background-color: #f0f0f0;
+}
+  
+.error {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.confirmation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: #575757;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.confirmation-modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    position: relative;
+}
+
+.confirmation-modal-content .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.confirmation-modal button {
+    border: none;
+    width: 159px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    color: #575757;
+    font-family: 'Gotham Pro', sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    cursor: pointer;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+.confirmation-modal button:hover{
+    color: white;
+    background-color: #575757;
+}
