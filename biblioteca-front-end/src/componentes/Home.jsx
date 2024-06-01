@@ -22,6 +22,9 @@ const Home = () => {
                     <div>
                         <Link to="/GerenciarGeneros" className="menu-option">Gerenciar Gêneros</Link>
                     </div>
+                    <div>
+                        <Link to="/GerenciarAutores" className="menu-option">Gerenciar Autores</Link>
+                    </div>
                     {/* <div>
                         <Link to="/GerenciarExemplares" className="menu-option">Gerenciar Exemplares</Link>
                     </div>

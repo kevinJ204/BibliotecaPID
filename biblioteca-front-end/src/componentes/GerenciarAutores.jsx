@@ -52,13 +52,10 @@ const GerenciarAutores = () => {
                         <Link to="/GerenciarTitulos" className="menu-option">Gerenciar Títulos</Link>
                     </div>
                     <div>
+                        <Link to="/GerenciarGeneros" className="menu-option">Gerenciar Gêneros</Link>
+                    </div>
+                    <div>
                         <Link to="/GerenciarAutores" className="menu-option">Gerenciar Autores</Link>
-                    </div>
-                    <div>
-                        <Link to="/GerenciarExemplares" className="menu-option">Gerenciar Exemplares</Link>
-                    </div>
-                    <div>
-                        <Link to="/GerenciarEmprestimos" className="menu-option">Gerenciar empréstimos</Link>
                     </div>
                 </div>
                 <Link to="/" className="logout-button">

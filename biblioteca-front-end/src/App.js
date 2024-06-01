@@ -1,14 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './componentes/login';
-import Home from './componentes/Home';
-import GerenciarUsuarios from './componentes/GerenciarUsuarios'
-import GerenciarAlunos from './componentes/GerenciarAlunos';
-import GerenciarTitulos from './componentes/GerenciarTitulos';
-import GerenciarAutores from './componentes/GerenciarAutores';
-import GerenciarExemplares from './componentes/GerenciarExemplares'
-import GerenciarEmprestimos from './componentes/GerenciarEmpréstimos'
-import GerenciarGeneros from './componentes/GerenciarGeneros';
+import Login from './componentes/login.jsx';
+import Home from './componentes/Home.jsx';
+import GerenciarUsuarios from './componentes/GerenciarUsuarios.jsx'
+import GerenciarAlunos from './componentes/GerenciarAlunos.jsx';
+import GerenciarTitulos from './componentes/GerenciarTitulos.jsx';
+import GerenciarAutores from './componentes/GerenciarAutores.jsx';
+import GerenciarExemplares from './componentes/GerenciarExemplares.jsx'
+import GerenciarEmprestimos from './componentes/GerenciarEmpréstimos.jsx'
+import GerenciarGeneros from './componentes/GerenciarGeneros.jsx';
 
 
 import './App.css';

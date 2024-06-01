@@ -92,6 +92,9 @@ const GerenciarTitulos = () => {
                     <div>
                         <Link to="/GerenciarGeneros" className="menu-option">Gerenciar Gêneros</Link>
                     </div>
+                    <div>
+                        <Link to="/GerenciarAutores" className="menu-option">Gerenciar Autores</Link>
+                    </div>
                 </div>
                 <Link to="/home" className="logout-button">
                     VOLTAR
