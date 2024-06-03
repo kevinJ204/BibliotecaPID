@@ -5,7 +5,7 @@ export default class AlunoDAO {
     async gravar(aluno){
         if (aluno instanceof Aluno){
             const conexao = await conectar();
-            const sql = `INSERT INTO alunos (nome, email, ra, telefone) values (?, ?, ?)`;
+            const sql = `INSERT INTO alunos (nome, email, ra, telefone) values (?, ?, ?, ?)`;
             const parametros = [
                 aluno.getNome(),
                 aluno.getEmail(),
@@ -26,7 +26,8 @@ export default class AlunoDAO {
                 aluno.getNome(),
                 aluno.getEmail(),
                 aluno.getRa(),
-                aluno.getTelefone()
+                aluno.getTelefone(),
+                aluno.getId()
             ];
 
             await conexao.execute(sql,parametros);
@@ -64,6 +65,7 @@ export default class AlunoDAO {
             const aluno = new Aluno(
                 registro.id,
                 registro.nome,
+                registro.email,
                 registro.ra,
                 registro.telefone
             );

@@ -8,14 +8,20 @@ import rotaTitulo from "./Rotas/rotaTitulo.js";
 import rotaGenero from "./Rotas/rotaGenero.js";
 import rotaAutor from "./Rotas/rotaAutor.js";
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
-
-const host='localhost';
+const host = 'localhost';
 const porta = 3001;
 
 const app = express();
-app.use(express.json()); 
+app.use(express.json());
 app.use(cookieParser());
+
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
     res.cookie('SameSite', 'None', {
@@ -25,13 +31,13 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/usuarios',rotaUsuario);
-app.use('/alunos',rotaAluno);
-app.use('/titulos',rotaTitulo);
-app.use('/generos',rotaGenero);
-app.use('/autores',rotaAutor);
+app.use('/usuarios', rotaUsuario);
+app.use('/alunos', rotaAluno);
+app.use('/titulos', rotaTitulo);
+app.use('/generos', rotaGenero);
+app.use('/autores', rotaAutor);
 
 app.use(session({
     secret: 'chaveSecreta',
@@ -41,15 +47,14 @@ app.use(session({
         secure: false,
         maxAge: 60 * 1000 * 30
     }
-}))
+}));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(process.cwd(), 'build', 'index.html'));
 });
 
 app.use(express.static(path.join(process.cwd(), 'build')));
-//app.use(autenticar, express.static(path.join(process.cwd(), 'privado')));
 
 app.listen(porta, host, () => {
     console.log(`Servidor escutando em http://${host}:${porta}`);
-})
+});

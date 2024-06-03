@@ -13,17 +13,12 @@ const GerenciarUsuarios = () => {
     const [selectedUsuarioIndex, setSelectedUsuarioIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
+    const [confirmationMessage, setConfirmationMessage] = useState('');
+    const [deleteConfirmationModalIsOpen, setDeleteConfirmationModalIsOpen] = useState(false);
+    const [usuarioADeletar, setUsuarioADeletar] = useState(null);
     const usuarioServico = new UsuarioServico();
 
     useEffect(() => {
-        async function fetchUsuarios() {
-            try {
-                const dados = await usuarioServico.obterUsuarios();
-                setUsuarios(dados);
-            } catch (error) {
-                console.error(error);
-            }
-        }
         fetchUsuarios();
     }, []);
 
@@ -33,6 +28,44 @@ const GerenciarUsuarios = () => {
         if (!/\S+@\S+\.\S+/.test(novoUsuario.email)) newErrors.email = 'Formato de email inválido';
         if (novoUsuario.senha.length < 6) newErrors.senha = 'Senha deve ter no mínimo 6 caracteres';
         return newErrors;
+    };    
+
+    const fetchUsuarios = async () => {
+        try {
+            const dados = await usuarioServico.obterUsuarios();
+            setUsuarios(dados);
+        } catch (error) {
+            alert(error);
+        }
+    };
+
+    const validateField = (field, value) => {
+        const newErrors = { ...errors };
+        if (field === 'nome') {
+            if (value.length < 3) {
+                newErrors.nome = 'Usuário deve ter no mínimo 3 caracteres';
+            } else {
+                delete newErrors.nome;
+            }
+        } else if (field === 'email') {
+            if (!/\S+@\S+\.\S+/.test(value)) {
+                newErrors.email = 'Formato de email inválido';
+            } else {
+                delete newErrors.email;
+            }
+        } else if (field === 'senha') {
+            if (value.length < 6) {
+                newErrors.senha = 'Senha deve ter no mínimo 6 caracteres';
+            } else {
+                delete newErrors.senha;
+            }
+        }
+        setErrors(newErrors);
+    };
+
+    const handleChange = (field, value) => {
+        setNovoUsuario({ ...novoUsuario, [field]: value });
+        validateField(field, value);
     };
 
     const handleAddUsuario = async () => {
@@ -41,34 +74,44 @@ const GerenciarUsuarios = () => {
             try {
                 if (selectedUsuarioIndex !== null) {
                     await usuarioServico.atualizarUsuario(usuarios[selectedUsuarioIndex].id, novoUsuario);
+                    setSelectedUsuarioIndex(null);
+                    setConfirmationMessage('Usuário atualizado com sucesso!');
                 } else {
-                    const novoUsuarioAdicionado = await usuarioServico.adicionarUsuario(novoUsuario);
-                    setUsuarios([...usuarios, novoUsuarioAdicionado]);
+                    await usuarioServico.adicionarUsuario(novoUsuario);
+                    setConfirmationMessage('Usuário cadastrado com sucesso!');
                 }
+                fetchUsuarios();
                 setNovoUsuario({ nome: '', email: '', senha: '', nivel: 'Basico' });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
-                console.error(error);
+                alert(error);
             }
         } else {
             setErrors(newErrors);
         }
     };
 
-    const handleDeleteUsuario = async (index) => {
+    const handleDeleteUsuario = (index) => {
+        setUsuarioADeletar(index);
+        setDeleteConfirmationModalIsOpen(true);
+    };
+
+    const confirmDeleteUsuario = async () => {
         try {
-            await usuarioServico.deletarUsuario(usuarios[index].id);
-            const updatedUsuarios = usuarios.filter((_, i) => i !== index);
-            setUsuarios(updatedUsuarios);
+            await usuarioServico.deletarUsuario(usuarios[usuarioADeletar].id);
+            fetchUsuarios();
+            setDeleteConfirmationModalIsOpen(false);
+            setUsuarioADeletar(null);
         } catch (error) {
-            console.error(error);
+            alert(error);
         }
     };
 
     const handleEditUsuario = (index) => {
         setNovoUsuario(usuarios[index]);
         setSelectedUsuarioIndex(index);
+        setErrors({});
         setModalIsOpen(true);
     };
 
@@ -82,6 +125,12 @@ const GerenciarUsuarios = () => {
         usuario.nivel.toLowerCase().includes(searchValue.toLowerCase())
     );
 
+    const closeModal = () => {
+        setModalIsOpen(false);
+        setErrors({});
+        setNovoUsuario({ nome: '', email: '', senha: '', nivel: 'Basico' });
+        setSelectedUsuarioIndex(null);
+    };
 
     return (
         <div className="home-page">
@@ -125,13 +174,12 @@ const GerenciarUsuarios = () => {
                         />
                         <span className="search-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path d="M12.5 11H11.71L11.43 10.73C12.4439 9.55402 13.0011 8.0527 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="#575757"/>
+                        <path d="M12.5 11H11.71L11.43 10.73C12.4439 9.55402 13.0011 8.0527 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.0527 13.0011 9.55402 12.4439 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C5.50739 11 4.53324 10.7063 3.6967 10.1583C2.86015 9.61036 2.20435 8.8328 1.80399 7.90599C1.40362 6.97917 1.27675 5.95079 1.43864 4.95341C1.60053 3.95602 2.04313 3.03153 2.70711 2.26757C3.3711 1.5036 4.22734 0.937269 5.17519 0.636428C6.12304 0.335587 7.12926 0.312878 8.08849 0.571325C9.04771 0.829772 9.92095 1.35992 10.6066 2.1005C11.2922 2.84107 11.7566 3.76546 11.9385 4.76537C12.1205 5.76528 12.0124 6.79795 11.6265 7.73363C11.2407 8.6693 10.5946 9.46554 9.76777 10.0156C8.94096 10.5657 7.97368 10.8428 6.985 10.82H6.5V11Z" fill="#787486"/>
                         </svg>
                         </span>
                     </div>
                     <button className="add-button" onClick={() => setModalIsOpen(true)}>NOVO +</button>
                 </div>
-
                 <div className="table-background">
                     <table>
                         <thead>
@@ -175,30 +223,50 @@ const GerenciarUsuarios = () => {
             {modalIsOpen && (
                 <div className="modal">
                     <div className="modal-content">
-                        <span className="close" onClick={() => setModalIsOpen(false)}>&times;</span>
+                        <span className="close" onClick={closeModal}>&times;</span>
                         <h2>{selectedUsuarioIndex !== null ? 'Editar Usuário' : 'Adicionar Novo Usuário'}</h2>
                         <div>
-                            <input type="text" placeholder="Usuário" value={novoUsuario.nome} onChange={(e) => setNovoUsuario({ ...novoUsuario, nome: e.target.value })} />
+                            <input
+                                type="text"
+                                placeholder="Usuário"
+                                value={novoUsuario.nome}
+                                onChange={(e) => handleChange('nome', e.target.value)}
+                            />
                             {errors.nome && <div className="error">{errors.nome}</div>}
                         </div>
                         <div>
-                            <input type="email" placeholder="Email" value={novoUsuario.email} onChange={(e) => setNovoUsuario({ ...novoUsuario, email: e.target.value })} />
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={novoUsuario.email}
+                                onChange={(e) => handleChange('email', e.target.value)}
+                            />
                             {errors.email && <div className="error">{errors.email}</div>}
                         </div>
                         <div>
-                            <input type="password" placeholder="Senha" value={novoUsuario.senha} onChange={(e) => setNovoUsuario({ ...novoUsuario, senha: e.target.value })} />
+                            <input
+                                type="password"
+                                placeholder="Senha"
+                                value={novoUsuario.senha}
+                                onChange={(e) => handleChange('senha', e.target.value)}
+                            />
                             {errors.senha && <div className="error">{errors.senha}</div>}
                         </div>
                         <div>
-                            <select value={novoUsuario.nivel} onChange={(e) => setNovoUsuario({ ...novoUsuario, nivel: e.target.value })}>
-                                <option value="Basico">Básico</option>
-                                <option value="Intermediario">Intermediário</option>
-                                <option value="Avancado">Avançado</option>
+                            <select
+                                value={novoUsuario.nivel}
+                                onChange={(e) => setNovoUsuario({ ...novoUsuario, nivel: e.target.value })}
+                            >
+                                <option value="Básico">Básico</option>
+                                <option value="Intermediário">Intermediário</option>
+                                <option value="Avançado">Avançado</option>
                             </select>
                         </div>
                         <div>
-                            <button className="cancel" onClick={() => setModalIsOpen(false)}>Cancelar</button>
-                            <button className="add" onClick={handleAddUsuario}>{selectedUsuarioIndex !== null ? 'Salvar' : 'Adicionar'}</button>
+                            <button className="cancel" onClick={closeModal}>Cancelar</button>
+                            <button className="add" onClick={handleAddUsuario} disabled={Object.keys(errors).length > 0}>
+                                {selectedUsuarioIndex !== null ? 'Salvar' : 'Adicionar'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -208,8 +276,19 @@ const GerenciarUsuarios = () => {
                 <div className="confirmation-modal">
                     <div className="confirmation-modal-content">
                         <span className="close" onClick={() => setConfirmationModalIsOpen(false)}>&times;</span>
-                        <h2>Usuário cadastrado com sucesso!</h2>
+                        <h2>{confirmationMessage}</h2>
                         <button onClick={() => setConfirmationModalIsOpen(false)}>Fechar</button>
+                    </div>
+                </div>
+            )}
+
+            {deleteConfirmationModalIsOpen && (
+                <div className="confirmation-modal">
+                    <div className="confirmation-modal-content">
+                        <span className="close" onClick={() => setDeleteConfirmationModalIsOpen(false)}>&times;</span>
+                        <h2>Tem certeza que deseja deletar este usuário?</h2>
+                        <button onClick={confirmDeleteUsuario}>Confirmar</button>
+                        <button onClick={() => setDeleteConfirmationModalIsOpen(false)}>Cancelar</button>
                     </div>
                 </div>
             )}

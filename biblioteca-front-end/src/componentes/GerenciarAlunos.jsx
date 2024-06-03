@@ -1,55 +1,129 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Alunos.css';
+import InputMask from 'react-input-mask';
+import AlunoServico from '../servicos/AlunoServico';
 
-const GerenciarUsuarios = () => {
+const GerenciarAlunos = () => {
     const [searchValue, setSearchValue] = useState('');
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um aluno...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [alunos, setAlunos] = useState([]);
-    const [novoAluno, setNovoAluno] = useState({ nome: '', email: '', ra: '', telefone: '' });
+    const [novoAluno, setNovoAluno] = useState({ nome: '', email: '', ra: 0, telefone: 0 });
     const [selectedAlunoIndex, setSelectedAlunoIndex] = useState(null);
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
     const [errors, setErrors] = useState({});
+    const [confirmationMessage, setConfirmationMessage] = useState('');
+    const [deleteConfirmationModalIsOpen, setDeleteConfirmationModalIsOpen] = useState(false);
+    const [alunoADeletar, setAlunoADeletar] = useState(null);
+    const alunoServico = new AlunoServico();
+
+    useEffect(() => {
+        fetchAlunos();
+    }, []);
 
     const validateForm = () => {
         const newErrors = {};
+        const telefoneNumerico = novoAluno.telefone.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
+    
         if (novoAluno.nome.length < 3) newErrors.nome = 'Nome deve ter no mínimo 3 caracteres';
         if (!/\S+@\S+\.\S+/.test(novoAluno.email)) newErrors.email = 'Formato de email inválido';
         if (!/^\d+$/.test(novoAluno.ra)) newErrors.ra = 'RA deve conter apenas números';
-        if (!/^\d+$/.test(novoAluno.telefone)) newErrors.telefone = 'Telefone deve conter apenas números';
+        if (telefoneNumerico.length !== 11) newErrors.telefone = 'Telefone deve ter 11 dígitos';
         return newErrors;
     };
+    
+    const validateField = (field, value) => {
+        const newErrors = { ...errors };
+        const telefoneNumerico = value.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
+    
+        if (field === 'nome') {
+            if (value.length < 3) {
+                newErrors.nome = 'Nome deve ter no mínimo 3 caracteres';
+            } else {
+                delete newErrors.nome;
+            }
+        } else if (field === 'email') {
+            if (!/\S+@\S+\.\S+/.test(value)) {
+                newErrors.email = 'Formato de email inválido';
+            } else {
+                delete newErrors.email;
+            }
+        } else if (field === 'ra') {
+            if (!/^\d+$/.test(value)) {
+                newErrors.ra = 'RA deve conter apenas números';
+            } else {
+                delete newErrors.ra;
+            }
+        } else if (field === 'telefone') {
+            if (telefoneNumerico.length !== 11) {
+                newErrors.telefone = 'Telefone deve ter 11 dígitos';
+            } else {
+                delete newErrors.telefone;
+            }
+        }
+        setErrors(newErrors);
+    };
+    
+    const fetchAlunos = async () => {
+        try {
+            const dados = await alunoServico.obterAlunos();
+            setAlunos(dados);
+        } catch (error) {
+            alert(error);
+        }
+    };
 
-    const handleAddAluno = () => {
+    const handleChange = (field, value) => {
+        setNovoAluno({ ...novoAluno, [field]: value });
+        validateField(field, value);
+    };
+
+    const handleAddAluno = async () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
-            if (selectedAlunoIndex !== null) {
-                const updatedAlunos = [...alunos];
-                updatedAlunos[selectedAlunoIndex] = novoAluno;
-                setAlunos(updatedAlunos);
-                setSelectedAlunoIndex(null);
-            } else {
-                setAlunos([...alunos, novoAluno]);
+            try {
+                if (selectedAlunoIndex !== null) {
+                    await alunoServico.atualizarAluno(alunos[selectedAlunoIndex].id, novoAluno);
+                    setSelectedAlunoIndex(null);
+                    setConfirmationMessage('Aluno atualizado com sucesso!');
+                } else {
+                    await alunoServico.adicionarAluno(novoAluno);
+                    setConfirmationMessage('Aluno cadastrado com sucesso!');
+                }
+                fetchAlunos();
+                setNovoAluno({ nome: '', email: '', ra: '', telefone: '' });
+                setModalIsOpen(false);
+                setConfirmationModalIsOpen(true);
+            } catch (error) {
+                alert(error);
             }
-            setNovoAluno({ nome: '', email: '', ra: '', telefone: '' });
-            setModalIsOpen(false);
-            setConfirmationModalIsOpen(true);
         } else {
             setErrors(newErrors);
         }
     };
 
     const handleDeleteAluno = (index) => {
-        const updatedAlunos = [...alunos];
-        updatedAlunos.splice(index, 1);
-        setAlunos(updatedAlunos);
+        setAlunoADeletar(index);
+        setDeleteConfirmationModalIsOpen(true);
+    };
+
+    const confirmDeleteAluno = async () => {
+        try {
+            await alunoServico.deletarAluno(alunos[alunoADeletar].id);
+            fetchAlunos();
+            setDeleteConfirmationModalIsOpen(false);
+            setAlunoADeletar(null);
+        } catch (error) {
+            alert(error);
+        }
     };
 
     const handleEditAluno = (index) => {
         setNovoAluno(alunos[index]);
         setSelectedAlunoIndex(index);
+        setErrors({});
         setModalIsOpen(true);
     };
 
@@ -63,6 +137,13 @@ const GerenciarUsuarios = () => {
         aluno.ra.toLowerCase().includes(searchValue.toLowerCase()) ||
         aluno.telefone.toLowerCase().includes(searchValue.toLowerCase())
     );
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+        setErrors({});
+        setNovoAluno({ nome: '', email: '', ra: '', telefone: '' });
+        setSelectedAlunoIndex(null);
+    };
 
     return (
         <div className="home-page">
@@ -117,6 +198,7 @@ const GerenciarUsuarios = () => {
                     <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Nome</th>
                                 <th>Email</th>
                                 <th>RA</th>
@@ -127,30 +209,37 @@ const GerenciarUsuarios = () => {
                         <tbody>
                             {filteredAlunos.map((aluno, index) => (
                                 <tr key={index} className="table-row">
+                                    <td className="table-row-text">{aluno.id}</td>
                                     <td className="table-row-text">{aluno.nome}</td>
                                     <td className="table-row-text">{aluno.email}</td>
                                     <td className="table-row-text">{aluno.ra}</td>
-                                    <td className="table-row-text">{aluno.telefone}</td>
+                                    <td className="table-row-text">
+                                        {(aluno.telefone.toString().replace(/\D/g, '').length === 11) ? 
+                                            `(${aluno.telefone.toString().substring(0, 2)}) ${aluno.telefone.toString().substring(2, 7)}-${aluno.telefone.toString().substring(7)}` : 
+                                            aluno.telefone
+                                        }
+                                    </td>
                                     <td className="table-row-text">
                                         <button className="edit-button" onClick={() => handleEditAluno(index)}>
                                             <span className="edit-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-  <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M16 5L19 8M20.385 6.585C20.7788 6.19115 21.0001 5.65698 21.0001 5.1C21.0001 4.54302 20.7788 4.00885 20.385 3.615C19.9912 3.22115 19.457 2.99989 18.9 2.99989C18.343 2.99989 17.8088 3.22115 17.415 3.615L9 12V15H12L20.385 6.585Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M16 5L19 8M20.385 6.585C20.7788 6.19115 21.0001 5.65698 21.0001 5.1C21.0001 4.54302 20.7788 4.00885 20.385 3.615C19.9912 3.22115 19.457 2.99989 18.9 2.99989C18.343 2.99989 17.8088 3.22115 17.415 3.615L9 12V15H12L20.385 6.585Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
                                             </span>
                                         </button>
                                         <button className="delete-button" onClick={() => handleDeleteAluno(index)}>
                                             <span className="delete-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-  <path d="M4 7H20M10 11V17M14 11V17M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7M9 7V4C9 3.73478 9.10536 3.48043 9.29289 3.29289C9.48043 3.10536 9.73478 3 10 3H14C14.2652 3 14.5196 3.10536 14.7071 3.29289C14.8946 3.48043 15 3.73478 15 4V7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M4 7H20M10 11V17M14 11V17M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7M9 7V4C9 3.73478 9.10536 3.48043 9.29289 3.29289C9.48043 3.10536 9.73478 3 10 3H14C14.2652 3 14.5196 3.10536 14.7071 3.29289C14.8946 3.48043 15 3.73478 15 4V7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
                                             </span>
                                         </button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
+
                     </table>
                 </div>
             </div>
@@ -158,27 +247,40 @@ const GerenciarUsuarios = () => {
             {modalIsOpen && (
                 <div className="modal">
                     <div className="modal-content">
-                        <span className="close" onClick={() => setModalIsOpen(false)}>&times;</span>
+                    <span className="close" onClick={closeModal}>&times;</span>
                         <h2>{selectedAlunoIndex !== null ? 'Editar Aluno' : 'Adicionar Novo Aluno'}</h2>
                         <div>
-                            <input type="text" placeholder="Nome" value={novoAluno.nome} onChange={(e) => setNovoAluno({ ...novoAluno, nome: e.target.value })} />
+                            <input 
+                            type="text" 
+                            placeholder="Nome" 
+                            value={novoAluno.nome} 
+                            onChange={(e) => handleChange('nome', e.target.value)} 
+                            />
                             {errors.nome && <div className="error">{errors.nome}</div>}
                         </div>
                         <div>
-                            <input type="email" placeholder="Email" value={novoAluno.email} onChange={(e) => setNovoAluno({ ...novoAluno, email: e.target.value })} />
+                            <input type="email" placeholder="Email" value={novoAluno.email} onChange={(e) => handleChange('email', e.target.value )} />
                             {errors.email && <div className="error">{errors.email}</div>}
                         </div>
                         <div>
-                            <input type="number" placeholder="RA" value={novoAluno.ra} onChange={(e) => setNovoAluno({ ...novoAluno, ra: e.target.value })} />
+                            <input type="number" placeholder="RA" value={novoAluno.ra} onChange={(e) => handleChange('ra', e.target.value )} />
                             {errors.ra && <div className="error">{errors.ra}</div>}
                         </div>
                         <div>
-                            <input type="text" placeholder="Telefone" value={novoAluno.telefone} onChange={(e) => setNovoAluno({ ...novoAluno, telefone: e.target.value })} />
+                            <InputMask
+                                mask="(99) 99999-9999"
+                                value={novoAluno.telefone}
+                                onChange={(e) => handleChange('telefone', e.target.value)}
+                            >
+                                {(inputProps) => <input {...inputProps} type="text" />}
+                            </InputMask>
                             {errors.telefone && <div className="error">{errors.telefone}</div>}
                         </div>
                         <div>
                             <button onClick={() => setModalIsOpen(false)}>Cancelar</button>
-                            <button onClick={handleAddAluno}>{selectedAlunoIndex !== null ? 'Salvar' : 'Adicionar'}</button>
+                            <button className="add" onClick={handleAddAluno} disabled={Object.keys(errors).length > 0}>
+                                {selectedAlunoIndex !== null ? 'Salvar' : 'Adicionar'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -188,8 +290,19 @@ const GerenciarUsuarios = () => {
                 <div className="confirmation-modal">
                     <div className="confirmation-modal-content">
                         <span className="close" onClick={() => setConfirmationModalIsOpen(false)}>&times;</span>
-                        <h2>Aluno cadastrado com sucesso!</h2>
+                        <h2>{confirmationMessage}</h2>
                         <button onClick={() => setConfirmationModalIsOpen(false)}>Fechar</button>
+                    </div>
+                </div>
+            )}
+
+            {deleteConfirmationModalIsOpen && (
+                <div className="confirmation-modal">
+                    <div className="confirmation-modal-content">
+                        <span className="close" onClick={() => setDeleteConfirmationModalIsOpen(false)}>&times;</span>
+                        <h2>Tem certeza que deseja deletar este aluno?</h2>
+                        <button onClick={confirmDeleteAluno}>Confirmar</button>
+                        <button onClick={() => setDeleteConfirmationModalIsOpen(false)}>Cancelar</button>
                     </div>
                 </div>
             )}
@@ -197,4 +310,4 @@ const GerenciarUsuarios = () => {
     );
 };
 
-export default GerenciarUsuarios;
+export default GerenciarAlunos;

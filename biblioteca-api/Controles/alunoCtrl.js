@@ -15,7 +15,7 @@ export default class AlunoCtrl{
         
 
             if (nome && email && ra && telefone){
-                const aluno = new Aluno(0, nome, ra, telefone);
+                const aluno = new Aluno(0, nome, email, ra, telefone);
                 aluno.gravar().then(()=>{
                     resposta.status(201);
                     resposta.json({
@@ -60,7 +60,7 @@ export default class AlunoCtrl{
             const telefone = dados.telefone;
             if (id && id > 0 && nome && email && ra && telefone)
             {
-                const aluno = new Aluno(id, nome, email, nivel);
+                const aluno = new Aluno(id, nome, email, ra, telefone);
                 aluno.atualizar()
                 .then(()=>{
                     resposta.status(200);
