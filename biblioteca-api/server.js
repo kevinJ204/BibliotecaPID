@@ -2,7 +2,11 @@ import express from 'express';
 import process from 'process';
 import path from 'path';
 import session from 'express-session';
-import rotaEvento from "./Rotas/rotaEvento.js";
+import rotaUsuario from "./Rotas/rotaUsuario.js";
+import rotaAluno from "./Rotas/rotaAluno.js";
+import rotaTitulo from "./Rotas/rotaTitulo.js";
+import rotaGenero from "./Rotas/rotaGenero.js";
+import rotaAutor from "./Rotas/rotaAutor.js";
 import cookieParser from 'cookie-parser';
 
 
@@ -23,7 +27,11 @@ app.use((req, res, next) => {
 
 app.use(express.urlencoded({extended: true}));
 
-//app.use('/eventos',rotaEvento);
+app.use('/usuarios',rotaUsuario);
+app.use('/alunos',rotaAluno);
+app.use('/titulos',rotaTitulo);
+app.use('/generos',rotaGenero);
+app.use('/autores',rotaAutor);
 
 app.use(session({
     secret: 'chaveSecreta',

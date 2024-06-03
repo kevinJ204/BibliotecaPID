@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import logoImage from './Logo.png';
 import './Alunos.css';
 
 const GerenciarUsuarios = () => {
@@ -66,7 +67,9 @@ const GerenciarUsuarios = () => {
     return (
         <div className="home-page">
             <div className="menu-background">
-                <div className="logo"></div>
+            <div className="logo-container">
+                    <img src={logoImage} alt="Logo" className="logo" />
+                </div>
                 <div className="menu-options">
                     <div>
                         <Link to="/GerenciarUsuarios"className="menu-option">Gerenciar Usuários</Link>

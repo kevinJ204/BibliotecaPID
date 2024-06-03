@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logoImage from './Logo.png';
 import './Login.css';
 
 const Login = () => {
@@ -20,7 +21,9 @@ const Login = () => {
     return (
         <div className="login-page">
             <div className="login-container">
-                <div className="logo"></div>
+                <div className="logo-container">
+                    <img src={logoImage} alt="Logo" className="logo" />
+                </div>
                 <form onSubmit={handleLogin} className="login-form">
                     {error && <p className="error">{error}</p>}
                     <label htmlFor="email">Email</label>

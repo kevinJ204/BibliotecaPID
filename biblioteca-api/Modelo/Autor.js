@@ -43,7 +43,7 @@ export default class Autor {
     }
 
     toString(){
-        return `Genero id: ${this.#id} -  nome: ${this.#nome}`;
+        return `Autor id: ${this.#id} -  nome: ${this.#nome}`;
     }
 
     toJSON(){

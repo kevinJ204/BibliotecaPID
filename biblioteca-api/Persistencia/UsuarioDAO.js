@@ -5,10 +5,11 @@ export default class UsuarioDAO {
     async gravar(usuario){
         if (usuario instanceof Usuario){
             const conexao = await conectar();
-            const sql = `INSERT INTO usuario (nome, email, nivel) values (?, ?, ?)`;
+            const sql = `INSERT INTO usuarios (nome, email, senha, nivel) values (?, ?, ?, ?)`;
             const parametros = [
                 usuario.getNome(),
                 usuario.getEmail(),
+                usuario.getSenha(),
                 usuario.getNivel()
             ];
             const [resultados, campos] = await conexao.execute(sql,parametros);
@@ -19,11 +20,12 @@ export default class UsuarioDAO {
     async atualizar(usuario){
         if (usuario instanceof Usuario){
             const conexao = await conectar();
-            const sql = `UPDATE usuario SET nome = ?,
-                         email = ?, nivel = ? WHERE id = ?`;
+            const sql = `UPDATE usuarios SET nome = ?,
+                         email = ?, senha = ?, nivel = ? WHERE id = ?`;
             const parametros = [
                 usuario.getNome(),
                 usuario.getEmail(),
+                usuario.getSenha(),
                 usuario.getNivel()
             ];
 
@@ -34,7 +36,7 @@ export default class UsuarioDAO {
     async excluir(usuario){
         if (usuario instanceof Usuario){
             const conexao = await conectar();
-            const sql = `DELETE FROM usuario WHERE id = ?`;
+            const sql = `DELETE FROM usuarios WHERE id = ?`;
             const parametros = [
                 usuario.getId()
             ]
@@ -48,11 +50,11 @@ export default class UsuarioDAO {
         }
         let sql="";
         if (isNaN(parseInt(termoDePesquisa))){
-            sql = `SELECT * FROM usuario WHERE nome LIKE ?`;
+            sql = `SELECT * FROM usuarios WHERE nome LIKE ?`;
             termoDePesquisa= '%' + termoDePesquisa + '%';
         }
         else{
-            sql = `SELECT * FROM usuario WHERE id = ?`;
+            sql = `SELECT * FROM usuarios WHERE id = ?`;
         }
 
         const conexao = await conectar();
@@ -63,6 +65,7 @@ export default class UsuarioDAO {
                 registro.id,
                 registro.nome,
                 registro.email,
+                registro.senha,
                 registro.nivel
             );
             listaUsuarios.push(usuario);

@@ -1,6 +1,6 @@
-import Evento from "../Modelo/Evento.js";
+import Aluno from "../Modelo/Aluno.js";
 
-export default class EventoCtrl{
+export default class AlunoCtrl{
 
     gravar(requisicao, resposta){
 
@@ -9,28 +9,25 @@ export default class EventoCtrl{
         if(requisicao.method === "POST" && requisicao.is('application/json')){
             const dados = requisicao.body;
             const nome = dados.nome;
-            const descricao = dados.descricao;
-            const dia = dados.dia;
-            const local = dados.local;
-            const horarioInicio = dados.horarioInicio;
-            const horarioFinal = dados.horarioFinal;
-            const valorIngresso = dados.valorIngresso;
-            const ingressosTotais = dados.ingressosTotais;
+            const email = dados.email;
+            const ra = dados.ra;
+            const telefone = dados.telefone;
+        
 
-            if (nome && descricao && dia && local && horarioInicio && horarioFinal && valorIngresso && ingressosTotais){
-                const evento = new Evento(0, nome, descricao, dia, local, horarioInicio, horarioFinal, valorIngresso, ingressosTotais);
-                evento.gravar().then(()=>{
+            if (nome && email && ra && telefone){
+                const aluno = new Aluno(0, nome, ra, telefone);
+                aluno.gravar().then(()=>{
                     resposta.status(201);
                     resposta.json({
                         "status":true,
-                        "mensagem": "Evento gravado com sucesso!",
-                        "id_evento": evento.id
+                        "mensagem": "Aluno gravado com sucesso!",
+                        "id_aluno": aluno.id
                     });
                 }).catch((erro) =>{
                     resposta.status(500);
                     resposta.json({
                         "status":false,
-                        "mensagem": "Não foi possível armazenar o evento! " + erro.message
+                        "mensagem": "Não foi possível armazenar o Aluno! " + erro.message
                     })
                 });
             }
@@ -38,7 +35,7 @@ export default class EventoCtrl{
                 resposta.status(400);
                 resposta.json({
                     "status":false,
-                    "mensagem": "Por favor, informe todos os dados do evento, conforme documentação da API"
+                    "mensagem": "Por favor, informe todos os dados do Aluno, conforme documentação da API"
                 });
             }
         }
@@ -46,7 +43,7 @@ export default class EventoCtrl{
             resposta.status(405);
             resposta.json({
                 "status":false,
-                "mensagem": "Requisição inválida! Esperando o método POST e dados no formato JSON para gravar um evento!"
+                "mensagem": "Requisição inválida! Esperando o método POST e dados no formato JSON para gravar um Aluno!"
             })
         }
     }
@@ -58,29 +55,25 @@ export default class EventoCtrl{
             const dados = requisicao.body; 
             const id = requisicao.params.id;
             const nome = dados.nome;
-            const descricao = dados.descricao;
-            const dia = dados.dia;
-            const local = dados.local;
-            const horarioInicio = dados.horarioInicio;
-            const horarioFinal = dados.horarioFinal;
-            const valorIngresso = dados.valorIngresso;
-            const ingressosTotais = dados.ingressosTotais;
-            if (id && id > 0 && nome && descricao && dia && local && horarioInicio && horarioFinal && valorIngresso && ingressosTotais)
+            const email = dados.email;
+            const ra = dados.ra;
+            const telefone = dados.telefone;
+            if (id && id > 0 && nome && email && ra && telefone)
             {
-                const evento = new Evento(id, nome, descricao, dia, local, horarioInicio, horarioFinal, valorIngresso, ingressosTotais);
-                evento.atualizar()
+                const aluno = new Aluno(id, nome, email, nivel);
+                aluno.atualizar()
                 .then(()=>{
                     resposta.status(200);
                     resposta.json({
                         "status":true,
-                        "mensagem": "Evento atualizado com sucesso!",
+                        "mensagem": "Aluno atualizado com sucesso!",
                     })
                 })
                 .catch((erro) =>{
                     resposta.status(500);
                     resposta.json({
                         "status":false,
-                        "mensagem": "Não foi possível atualizar o evento! " + erro.message
+                        "mensagem": "Não foi possível atualizar o Aluno! " + erro.message
                     })
                 });
             }
@@ -88,7 +81,7 @@ export default class EventoCtrl{
                 resposta.status(400);
                 resposta.json({
                     "status":false,
-                    "mensagem": "Por favor, informe todos os dados do evento, conforme documentação da API"
+                    "mensagem": "Por favor, informe todos os dados do Aluno, conforme documentação da API"
                 })
             }
         }
@@ -96,7 +89,7 @@ export default class EventoCtrl{
             resposta.status(405);
             resposta.json({
                 "status":false,
-                "mensagem": "Requisição inválida! Esperando o método PATCH, PUT e dados no formato JSON para atualizar um evento!"
+                "mensagem": "Requisição inválida! Esperando o método PATCH, PUT e dados no formato JSON para atualizar um Aluno!"
             })
         }
     }
@@ -106,20 +99,20 @@ export default class EventoCtrl{
         if (requisicao.method === "DELETE"){
             const id = requisicao.params.id;
             if (id && id > 0){
-                const evento = new Evento(id);
-                evento.excluir()
+                const aluno = new Aluno(id);
+                aluno.excluir()
                 .then(()=>{
                     resposta.status(200);
                     resposta.json({
                         "status":true,
-                        "mensagem": "Evento excluído com sucesso!",
+                        "mensagem": "Aluno excluído com sucesso!",
                     })
                 })
                 .catch((erro) =>{
                     resposta.status(500);
                     resposta.json({
                         "status":false,
-                        "mensagem": "Não foi possível excluir o evento! " + erro.message
+                        "mensagem": "Não foi possível excluir o Aluno! " + erro.message
                     })
                 })
             }
@@ -127,7 +120,7 @@ export default class EventoCtrl{
                 resposta.status(400);
                 resposta.json({
                     "status":false,
-                    "mensagem": "Por favor, informe o id do evento que deseja excluir, conforme documentação da API"
+                    "mensagem": "Por favor, informe o id do Aluno que deseja excluir, conforme documentação da API"
                 })
             }
         }
@@ -135,7 +128,7 @@ export default class EventoCtrl{
             resposta.status(405);
             resposta.json({
                 "status":false,
-                "mensagem": "Requisição inválida! Esperando o método DELETE para excluir um evento!"
+                "mensagem": "Requisição inválida! Esperando o método DELETE para excluir um Aluno!"
             })
         }
     }
@@ -144,17 +137,17 @@ export default class EventoCtrl{
         resposta.type('application/json');
         if (requisicao.method === "GET"){
             const termoDeQuery = requisicao.params.termo;
-            const evento = new Evento(0);
-            evento.consultar(termoDeQuery)
-            .then((eventos)=>{
+            const aluno = new Aluno(0);
+            aluno.consultar(termoDeQuery)
+            .then((alunos)=>{
                 resposta.status(200);
-                resposta.json(eventos);
+                resposta.json(alunos);
             })
             .catch((erro) =>{
                 resposta.status(500);
                 resposta.json({
                     "status":false,
-                    "mensagem": "Não foi possível consultar os eventos! " + erro.message
+                    "mensagem": "Não foi possível consultar os Alunos! " + erro.message
                 })
             })
         }
@@ -162,7 +155,7 @@ export default class EventoCtrl{
             resposta.status(405);
             resposta.json({
                 "status":false,
-                "mensagem": "Requisição inválida! Esperando o método GET para consultar os eventos!"
+                "mensagem": "Requisição inválida! Esperando o método GET para consultar os Alunos!"
             })
         }
     }

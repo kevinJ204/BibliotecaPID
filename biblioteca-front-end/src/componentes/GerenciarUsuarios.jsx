@@ -1,48 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import logoImage from './Logo.png';
 import './Usuarios.css';
+import UsuarioServico from '../servicos/UsuarioServico';
 
 const GerenciarUsuarios = () => {
     const [searchValue, setSearchValue] = useState('');
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um usuário...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [usuarios, setUsuarios] = useState([]);
-    const [novoUsuario, setNovoUsuario] = useState({ usuario: '', email: '', senha: '', nivel: 'Basico' });
+    const [novoUsuario, setNovoUsuario] = useState({ nome: '', email: '', senha: '', nivel: 'Basico' });
     const [selectedUsuarioIndex, setSelectedUsuarioIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
+    const usuarioServico = new UsuarioServico();
+
+    useEffect(() => {
+        async function fetchUsuarios() {
+            try {
+                const dados = await usuarioServico.obterUsuarios();
+                setUsuarios(dados);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        fetchUsuarios();
+    }, []);
 
     const validateForm = () => {
         const newErrors = {};
-        if (novoUsuario.usuario.length < 3) newErrors.usuario = 'Usuário deve ter no mínimo 3 caracteres';
+        if (novoUsuario.nome.length < 3) newErrors.nome = 'Usuário deve ter no mínimo 3 caracteres';
         if (!/\S+@\S+\.\S+/.test(novoUsuario.email)) newErrors.email = 'Formato de email inválido';
         if (novoUsuario.senha.length < 6) newErrors.senha = 'Senha deve ter no mínimo 6 caracteres';
         return newErrors;
     };
 
-    const handleAddUsuario = () => {
+    const handleAddUsuario = async () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
-            if (selectedUsuarioIndex !== null) {
-                const updatedUsuarios = [...usuarios];
-                updatedUsuarios[selectedUsuarioIndex] = novoUsuario;
-                setUsuarios(updatedUsuarios);
-                setSelectedUsuarioIndex(null);
-            } else {
-                setUsuarios([...usuarios, novoUsuario]);
+            try {
+                if (selectedUsuarioIndex !== null) {
+                    await usuarioServico.atualizarUsuario(usuarios[selectedUsuarioIndex].id, novoUsuario);
+                } else {
+                    const novoUsuarioAdicionado = await usuarioServico.adicionarUsuario(novoUsuario);
+                    setUsuarios([...usuarios, novoUsuarioAdicionado]);
+                }
+                setNovoUsuario({ nome: '', email: '', senha: '', nivel: 'Basico' });
+                setModalIsOpen(false);
+                setConfirmationModalIsOpen(true);
+            } catch (error) {
+                console.error(error);
             }
-            setNovoUsuario({ usuario: '', email: '', senha: '', nivel: 'Basico' });
-            setModalIsOpen(false);
-            setConfirmationModalIsOpen(true);
         } else {
             setErrors(newErrors);
         }
     };
 
-    const handleDeleteUsuario = (index) => {
-        const updatedUsuarios = [...usuarios];
-        updatedUsuarios.splice(index, 1);
-        setUsuarios(updatedUsuarios);
+    const handleDeleteUsuario = async (index) => {
+        try {
+            await usuarioServico.deletarUsuario(usuarios[index].id);
+            const updatedUsuarios = usuarios.filter((_, i) => i !== index);
+            setUsuarios(updatedUsuarios);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleEditUsuario = (index) => {
@@ -56,18 +77,21 @@ const GerenciarUsuarios = () => {
     };
 
     const filteredUsuarios = usuarios.filter(usuario =>
-        usuario.usuario.toLowerCase().includes(searchValue.toLowerCase()) ||
+        usuario.nome.toLowerCase().includes(searchValue.toLowerCase()) ||
         usuario.email.toLowerCase().includes(searchValue.toLowerCase()) ||
         usuario.nivel.toLowerCase().includes(searchValue.toLowerCase())
     );
 
+
     return (
         <div className="home-page">
             <div className="menu-background">
-                <div className="logo"></div>
+                <div className="logo-container">
+                    <img src={logoImage} alt="Logo" className="logo" />
+                </div>
                 <div className="menu-options">
-                <div>
-                        <Link to="/GerenciarUsuarios"className="menu-option">Gerenciar Usuários</Link>
+                    <div>
+                        <Link to="/GerenciarUsuarios" className="menu-option">Gerenciar Usuários</Link>
                     </div>
                     <div>
                         <Link to="/GerenciarAlunos" className="menu-option">Gerenciar Alunos</Link>
@@ -112,6 +136,7 @@ const GerenciarUsuarios = () => {
                     <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Usuário</th>
                                 <th>Email</th>
                                 <th>Nível</th>
@@ -121,7 +146,8 @@ const GerenciarUsuarios = () => {
                         <tbody>
                             {filteredUsuarios.map((usuario, index) => (
                                 <tr key={index} className="table-row">
-                                    <td className="table-row-text">{usuario.usuario}</td>
+                                    <td className="table-row-text">{usuario.id}</td>
+                                    <td className="table-row-text">{usuario.nome}</td>
                                     <td className="table-row-text">{usuario.email}</td>
                                     <td className="table-row-text">{usuario.nivel}</td>
                                     <td className="table-row-text">
@@ -129,7 +155,7 @@ const GerenciarUsuarios = () => {
                                             <span className="edit-icon">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                             <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M16 5L19 8M20.385 6.585C20.7788 6.19115 21.0001 5.65698 21.0001 5.1C21.0001 4.54302 20.7788 4.00885 20.385 3.615C19.9912 3.22115 19.457 2.99989 18.9 2.99989C18.343 2.99989 17.8088 3.22115 17.415 3.615L9 12V15H12L20.385 6.585Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M9 11L17.385 2.615C17.7788 2.22115 18.313 2 18.87 2C19.427 2 19.9612 2.22115 20.355 2.615C20.7488 3.00885 20.9701 3.54302 20.9701 4.1C20.9701 4.65698 20.7488 5.19115 20.355 5.585L12 14H9V11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                             </svg>
                                             </span>
                                         </button>
@@ -152,8 +178,8 @@ const GerenciarUsuarios = () => {
                         <span className="close" onClick={() => setModalIsOpen(false)}>&times;</span>
                         <h2>{selectedUsuarioIndex !== null ? 'Editar Usuário' : 'Adicionar Novo Usuário'}</h2>
                         <div>
-                            <input type="text" placeholder="Usuário" value={novoUsuario.usuario} onChange={(e) => setNovoUsuario({ ...novoUsuario, usuario: e.target.value })} />
-                            {errors.usuario && <div className="error">{errors.usuario}</div>}
+                            <input type="text" placeholder="Usuário" value={novoUsuario.nome} onChange={(e) => setNovoUsuario({ ...novoUsuario, nome: e.target.value })} />
+                            {errors.nome && <div className="error">{errors.nome}</div>}
                         </div>
                         <div>
                             <input type="email" placeholder="Email" value={novoUsuario.email} onChange={(e) => setNovoUsuario({ ...novoUsuario, email: e.target.value })} />
@@ -166,7 +192,7 @@ const GerenciarUsuarios = () => {
                         <div>
                             <select value={novoUsuario.nivel} onChange={(e) => setNovoUsuario({ ...novoUsuario, nivel: e.target.value })}>
                                 <option value="Basico">Básico</option>
-                                <option value="Intermediario">Intermediario</option>
+                                <option value="Intermediario">Intermediário</option>
                                 <option value="Avancado">Avançado</option>
                             </select>
                         </div>
@@ -192,4 +218,3 @@ const GerenciarUsuarios = () => {
 };
 
 export default GerenciarUsuarios;
-

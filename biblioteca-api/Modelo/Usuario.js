@@ -4,11 +4,13 @@ export default class Usuario {
     #id;
     #nome;
     #email;
+    #senha;
     #nivel;
 
-    constructor(id=0, nome="", email="", nivel=0) {
+    constructor(id=0, nome="", email="", senha="", nivel=0) {
         this.#id = id;
         this.#nome = nome;
+        this.#senha = senha;
         this.#email = email;
         this.#nivel = nivel;
     }
@@ -30,6 +32,12 @@ export default class Usuario {
     }
     setEmail(email) {
         this.#email = email;
+    }
+    getSenha() {
+        return this.#email;
+    }
+    setSenha(senha) {
+        this.#senha = senha;
     }
     getNivel() {
         return this.#nivel;
