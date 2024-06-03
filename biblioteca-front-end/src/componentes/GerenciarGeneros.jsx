@@ -7,16 +7,15 @@ const GerenciarGeneros = () => {
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um gênero...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [generos, setGeneros] = useState([]);
-    const [novoGenero, setNovoGenero] = useState({ genero: '', titulo: '', autor: '' });
+    const [novoGenero, setNovoGenero] = useState({ id: '', genero: '' });
     const [selectedGeneroIndex, setSelectedGeneroIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
 
     const validateForm = () => {
         const newErrors = {};
+        if (!novoGenero.id) newErrors.id = 'ID é obrigatório';
         if (!novoGenero.genero) newErrors.genero = 'Gênero é obrigatório';
-        if (!novoGenero.titulo) newErrors.titulo = 'Título é obrigatório';
-        if (!novoGenero.autor) newErrors.autor = 'Autor é obrigatório';
         return newErrors;
     };
 
@@ -31,7 +30,7 @@ const GerenciarGeneros = () => {
             } else {
                 setGeneros([...generos, novoGenero]);
             }
-            setNovoGenero({ genero: '', titulo: '', autor: '' });
+            setNovoGenero({ id: '', genero: '' });
             setModalIsOpen(false);
             setConfirmationModalIsOpen(true);
         } else {
@@ -56,9 +55,8 @@ const GerenciarGeneros = () => {
     };
 
     const filteredGeneros = generos.filter(genero =>
-        genero.genero.toLowerCase().includes(searchValue.toLowerCase()) ||
-        genero.titulo.toLowerCase().includes(searchValue.toLowerCase()) ||
-        genero.autor.toLowerCase().includes(searchValue.toLowerCase())
+        genero.id.toLowerCase().includes(searchValue.toLowerCase()) ||
+        genero.genero.toLowerCase().includes(searchValue.toLowerCase())
     );
 
     return (
@@ -66,7 +64,7 @@ const GerenciarGeneros = () => {
             <div className="menu-background">
                 <div className="logo"></div>
                 <div className="menu-options">
-                <div>
+                    <div>
                         <Link to="/GerenciarUsuarios" className="menu-option">Gerenciar Usuários</Link>
                     </div>
                     <div>
@@ -112,18 +110,16 @@ const GerenciarGeneros = () => {
                     <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Gênero</th>
-                                <th>Título</th>
-                                <th>Autor</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredGeneros.map((genero, index) => (
                                 <tr key={index} className="table-row">
+                                    <td className="table-row-text">{genero.id}</td>
                                     <td className="table-row-text">{genero.genero}</td>
-                                    <td className="table-row-text">{genero.titulo}</td>
-                                    <td className="table-row-text">{genero.autor}</td>
                                     <td className="table-row-text">
                                         <button className="edit-button" onClick={() => handleEditGenero(index)}>
                                             <span className="edit-icon">
@@ -152,39 +148,30 @@ const GerenciarGeneros = () => {
                         <span className="close" onClick={() => setModalIsOpen(false)}>&times;</span>
                         <h2>{selectedGeneroIndex !== null ? 'Editar Gênero' : 'Adicionar Novo Gênero'}</h2>
                         <div>
+                            <input
+                                type="text"
+                                placeholder="ID"
+                                value={novoGenero.id}
+                                onChange={(e) => setNovoGenero({ ...novoGenero, id: e.target.value })}
+                            />
+                            {errors.id && <div className="error">{errors.id}</div>}
+                        </div>
+                        <div>
                             <select
                                 value={novoGenero.genero}
                                 onChange={(e) => setNovoGenero({ ...novoGenero, genero: e.target.value })}
                             >
-                                <option value="">Selecione um Gênero</option>
-                                <option value="Fantasia">Fantasia</option>
-                                <option value="Ficção científica">Ficção científica</option>
-                                <option value="Ação e aventura">Ação e aventura</option>
-                                <option value="Ficção histórica">Ficção histórica</option>
+                                <option value="">Selecione um gênero</option>
+                                <option value="Ação">Ação</option>
+                                <option value="Aventura">Aventura</option>
+                                <option value="Comédia">Comédia</option>
+                                <option value="Drama">Drama</option>
+                                <option value="Ficção Científica">Ficção Científica</option>
                                 <option value="Romance">Romance</option>
-                                <option value="Ficção Contemporânea">Ficção Contemporânea</option>
-                                <option value="Realismo mágico">Realismo mágico</option>
-                                <option value="Conto">Conto</option>
+                                <option value="Terror">Terror</option>
+                                <option value="Outro">Outro</option>
                             </select>
                             {errors.genero && <div className="error">{errors.genero}</div>}
-                        </div>
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="Título"
-                                value={novoGenero.titulo}
-                                onChange={(e) => setNovoGenero({ ...novoGenero, titulo: e.target.value })}
-                            />
-                            {errors.titulo && <div className="error">{errors.titulo}</div>}
-                        </div>
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="Autor"
-                                value={novoGenero.autor}
-                                onChange={(e) => setNovoGenero({ ...novoGenero, autor: e.target.value })}
-                            />
-                            {errors.autor && <div className="error">{errors.autor}</div>}
                         </div>
                         <div>
                             <button className="cancel" onClick={() => setModalIsOpen(false)}>Cancelar</button>

@@ -2,13 +2,12 @@ import express from 'express';
 import process from 'process';
 import path from 'path';
 import session from 'express-session';
-//import autenticar from './seguranca/autenticar.js';
-//import rotaEvento from "./Rotas/rotaEvento.js";
+import rotaEvento from "./Rotas/rotaEvento.js";
 import cookieParser from 'cookie-parser';
 
 
 const host='localhost';
-const porta = 3000;
+const porta = 3001;
 
 const app = express();
 app.use(express.json()); 
