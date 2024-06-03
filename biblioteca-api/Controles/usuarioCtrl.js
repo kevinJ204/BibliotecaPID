@@ -60,7 +60,7 @@ export default class UsuarioCtrl{
             const nivel = dados.nivel;
             if (id && id > 0 && nome && email && senha && nivel)
             {
-                const usuario = new Usuario(id, nome, email, nivel);
+                const usuario = new Usuario(id, nome, email, senha, nivel);
                 usuario.atualizar()
                 .then(()=>{
                     resposta.status(200);

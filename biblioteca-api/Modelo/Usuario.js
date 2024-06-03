@@ -7,7 +7,7 @@ export default class Usuario {
     #senha;
     #nivel;
 
-    constructor(id=0, nome="", email="", senha="", nivel=0) {
+    constructor(id=0, nome="", email="", senha="", nivel="") {
         this.#id = id;
         this.#nome = nome;
         this.#senha = senha;
@@ -34,7 +34,7 @@ export default class Usuario {
         this.#email = email;
     }
     getSenha() {
-        return this.#email;
+        return this.#senha;
     }
     setSenha(senha) {
         this.#senha = senha;
@@ -67,7 +67,7 @@ export default class Usuario {
     }
 
     toString(){
-        return `Usuario id: ${this.#id} -  nome: ${this.#nome} - email: ${this.#email} - nivel: ${this.#nivel}
+        return `Usuario id: ${this.#id} -  nome: ${this.#nome} - email: ${this.#email} - senha: ${this.#senha} - nivel: ${this.#nivel}
         `;
     }
 
@@ -76,6 +76,7 @@ export default class Usuario {
             "id": this.#id,
             "nome": this.#nome,
             "email": this.#email,
+            "senha": this.#senha,
             "nivel": this.#nivel
         }
     }

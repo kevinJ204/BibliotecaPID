@@ -20,13 +20,13 @@ export default class UsuarioDAO {
     async atualizar(usuario){
         if (usuario instanceof Usuario){
             const conexao = await conectar();
-            const sql = `UPDATE usuarios SET nome = ?,
-                         email = ?, senha = ?, nivel = ? WHERE id = ?`;
+            const sql = `UPDATE usuarios SET nome = ?, email = ?, senha = ?, nivel = ? WHERE id = ?`;
             const parametros = [
                 usuario.getNome(),
                 usuario.getEmail(),
                 usuario.getSenha(),
-                usuario.getNivel()
+                usuario.getNivel(),
+                usuario.getId()
             ];
 
             await conexao.execute(sql,parametros);
