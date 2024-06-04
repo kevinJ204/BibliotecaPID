@@ -9,7 +9,7 @@ const GerenciarUsuarios = () => {
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um usuário...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [usuarios, setUsuarios] = useState([]);
-    const [novoUsuario, setNovoUsuario] = useState({ nome: '', email: '', senha: '', nivel: 'Basico' });
+    const [novoUsuario, setNovoUsuario] = useState({ nome: '', email: '', senha: '', nivel: 'Básico' });
     const [selectedUsuarioIndex, setSelectedUsuarioIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
@@ -38,6 +38,16 @@ const GerenciarUsuarios = () => {
             alert(error);
         }
     };
+
+    useEffect(() => {
+        if (searchValue) {
+            usuarioServico.obterUsuarioPorIdOuNome(searchValue)
+                .then(setUsuarios)
+                .catch(error => console.error('Erro ao buscar usuários:', error));
+        } else {
+            setUsuarios([]);
+        }
+    }, [searchValue]);
 
     const validateField = (field, value) => {
         const newErrors = { ...errors };
