@@ -55,7 +55,8 @@ export default class AlunoDAO {
             termoDePesquisa= '%' + termoDePesquisa + '%';
         }
         else{
-            sql = `SELECT * FROM alunos WHERE id = ?`;
+            sql = `SELECT * FROM alunos WHERE id LIKE ?`;
+            termoDePesquisa= '%' + termoDePesquisa + '%';
         }
 
         const conexao = await conectar();

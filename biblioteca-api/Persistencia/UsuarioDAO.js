@@ -54,7 +54,8 @@ export default class UsuarioDAO {
             termoDePesquisa= '%' + termoDePesquisa + '%';
         }
         else{
-            sql = `SELECT * FROM usuarios WHERE id = ?`;
+            sql = `SELECT * FROM usuarios WHERE id LIKE ?`;
+            termoDePesquisa= '%' + termoDePesquisa + '%';
         }
 
         const conexao = await conectar();

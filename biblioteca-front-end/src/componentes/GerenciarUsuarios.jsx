@@ -45,7 +45,9 @@ const GerenciarUsuarios = () => {
                 .then(setUsuarios)
                 .catch(error => console.error('Erro ao buscar usuários:', error));
         } else {
-            setUsuarios([]);
+            usuarioServico.obterUsuarios(searchValue)
+            .then(setUsuarios)
+            .catch(error => console.error('Erro ao buscar usuários:', error));
         }
     }, [searchValue]);
 
@@ -129,12 +131,6 @@ const GerenciarUsuarios = () => {
         setSearchValue(e.target.value);
     };
 
-    const filteredUsuarios = usuarios.filter(usuario =>
-        usuario.nome.toLowerCase().includes(searchValue.toLowerCase()) ||
-        usuario.email.toLowerCase().includes(searchValue.toLowerCase()) ||
-        usuario.nivel.toLowerCase().includes(searchValue.toLowerCase())
-    );
-
     const closeModal = () => {
         setModalIsOpen(false);
         setErrors({});
@@ -202,7 +198,7 @@ const GerenciarUsuarios = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredUsuarios.map((usuario, index) => (
+                            {usuarios.map((usuario, index) => (
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{usuario.id}</td>
                                     <td className="table-row-text">{usuario.nome}</td>

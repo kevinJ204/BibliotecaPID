@@ -73,6 +73,18 @@ const GerenciarAlunos = () => {
         }
     };
 
+    useEffect(() => {
+        if (searchValue) {
+            alunoServico.obterAlunoPorIdOuNome(searchValue)
+                .then(setAlunos)
+                .catch(error => console.error('Erro ao buscar alunos:', error));
+        } else {
+            alunoServico.obterAlunos(searchValue)
+            .then(setAlunos)
+            .catch(error => console.error('Erro ao buscar alunos:', error));
+        }
+    }, [searchValue]);
+
     const handleChange = (field, value) => {
         setNovoAluno({ ...novoAluno, [field]: value });
         validateField(field, value);
@@ -128,13 +140,6 @@ const GerenciarAlunos = () => {
     const handleSearchChange = (e) => {
         setSearchValue(e.target.value);
     };
-
-    const filteredAlunos = alunos.filter(aluno =>
-        aluno.nome.toLowerCase().includes(searchValue.toLowerCase()) ||
-        aluno.email.toLowerCase().includes(searchValue.toLowerCase()) ||
-        aluno.ra.toLowerCase().includes(searchValue.toLowerCase()) ||
-        aluno.telefone.toLowerCase().includes(searchValue.toLowerCase())
-    );
 
     const closeModal = () => {
         setModalIsOpen(false);
@@ -205,7 +210,7 @@ const GerenciarAlunos = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredAlunos.map((aluno, index) => (
+                            {alunos.map((aluno, index) => (
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{aluno.id}</td>
                                     <td className="table-row-text">{aluno.nome}</td>
