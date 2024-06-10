@@ -11,13 +11,13 @@ export default class GeneroCtrl{
             const genero = dados.genero;        
 
             if (genero){
-                const genero = new Genero(0, genero);
-                genero.gravar().then(()=>{
+                const gen = new Genero(0, genero);
+                gen.gravar().then(()=>{
                     resposta.status(201);
                     resposta.json({
                         "status":true,
                         "mensagem": "Gênero gravado com sucesso!",
-                        "id_genero": genero.id
+                        "id_genero": gen.id
                     });
                 }).catch((erro) =>{
                     resposta.status(500);
@@ -53,8 +53,8 @@ export default class GeneroCtrl{
             const genero = dados.genero;
             if (id && id > 0 && genero)
             {
-                const genero = new Genero(id, genero);
-                genero.atualizar()
+                const gen = new Genero(id, genero);
+                gen.atualizar()
                 .then(()=>{
                     resposta.status(200);
                     resposta.json({

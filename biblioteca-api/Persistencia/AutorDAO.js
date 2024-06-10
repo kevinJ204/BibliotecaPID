@@ -19,7 +19,8 @@ export default class AutorDAO {
             const conexao = await conectar();
             const sql = `UPDATE autores SET nome = ? WHERE id = ?`;
             const parametros = [
-                autor.getNome()
+                autor.getNome(),
+                autor.getId()
             ];
 
             await conexao.execute(sql,parametros);
@@ -47,7 +48,8 @@ export default class AutorDAO {
             termoDePesquisa= '%' + termoDePesquisa + '%';
         }
         else{
-            sql = `SELECT * FROM autores WHERE id = ?`;
+            sql = `SELECT * FROM autores WHERE id LIKE ?`;
+            termoDePesquisa= '%' + termoDePesquisa + '%';
         }
 
         const conexao = await conectar();
@@ -55,8 +57,8 @@ export default class AutorDAO {
         let listaAutores = [];
         for (const registro of registros){
             const autor = new Autor(
-                autor.id,
-                autor.nome
+                registro.id,
+                registro.nome
             );
             listaAutores.push(autor);
         }

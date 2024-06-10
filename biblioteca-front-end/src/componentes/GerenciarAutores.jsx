@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Usuarios.css';
+import AutorServico from '../servicos/AutorServico';
 
 const GerenciarAutores = () => {
     const [searchValue, setSearchValue] = useState('');
@@ -12,42 +13,103 @@ const GerenciarAutores = () => {
     const [selectedAutorIndex, setSelectedAutorIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
+    const [confirmationMessage, setConfirmationMessage] = useState('');
+    const [deleteConfirmationModalIsOpen, setDeleteConfirmationModalIsOpen] = useState(false);
+    const [autorADeletar, setAutorADeletar] = useState(null);
+    const autorServico = new AutorServico();
+
+    useEffect(() => {
+        fetchAutores();
+    }, []);
+
+    const fetchAutores = async () => {
+        try {
+            const dados = await autorServico.obterAutores();
+            setAutores(dados);
+        } catch (error) {
+            alert(error);
+        }
+    };
+
+    useEffect(() => {
+        if (searchValue) {
+            autorServico.obterAutorPorIdOuNome(searchValue)
+                .then(setAutores)
+                .catch(error => console.error('Erro ao buscar autores:', error));
+        } else {
+            autorServico.obterAutores(searchValue)
+            .then(setAutores)
+            .catch(error => console.error('Erro ao buscar autores:', error));
+        }
+    }, [searchValue]);
 
     const validateForm = () => {
         const newErrors = {};
-        if (!novoAutor.id) newErrors.id = 'ID é obrigatório';
         if (!novoAutor.nome) newErrors.nome = 'Nome é obrigatório';
         return newErrors;
     };
 
-    const handleAddAutor = () => {
+    const validateField = (field, value) => {
+        const newErrors = { ...errors };
+        if (field === 'nome') {
+            if (value.length < 3) {
+                newErrors.nome = 'Nome deve ter no mínimo 3 caracteres';
+            } else {
+                delete newErrors.nome;
+            }
+        }
+        setErrors(newErrors);
+    };
+
+    const handleAddAutor = async () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
-            if (selectedAutorIndex !== null) {
-                const updatedAutores = [...autores];
-                updatedAutores[selectedAutorIndex] = novoAutor;
-                setAutores(updatedAutores);
-                setSelectedAutorIndex(null);
-            } else {
-                setAutores([...autores, novoAutor]);
+            try {
+                if (selectedAutorIndex !== null) {
+                    await autorServico.atualizarAutor(autores[selectedAutorIndex].id, novoAutor);
+                    setSelectedAutorIndex(null);
+                    setConfirmationMessage('Autor atualizado com sucesso!');
+                } else {
+                    await autorServico.adicionarAutores(novoAutor);
+                    setConfirmationMessage('Autor cadastrado com sucesso!');
+                }
+                fetchAutores();
+                setNovoAutor({ id: '', nome: ''});
+                setModalIsOpen(false);
+                setConfirmationModalIsOpen(true);
+            } catch (error) {
+                alert(error);
             }
-            setNovoAutor({ id: '', nome: '' });
-            setModalIsOpen(false);
-            setConfirmationModalIsOpen(true);
         } else {
             setErrors(newErrors);
         }
     };
 
     const handleDeleteAutor = (index) => {
-        const updatedAutores = [...autores];
-        updatedAutores.splice(index, 1);
-        setAutores(updatedAutores);
+        setAutorADeletar(index);
+        setDeleteConfirmationModalIsOpen(true);
+    };
+
+    const confirmDeleteAutor = async () => {
+        try {
+            await autorServico.deletarAutor(autores[autorADeletar].id);
+            fetchAutores();
+            setDeleteConfirmationModalIsOpen(false);
+            setAutorADeletar(null);
+        } catch (error) {
+            alert(error);
+        }
+    };
+
+    const handleChange = (field, value) => {
+        setNovoAutor({ ...novoAutor, [field]: value });
+        validateField(field, value);
     };
 
     const handleEditAutor = (index) => {
         setNovoAutor(autores[index]);
         setSelectedAutorIndex(index);
+        setErrors({});
         setModalIsOpen(true);
     };
 
@@ -55,9 +117,12 @@ const GerenciarAutores = () => {
         setSearchValue(e.target.value);
     };
 
-    const filteredAutores = autores.filter(autor =>
-        autor.nome.toLowerCase().includes(searchValue.toLowerCase())
-    );
+    const closeModal = () => {
+        setModalIsOpen(false);
+        setErrors({});
+        setNovoAutor({ id: '', nome: ''});
+        setSelectedAutorIndex(null);
+    };
 
     return (
         <div className="home-page">
@@ -118,7 +183,7 @@ const GerenciarAutores = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredAutores.map((autor, index) => (
+                            {autores.map((autor, index) => (
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{autor.id}</td>
                                     <td className="table-row-text">{autor.nome}</td>
@@ -147,29 +212,22 @@ const GerenciarAutores = () => {
             {modalIsOpen && (
                 <div className="modal">
                     <div className="modal-content">
-                        <span className="close" onClick={() => setModalIsOpen(false)}>&times;</span>
+                    <span className="close" onClick={closeModal}>&times;</span>
                         <h2>{selectedAutorIndex !== null ? 'Editar Autor' : 'Adicionar Novo Autor'}</h2>
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="ID"
-                                value={novoAutor.id}
-                                onChange={(e) => setNovoAutor({ ...novoAutor, id: e.target.value })}
-                            />
-                            {errors.id && <div className="error">{errors.id}</div>}
-                        </div>
                         <div>
                             <input
                                 type="text"
                                 placeholder="Nome"
                                 value={novoAutor.nome}
-                                onChange={(e) => setNovoAutor({ ...novoAutor, nome: e.target.value })}
+                                onChange={(e) => handleChange('nome', e.target.value)}
                             />
                             {errors.nome && <div className="error">{errors.nome}</div>}
                         </div>
                         <div>
-                            <button className="cancel" onClick={() => setModalIsOpen(false)}>Cancelar</button>
-                            <button className="add" onClick={handleAddAutor}>{selectedAutorIndex !== null ? 'Salvar' : 'Adicionar'}</button>
+                            <button className="cancel" onClick={closeModal}>Cancelar</button>
+                            <button className="add" onClick={handleAddAutor} disabled={Object.keys(errors).length > 0}>
+                                {selectedAutorIndex !== null ? 'Salvar' : 'Adicionar'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -184,6 +242,18 @@ const GerenciarAutores = () => {
                     </div>
                 </div>
             )}
+
+            {deleteConfirmationModalIsOpen && (
+                <div className="confirmation-modal">
+                    <div className="confirmation-modal-content">
+                        <span className="close" onClick={() => setDeleteConfirmationModalIsOpen(false)}>&times;</span>
+                        <h2>Tem certeza que deseja deletar este autor?</h2>
+                        <button onClick={confirmDeleteAutor}>Confirmar</button>
+                        <button onClick={() => setDeleteConfirmationModalIsOpen(false)}>Cancelar</button>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

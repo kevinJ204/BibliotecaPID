@@ -24,7 +24,8 @@ export default class TituloDAO {
             const parametros = [
                 titulo.getNome(),
                 titulo.getGenero(),
-                titulo.getAssunto()
+                titulo.getAssunto(),
+                titulo.getId()
             ];
 
             await conexao.execute(sql,parametros);
@@ -52,7 +53,8 @@ export default class TituloDAO {
             termoDePesquisa= '%' + termoDePesquisa + '%';
         }
         else{
-            sql = `SELECT * FROM titulos WHERE id = ?`;
+            sql = `SELECT * FROM titulos WHERE id LIKE ?`;
+            termoDePesquisa= '%' + termoDePesquisa + '%';
         }
 
         const conexao = await conectar();

@@ -19,7 +19,8 @@ export default class GeneroDAO {
             const conexao = await conectar();
             const sql = `UPDATE generos SET genero = ? WHERE id = ?`;
             const parametros = [
-                genero.getGenero()
+                genero.getGenero(),
+                genero.getId()
             ];
 
             await conexao.execute(sql,parametros);
@@ -47,7 +48,8 @@ export default class GeneroDAO {
             termoDePesquisa= '%' + termoDePesquisa + '%';
         }
         else{
-            sql = `SELECT * FROM generos WHERE id = ?`;
+            sql = `SELECT * FROM generos WHERE id LIKE ?`;
+            termoDePesquisa= '%' + termoDePesquisa + '%';
         }
 
         const conexao = await conectar();
@@ -55,8 +57,8 @@ export default class GeneroDAO {
         let listaGeneros = [];
         for (const registro of registros){
             const genero = new Genero(
-                genero.id,
-                genero.genero
+                registro.id,
+                registro.genero
             );
             listaGeneros.push(genero);
         }

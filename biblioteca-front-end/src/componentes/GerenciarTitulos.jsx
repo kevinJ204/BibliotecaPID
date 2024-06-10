@@ -9,7 +9,6 @@ const GerenciarTitulos = () => {
     const [searchValue, setSearchValue] = useState('');
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um Livro...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [isEditMode, setIsEditMode] = useState(false);
     const [titulos, setTitulos] = useState([]);
     const [novoTitulo, setNovoTitulo] = useState({ id: '', nome: '', genero: '', assunto: '' });
     const [selectedTituloIndex, setSelectedTituloIndex] = useState(null);
@@ -38,11 +37,13 @@ const GerenciarTitulos = () => {
 
     useEffect(() => {
         if (searchValue) {
-            TituloServico.obterTituloPorIdOuNome(searchValue)
+            tituloServico.obterTituloPorIdOuNome(searchValue)
                 .then(setTitulos)
                 .catch(error => console.error('Erro ao buscar títulos:', error));
         } else {
-            setTitulos([]);
+            tituloServico.obterTitulos(searchValue)
+            .then(setTitulos)
+            .catch(error => console.error('Erro ao buscar títulos:', error));
         }
     }, [searchValue]);
 
@@ -78,7 +79,7 @@ const GerenciarTitulos = () => {
 
     const handleChange = (field, value) => {
         setNovoTitulo({ ...novoTitulo, [field]: value });
-        validateForm(field, value);
+        validateField(field, value);
     };
 
     const handleDeleteTitulo = (index) => {
@@ -110,7 +111,7 @@ const GerenciarTitulos = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (novoTitulo.nome.length <= 3) {
+        if (novoTitulo.nome.length < 3) {
             newErrors.nome = 'Nome deve ter mais que 3 letras.';
         }
         if (!novoTitulo.genero) {
@@ -119,16 +120,33 @@ const GerenciarTitulos = () => {
         if (novoTitulo.assunto.length < 2) {
             newErrors.assunto = 'Assunto deve ter pelo menos 2 caracteres.';
         }
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return newErrors;
     };
 
-    const filteredTitulos = titulos.filter(titulo =>
-        titulo.nome.toLowerCase().includes(searchValue.toLowerCase()) ||
-        titulo.genero.toLowerCase().includes(searchValue.toLowerCase()) ||
-        titulo.assunto.toLowerCase().includes(searchValue.toLowerCase())
-    );
-
+    const validateField = (field, value) => {
+        const newErrors = { ...errors };
+        if (field === 'nome') {
+            if (value.length < 3) {
+                newErrors.nome = 'Nome deve ter no mínimo 3 caracteres';
+            } else {
+                delete newErrors.nome;
+            }
+        } else if (field === 'genero') {
+            if (value === "Selecione um Gênero") {
+                newErrors.genero = 'Gênero inválido';
+            } else {
+                delete newErrors.genero;
+            }
+        } else if (field === 'assunto') {
+            if (value.length < 3) {
+                newErrors.assunto = 'Assunto deve ter no mínimo 3 caracteres';
+            } else {
+                delete newErrors.assunto;
+            }
+        }
+        setErrors(newErrors);
+    };
+        
     const closeModal = () => {
         setModalIsOpen(false);
         setErrors({});
@@ -197,7 +215,7 @@ const GerenciarTitulos = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredTitulos.map((titulo, index) => (
+                            {titulos.map((titulo, index) => (
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{titulo.id}</td>
                                     <td className="table-row-text">{titulo.nome}</td>
@@ -268,6 +286,28 @@ const GerenciarTitulos = () => {
                     </div>
                 </div>
             )}
+
+            {confirmationModalIsOpen && (
+                <div className="confirmation-modal">
+                    <div className="confirmation-modal-content">
+                        <span className="close" onClick={() => setConfirmationModalIsOpen(false)}>&times;</span>
+                        <h2>{confirmationMessage}</h2>
+                        <button onClick={() => setConfirmationModalIsOpen(false)}>Fechar</button>
+                    </div>
+                </div>
+            )}
+
+            {deleteConfirmationModalIsOpen && (
+                <div className="confirmation-modal">
+                    <div className="confirmation-modal-content">
+                        <span className="close" onClick={() => setDeleteConfirmationModalIsOpen(false)}>&times;</span>
+                        <h2>Tem certeza que deseja deletar este aluno?</h2>
+                        <button onClick={confirmDeleteTitulo}>Confirmar</button>
+                        <button onClick={() => setDeleteConfirmationModalIsOpen(false)}>Cancelar</button>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Usuarios.css';
+import GeneroServico from '../servicos/GeneroServico';
 
 const GerenciarGeneros = () => {
     const [searchValue, setSearchValue] = useState('');
@@ -12,53 +13,116 @@ const GerenciarGeneros = () => {
     const [selectedGeneroIndex, setSelectedGeneroIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
+    const [confirmationMessage, setConfirmationMessage] = useState('');
+    const [deleteConfirmationModalIsOpen, setDeleteConfirmationModalIsOpen] = useState(false);
+    const [generoADeletar, setGeneroADeletar] = useState(null);
+    const generoServico = new GeneroServico();
+
+    useEffect(() => {
+        fetchGeneros();
+    }, []);
+
+    const fetchGeneros = async () => {
+        try {
+            const dados = await generoServico.obterGeneros();
+            setGeneros(dados);
+        } catch (error) {
+            alert(error);
+        }
+    };
+
+    useEffect(() => {
+        if (searchValue) {
+            generoServico.obterGeneroPorIdOuNome(searchValue)
+                .then(setGeneros)
+                .catch(error => console.error('Erro ao buscar gêneros:', error));
+        } else {
+            generoServico.obterGeneros(searchValue)
+            .then(setGeneros)
+            .catch(error => console.error('Erro ao buscar gêneros:', error));
+        }
+    }, [searchValue]);
 
     const validateForm = () => {
         const newErrors = {};
-        if (!novoGenero.id) newErrors.id = 'ID é obrigatório';
         if (!novoGenero.genero) newErrors.genero = 'Gênero é obrigatório';
         return newErrors;
     };
 
-    const handleAddGenero = () => {
+    const validateField = (field, value) => {
+        const newErrors = { ...errors };
+        if (field === 'genero') {
+            if (value.length < 3) {
+                newErrors.genero = 'Gênero deve ter no mínimo 3 caracteres';
+            } else {
+                delete newErrors.genero;
+            }
+        }
+        setErrors(newErrors);
+    };
+
+    const handleAddGenero = async () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
-            if (selectedGeneroIndex !== null) {
-                const updatedGeneros = [...generos];
-                updatedGeneros[selectedGeneroIndex] = novoGenero;
-                setGeneros(updatedGeneros);
-                setSelectedGeneroIndex(null);
-            } else {
-                setGeneros([...generos, novoGenero]);
+            try {
+                if (selectedGeneroIndex !== null) {
+                    await generoServico.atualizarGenero(generos[selectedGeneroIndex].id, novoGenero);
+                    setSelectedGeneroIndex(null);
+                    setConfirmationMessage('Gênero atualizado com sucesso!');
+                } else {
+                    await generoServico.adicionarGenero(novoGenero);
+                    setConfirmationMessage('Gênero cadastrado com sucesso!');
+                }
+                fetchGeneros();
+                setNovoGenero({ id: '', genero: ''});
+                setModalIsOpen(false);
+                setConfirmationModalIsOpen(true);
+            } catch (error) {
+                alert(error);
             }
-            setNovoGenero({ id: '', genero: '' });
-            setModalIsOpen(false);
-            setConfirmationModalIsOpen(true);
         } else {
             setErrors(newErrors);
         }
     };
 
     const handleDeleteGenero = (index) => {
-        const updatedGeneros = [...generos];
-        updatedGeneros.splice(index, 1);
-        setGeneros(updatedGeneros);
+        setGeneroADeletar(index);
+        setDeleteConfirmationModalIsOpen(true);
+    };
+
+    const confirmDeleteGenero = async () => {
+        try {
+            await generoServico.deletarGenero(generos[generoADeletar].id);
+            fetchGeneros();
+            setDeleteConfirmationModalIsOpen(false);
+            setGeneroADeletar(null);
+        } catch (error) {
+            alert(error);
+        }
     };
 
     const handleEditGenero = (index) => {
         setNovoGenero(generos[index]);
         setSelectedGeneroIndex(index);
+        setErrors({});
         setModalIsOpen(true);
+    };
+
+    const handleChange = (field, value) => {
+        setNovoGenero({ ...novoGenero, [field]: value });
+        validateField(field, value);
     };
 
     const handleSearchChange = (e) => {
         setSearchValue(e.target.value);
     };
 
-    const filteredGeneros = generos.filter(genero =>
-        genero.id.toLowerCase().includes(searchValue.toLowerCase()) ||
-        genero.genero.toLowerCase().includes(searchValue.toLowerCase())
-    );
+    const closeModal = () => {
+        setModalIsOpen(false);
+        setErrors({});
+        setNovoGenero({ id: '', genero: ''});
+        setSelectedGeneroIndex(null);
+    };
 
     return (
         <div className="home-page">
@@ -119,7 +183,7 @@ const GerenciarGeneros = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredGeneros.map((genero, index) => (
+                            {generos.map((genero, index) => (
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{genero.id}</td>
                                     <td className="table-row-text">{genero.genero}</td>
@@ -148,37 +212,22 @@ const GerenciarGeneros = () => {
             {modalIsOpen && (
                 <div className="modal">
                     <div className="modal-content">
-                        <span className="close" onClick={() => setModalIsOpen(false)}>&times;</span>
+                    <span className="close" onClick={closeModal}>&times;</span>
                         <h2>{selectedGeneroIndex !== null ? 'Editar Gênero' : 'Adicionar Novo Gênero'}</h2>
                         <div>
                             <input
                                 type="text"
-                                placeholder="ID"
-                                value={novoGenero.id}
-                                onChange={(e) => setNovoGenero({ ...novoGenero, id: e.target.value })}
-                            />
-                            {errors.id && <div className="error">{errors.id}</div>}
-                        </div>
-                        <div>
-                            <select
+                                placeholder="Gênero"
                                 value={novoGenero.genero}
-                                onChange={(e) => setNovoGenero({ ...novoGenero, genero: e.target.value })}
-                            >
-                                <option value="">Selecione um gênero</option>
-                                <option value="Ação">Ação</option>
-                                <option value="Aventura">Aventura</option>
-                                <option value="Comédia">Comédia</option>
-                                <option value="Drama">Drama</option>
-                                <option value="Ficção Científica">Ficção Científica</option>
-                                <option value="Romance">Romance</option>
-                                <option value="Terror">Terror</option>
-                                <option value="Outro">Outro</option>
-                            </select>
+                                onChange={(e) => handleChange('genero', e.target.value)}
+                            />
                             {errors.genero && <div className="error">{errors.genero}</div>}
                         </div>
                         <div>
-                            <button className="cancel" onClick={() => setModalIsOpen(false)}>Cancelar</button>
-                            <button className="add" onClick={handleAddGenero}>{selectedGeneroIndex !== null ? 'Salvar' : 'Adicionar'}</button>
+                            <button className="cancel" onClick={closeModal}>Cancelar</button>
+                            <button className="add" onClick={handleAddGenero} disabled={Object.keys(errors).length > 0}>
+                                {selectedGeneroIndex !== null ? 'Salvar' : 'Adicionar'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -188,11 +237,23 @@ const GerenciarGeneros = () => {
                 <div className="confirmation-modal">
                     <div className="confirmation-modal-content">
                         <span className="close" onClick={() => setConfirmationModalIsOpen(false)}>&times;</span>
-                        <h2>Gênero cadastrado com sucesso!</h2>
+                        <h2>{confirmationMessage}</h2>
                         <button onClick={() => setConfirmationModalIsOpen(false)}>Fechar</button>
                     </div>
                 </div>
             )}
+
+            {deleteConfirmationModalIsOpen && (
+                <div className="confirmation-modal">
+                    <div className="confirmation-modal-content">
+                        <span className="close" onClick={() => setDeleteConfirmationModalIsOpen(false)}>&times;</span>
+                        <h2>Tem certeza que deseja deletar este gênero?</h2>
+                        <button onClick={confirmDeleteGenero}>Confirmar</button>
+                        <button onClick={() => setDeleteConfirmationModalIsOpen(false)}>Cancelar</button>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };
