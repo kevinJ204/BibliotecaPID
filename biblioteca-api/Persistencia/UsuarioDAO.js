@@ -73,4 +73,19 @@ export default class UsuarioDAO {
         }
         return listaUsuarios;
     }
+
+    async autenticar(email, senha) {
+        const conexao = await conectar();
+        const sql = 'SELECT * FROM usuarios WHERE email = ? AND senha = ?';
+        const parametros = [
+            email,
+            senha
+        ]
+        const result = await conexao.execute(sql,parametros);
+        if (result[0].length > 0) {
+            return result[0];
+        } else {
+            throw new Error('Usuário ou senha inválidos');
+        }
+    }
 }

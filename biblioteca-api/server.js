@@ -7,6 +7,7 @@ import rotaAluno from "./Rotas/rotaAluno.js";
 import rotaTitulo from "./Rotas/rotaTitulo.js";
 import rotaGenero from "./Rotas/rotaGenero.js";
 import rotaAutor from "./Rotas/rotaAutor.js";
+import rotaAuth from "./Rotas/rotaAuth.js";
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -38,6 +39,7 @@ app.use('/alunos', rotaAluno);
 app.use('/titulos', rotaTitulo);
 app.use('/generos', rotaGenero);
 app.use('/autores', rotaAutor);
+app.use('/auth', rotaAuth);
 
 app.use(session({
     secret: 'chaveSecreta',

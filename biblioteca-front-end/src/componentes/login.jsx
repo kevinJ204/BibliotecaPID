@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Login.css';
+import AuthServico from '../servicos/AuthServico';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -15,7 +16,19 @@ const Login = () => {
             setError('O usuário e a senha devem ter mais de 3 caracteres.');
             return;
         }
-        navigate('/home');
+
+        const authServico = new AuthServico();
+
+        try {
+            const result = await authServico.login(email, password);
+            if (result && result.status) {
+                navigate('/home');
+            } else {
+                setError(result ? result.mensagem : 'Erro ao fazer login. Tente novamente mais tarde.');
+            }
+        } catch (error) {
+            setError('Erro ao fazer login. Tente novamente mais tarde.');
+        }
     };
 
     return (

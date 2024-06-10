@@ -66,6 +66,11 @@ export default class Usuario {
         return await dao.consultar(termoDePesquisa);
     }
 
+    static async autenticar(email, senha) {
+        const dao = new UsuarioDAO();
+        return await dao.autenticar(email, senha);
+    }
+
     toString(){
         return `Usuario id: ${this.#id} -  nome: ${this.#nome} - email: ${this.#email} - senha: ${this.#senha} - nivel: ${this.#nivel}
         `;
