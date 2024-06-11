@@ -86,6 +86,9 @@ const GerenciarAlunos = () => {
     }, [searchValue]);
 
     const handleChange = (field, value) => {
+        if (field === 'telefone') {
+            value = value.replace(/\D/g, '');
+        }
         setNovoAluno({ ...novoAluno, [field]: value });
         validateField(field, value);
     };
