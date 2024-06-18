@@ -93,6 +93,8 @@ class TituloServico {
             if (!response.ok) {
                 throw new Error(`Erro ao deletar título: ${response.statusText}`);
             }
+            const tituloDeletado = await response.json();
+            return tituloDeletado;
         } catch (error) {
             console.error("Erro ao deletar título:", error);
         }

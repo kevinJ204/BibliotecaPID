@@ -10,7 +10,7 @@ const GerenciarTitulos = () => {
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um Livro...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [titulos, setTitulos] = useState([]);
-    const [novoTitulo, setNovoTitulo] = useState({ id: '', nome: '', genero: '', assunto: '' });
+    const [novoTitulo, setNovoTitulo] = useState({ id: '', nome: '', genero: { id: 0, genero: '' }, assunto: '' });
     const [selectedTituloIndex, setSelectedTituloIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
@@ -31,7 +31,7 @@ const GerenciarTitulos = () => {
             const dados = await tituloServico.obterTitulos();
             setTitulos(dados);
         } catch (error) {
-            alert(error);
+            alert('Erro ao buscar títulos: ' + error);
         }
     };
 
@@ -39,34 +39,40 @@ const GerenciarTitulos = () => {
         if (searchValue) {
             tituloServico.obterTituloPorIdOuNome(searchValue)
                 .then(setTitulos)
-                .catch(error => console.error('Erro ao buscar títulos:', error));
+                .catch(error => alert('Erro ao buscar títulos: ' + error));
         } else {
             tituloServico.obterTitulos(searchValue)
             .then(setTitulos)
-            .catch(error => console.error('Erro ao buscar títulos:', error));
+            .catch(error => alert('Erro ao buscar títulos: ' + error));
         }
     }, [searchValue]);
 
     useEffect(() => {
         generoServico.obterGeneros()
             .then(setGeneros)
-            .catch(error => console.error('Erro ao buscar gêneros:', error));
+            .catch(error => alert('Erro ao buscar gêneros:', error));
     }, []);
 
     const handleAddTitulo = async () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
             try {
+                let resposta;
                 if (selectedTituloIndex !== null) {
-                    await tituloServico.atualizarTitulo(titulos[selectedTituloIndex].id, novoTitulo);
+                    resposta = await tituloServico.atualizarTitulo(titulos[selectedTituloIndex].id, novoTitulo);
                     setSelectedTituloIndex(null);
-                    setConfirmationMessage('Título atualizado com sucesso!');
                 } else {
-                    await tituloServico.adicionarTitulo(novoTitulo);
-                    setConfirmationMessage('Título cadastrado com sucesso!');
+                    resposta = await tituloServico.adicionarTitulo(novoTitulo);
                 }
+    
+                if (resposta && resposta.status === true) {
+                    setConfirmationMessage(selectedTituloIndex !== null ? 'Título atualizado com sucesso!' : 'Título cadastrado com sucesso!');
+                } else {
+                    setConfirmationMessage('Erro ao salvar título!');
+                }
+    
                 fetchTitulos();
-                setNovoTitulo({ nome: '', genero: '', assunto: ''});
+                setNovoTitulo({ nome: '', genero: { id: 0, genero: '' }, assunto: '' });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
@@ -76,12 +82,17 @@ const GerenciarTitulos = () => {
             setErrors(newErrors);
         }
     };
-
+    
     const handleChange = (field, value) => {
-        setNovoTitulo({ ...novoTitulo, [field]: value });
+        if (field === 'genero') {
+            const generoSelecionado = generos.find(genero => genero.id === parseInt(value));
+            setNovoTitulo({ ...novoTitulo, genero: generoSelecionado });
+        } else {
+            setNovoTitulo({ ...novoTitulo, [field]: value });
+        }
         validateField(field, value);
     };
-
+    
     const handleDeleteTitulo = (index) => {
         setTituloADeletar(index);
         setDeleteConfirmationModalIsOpen(true);
@@ -99,12 +110,13 @@ const GerenciarTitulos = () => {
     };
 
     const handleEditTitulo = (index) => {
-        setNovoTitulo(titulos[index]);
+        const titulo = titulos[index];
+        setNovoTitulo({ ...titulo });
         setSelectedTituloIndex(index);
         setErrors({});
         setModalIsOpen(true);
     };
-
+    
     const handleSearchChange = (e) => {
         setSearchValue(e.target.value);
     };
@@ -114,7 +126,7 @@ const GerenciarTitulos = () => {
         if (novoTitulo.nome.length < 3) {
             newErrors.nome = 'Nome deve ter mais que 3 letras.';
         }
-        if (!novoTitulo.genero) {
+        if (!novoTitulo.genero || novoTitulo.genero.id === 0) {
             newErrors.genero = 'Selecione um gênero.';
         }
         if (novoTitulo.assunto.length < 2) {
@@ -132,7 +144,7 @@ const GerenciarTitulos = () => {
                 delete newErrors.nome;
             }
         } else if (field === 'genero') {
-            if (value === "Selecione um Gênero") {
+            if (!value || value === '0') {
                 newErrors.genero = 'Gênero inválido';
             } else {
                 delete newErrors.genero;
@@ -146,11 +158,11 @@ const GerenciarTitulos = () => {
         }
         setErrors(newErrors);
     };
-        
+
     const closeModal = () => {
         setModalIsOpen(false);
         setErrors({});
-        setNovoTitulo({ nome: '', genero: '', assunto: ''});
+        setNovoTitulo({ nome: '', genero: { id: 0, genero: '' }, assunto: '' });
         setSelectedTituloIndex(null);
     };
 
@@ -219,7 +231,7 @@ const GerenciarTitulos = () => {
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{titulo.id}</td>
                                     <td className="table-row-text">{titulo.nome}</td>
-                                    <td className="table-row-text">{titulo.genero}</td>
+                                    <td className="table-row-text">{titulo.genero.genero}</td>
                                     <td className="table-row-text">{titulo.assunto}</td>
                                     <td className="table-row-text">
                                         <button className="edit-button" onClick={() => {handleEditTitulo(index);
@@ -251,26 +263,31 @@ const GerenciarTitulos = () => {
                             <input
                                 type="text"
                                 placeholder="Nome"
+                                id="nome"
                                 value={novoTitulo.nome}
                                 onChange={(e) => handleChange('nome', e.target.value)}
                             />
                             {errors.nome && <div className="error">{errors.nome}</div>}
                         </div>
-                        <div>
-                            <select
-                                value={novoTitulo.genero}
-                                onChange={(e) => handleChange('genero', e.target.value)}
-                            >
-                                <option value="">Selecione um Gênero</option>
-                                {generos.map((genero) => (
-                                    <option key={genero.id} value={genero.genero}>{genero.genero}</option>
-                                ))}
-                            </select>
-                            {errors.genero && <div className="error">{errors.genero}</div>}
-                        </div>
+                        <div className="form-group">
+                                    <select
+                                        id="genero"
+                                        value={novoTitulo.genero.id}
+                                        onChange={(e) => handleChange('genero', e.target.value)}
+                                    >
+                                        <option value="0">Selecione um gênero</option>
+                                        {generos.map((genero) => (
+                                            <option key={genero.id} value={genero.id}>
+                                                {genero.genero}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.genero && <span className="error">{errors.genero}</span>}
+                                </div>
                         <div>
                             <input
                                 type="text"
+                                id="assunto"
                                 placeholder="Assunto"
                                 value={novoTitulo.assunto}
                                 onChange={(e) => handleChange('assunto', e.target.value)}
@@ -278,7 +295,7 @@ const GerenciarTitulos = () => {
                             {errors.assunto && <div className="error">{errors.assunto}</div>}
                         </div>
                         <div>
-                        <button className="cancel" onClick={closeModal}>Cancelar</button>
+                            <button className="cancel" onClick={closeModal}>Cancelar</button>
                             <button className="add" onClick={handleAddTitulo} disabled={Object.keys(errors).length > 0}>
                                 {selectedTituloIndex !== null ? 'Salvar' : 'Adicionar'}
                             </button>
