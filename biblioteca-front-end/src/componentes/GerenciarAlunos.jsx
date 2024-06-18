@@ -97,13 +97,17 @@ const GerenciarAlunos = () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
             try {
+                let resposta;
                 if (selectedAlunoIndex !== null) {
-                    await alunoServico.atualizarAluno(alunos[selectedAlunoIndex].id, novoAluno);
+                    resposta = await alunoServico.atualizarAluno(alunos[selectedAlunoIndex].id, novoAluno);
                     setSelectedAlunoIndex(null);
-                    setConfirmationMessage('Aluno atualizado com sucesso!');
                 } else {
-                    await alunoServico.adicionarAluno(novoAluno);
-                    setConfirmationMessage('Aluno cadastrado com sucesso!');
+                    resposta = await alunoServico.adicionarAluno(novoAluno);
+                }
+                if (resposta && resposta.status === true) {
+                    setConfirmationMessage(selectedAlunoIndex !== null ? 'Aluno atualizado com sucesso!' : 'Aluno cadastrado com sucesso');
+                } else {
+                    setConfirmationMessage('Erro ao salvar aluno!');
                 }
                 fetchAlunos();
                 setNovoAluno({ nome: '', email: '', ra: '', telefone: '' });

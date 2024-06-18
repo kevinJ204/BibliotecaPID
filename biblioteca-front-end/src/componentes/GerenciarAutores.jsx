@@ -65,13 +65,17 @@ const GerenciarAutores = () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
             try {
+                let resposta;
                 if (selectedAutorIndex !== null) {
-                    await autorServico.atualizarAutor(autores[selectedAutorIndex].id, novoAutor);
+                    resposta = await autorServico.atualizarAutor(autores[selectedAutorIndex].id, novoAutor);
                     setSelectedAutorIndex(null);
-                    setConfirmationMessage('Autor atualizado com sucesso!');
                 } else {
-                    await autorServico.adicionarAutores(novoAutor);
-                    setConfirmationMessage('Autor cadastrado com sucesso!');
+                    resposta = await autorServico.adicionarAutores(novoAutor);
+                }
+                if (resposta && resposta.status === true) {
+                    setConfirmationMessage(selectedAutorIndex !== null ? 'Autor atualizado com sucesso!' : 'Autor cadastrado com sucesso');
+                } else {
+                    setConfirmationMessage('Erro ao salvar autor!');
                 }
                 fetchAutores();
                 setNovoAutor({ id: '', nome: ''});

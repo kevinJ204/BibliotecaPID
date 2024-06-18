@@ -84,13 +84,17 @@ const GerenciarUsuarios = () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
             try {
+                let resposta;
                 if (selectedUsuarioIndex !== null) {
-                    await usuarioServico.atualizarUsuario(usuarios[selectedUsuarioIndex].id, novoUsuario);
+                    resposta = await usuarioServico.atualizarUsuario(usuarios[selectedUsuarioIndex].id, novoUsuario);
                     setSelectedUsuarioIndex(null);
-                    setConfirmationMessage('Usuário atualizado com sucesso!');
                 } else {
-                    await usuarioServico.adicionarUsuario(novoUsuario);
-                    setConfirmationMessage('Usuário cadastrado com sucesso!');
+                    resposta = await usuarioServico.adicionarUsuario(novoUsuario);
+                }
+                if (resposta && resposta.status === true) {
+                    setConfirmationMessage(selectedUsuarioIndex !== null ? 'Usuário atualizado com sucesso!' : 'Usuário cadastrado com sucesso');
+                } else {
+                    setConfirmationMessage('Erro ao salvar usuário!');
                 }
                 fetchUsuarios();
                 setNovoUsuario({ nome: '', email: '', senha: '', nivel: 'Basico' });

@@ -65,13 +65,17 @@ const GerenciarGeneros = () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
             try {
+                let resposta;
                 if (selectedGeneroIndex !== null) {
-                    await generoServico.atualizarGenero(generos[selectedGeneroIndex].id, novoGenero);
+                    resposta = await generoServico.atualizarGenero(generos[selectedGeneroIndex].id, novoGenero);
                     setSelectedGeneroIndex(null);
-                    setConfirmationMessage('Gênero atualizado com sucesso!');
                 } else {
-                    await generoServico.adicionarGenero(novoGenero);
-                    setConfirmationMessage('Gênero cadastrado com sucesso!');
+                    resposta = await generoServico.adicionarGenero(novoGenero);
+                }
+                if (resposta && resposta.status === true) {
+                    setConfirmationMessage(selectedGeneroIndex !== null ? 'Gênero atualizado com sucesso!' : 'Gênero cadastrado com sucesso');
+                } else {
+                    setConfirmationMessage('Erro ao salvar gênero!');
                 }
                 fetchGeneros();
                 setNovoGenero({ id: '', genero: ''});
