@@ -1,12 +1,16 @@
+import TokenServico from './TokenServico';
+
 const API_BASE_URL = "http://localhost:3001";
 
 class GeneroServico {
     async obterGeneros() {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/generos`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {
@@ -22,10 +26,12 @@ class GeneroServico {
 
     async obterGeneroPorIdOuNome(termo) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/generos/${termo}`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {
@@ -41,11 +47,13 @@ class GeneroServico {
 
     async adicionarGenero(genero) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/generos`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
                 body: JSON.stringify(genero),
             });
@@ -62,11 +70,13 @@ class GeneroServico {
 
     async atualizarGenero(id, genero) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/generos/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
                 body: JSON.stringify(genero),
             });
@@ -83,11 +93,13 @@ class GeneroServico {
 
     async deletarGenero(id) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/generos/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {

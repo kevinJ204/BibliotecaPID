@@ -1,3 +1,5 @@
+import TokenServico from './TokenServico';
+
 const API_BASE_URL = "http://localhost:3001";
 
 class AuthServico {
@@ -17,6 +19,11 @@ class AuthServico {
             }
 
             const dados = await response.json();
+
+            if (dados.status && dados.token) {
+                TokenServico.armazenarToken(dados.token);
+            }
+
             return dados;
         } catch (error) {
             console.error("Erro ao fazer login:", error);
@@ -26,6 +33,8 @@ class AuthServico {
 
     async logout() {
         try {
+            TokenServico.removerToken();
+
             const response = await fetch(`${API_BASE_URL}/auth/logout`, {
                 method: 'POST',
                 headers: {

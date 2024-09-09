@@ -10,6 +10,10 @@ import rotaAutor from "./Rotas/rotaAutor.js";
 import rotaAuth from "./Rotas/rotaAuth.js";
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import { verificarAutenticacao } from './Controles/authCtrl.js';
+
+dotenv.configDotenv();
 
 const host = 'localhost';
 const porta = 3001;
@@ -24,6 +28,16 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+app.use(session({
+    secret: process.env.CHAVE_SECRETA,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: false,
+        maxAge: 60 * 1000 * 30
+    }
+}));
+
 app.use((req, res, next) => {
     res.cookie('SameSite', 'None', {
         secure: true,
@@ -34,22 +48,12 @@ app.use((req, res, next) => {
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/usuarios', rotaUsuario);
-app.use('/alunos', rotaAluno);
-app.use('/titulos', rotaTitulo);
-app.use('/generos', rotaGenero);
-app.use('/autores', rotaAutor);
+app.use('/usuarios', verificarAutenticacao, rotaUsuario);
+app.use('/alunos', verificarAutenticacao, rotaAluno);
+app.use('/titulos', verificarAutenticacao, rotaTitulo);
+app.use('/generos', verificarAutenticacao, rotaGenero);
+app.use('/autores', verificarAutenticacao, rotaAutor);
 app.use('/auth', rotaAuth);
-
-app.use(session({
-    secret: 'chaveSecreta',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: false,
-        maxAge: 60 * 1000 * 30
-    }
-}));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(process.cwd(), 'build', 'index.html'));

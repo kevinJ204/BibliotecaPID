@@ -1,12 +1,16 @@
+import TokenServico from './TokenServico';
+
 const API_BASE_URL = "http://localhost:3001";
 
 class TituloServico {
     async obterTitulos() {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/titulos`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {
@@ -22,10 +26,12 @@ class TituloServico {
 
     async obterTituloPorIdOuNome(termo) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/titulos/${termo}`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {
@@ -41,11 +47,13 @@ class TituloServico {
 
     async adicionarTitulo(titulo) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/titulos`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
                 body: JSON.stringify(titulo),
             });
@@ -62,11 +70,13 @@ class TituloServico {
 
     async atualizarTitulo(id, titulo) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/titulos/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
                 body: JSON.stringify(titulo),
             });
@@ -83,11 +93,13 @@ class TituloServico {
 
     async deletarTitulo(id) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/titulos/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {
@@ -97,6 +109,7 @@ class TituloServico {
             return tituloDeletado;
         } catch (error) {
             console.error("Erro ao deletar título:", error);
+            return null;
         }
     }
 }

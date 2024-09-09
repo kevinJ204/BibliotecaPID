@@ -1,12 +1,16 @@
+import TokenServico from './TokenServico';
+
 const API_BASE_URL = "http://localhost:3001";
 
 class AutorServico {
     async obterAutores() {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/autores`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {
@@ -22,10 +26,12 @@ class AutorServico {
 
     async obterAutorPorIdOuNome(termo) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/autores/${termo}`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {
@@ -41,11 +47,13 @@ class AutorServico {
 
     async adicionarAutores(autor) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/autores`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
                 body: JSON.stringify(autor),
             });
@@ -62,11 +70,13 @@ class AutorServico {
 
     async atualizarAutor(id, autor) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/autores/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
                 body: JSON.stringify(autor),
             });
@@ -83,11 +93,13 @@ class AutorServico {
 
     async deletarAutor(id) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/autores/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {

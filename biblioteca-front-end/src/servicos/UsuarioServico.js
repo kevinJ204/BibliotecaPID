@@ -1,12 +1,16 @@
+import TokenServico from './TokenServico';
+
 const API_BASE_URL = "http://localhost:3001";
 
 class UsuarioServico {
     async obterUsuarios() {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/usuarios`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {
@@ -22,10 +26,12 @@ class UsuarioServico {
 
     async obterUsuarioPorIdOuNome(termo) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/usuarios/${termo}`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {
@@ -41,11 +47,13 @@ class UsuarioServico {
 
     async adicionarUsuario(usuario) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/usuarios`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
                 body: JSON.stringify(usuario),
             });
@@ -62,11 +70,13 @@ class UsuarioServico {
 
     async atualizarUsuario(id, usuario) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/usuarios/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
                 body: JSON.stringify(usuario),
             });
@@ -83,11 +93,13 @@ class UsuarioServico {
 
     async deletarUsuario(id) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/usuarios/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
                 },
             });
             if (!response.ok) {

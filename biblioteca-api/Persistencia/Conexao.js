@@ -3,8 +3,8 @@ import mysql from 'mysql2/promise';
 export default async function conectar() {
     const pool = mysql.createPool({
         host: 'localhost',
-        user: 'root', 
-        password: 'O123456K',
+        user: process.env.USER_BD, 
+        password: process.env.SENHA_BD,
         port: 3306,
         database: 'biblioteca'
     });
