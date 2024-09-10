@@ -14,6 +14,7 @@ export default class UsuarioDAO {
             ];
             const [resultados, campos] = await conexao.execute(sql,parametros);
             usuario.setId(resultados.insertId);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -30,6 +31,7 @@ export default class UsuarioDAO {
             ];
 
             await conexao.execute(sql,parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -41,6 +43,7 @@ export default class UsuarioDAO {
                 usuario.getId()
             ]
             await conexao.execute(sql,parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
     
@@ -72,6 +75,7 @@ export default class UsuarioDAO {
             listaUsuarios.push(usuario);
         }
         return listaUsuarios;
+        global.poolConexoes.releaseConnection(conexao);
     }
 
     async autenticar(email, senha) {
@@ -87,5 +91,6 @@ export default class UsuarioDAO {
         } else {
             throw new Error('Usuário ou senha inválidos');
         }
+        global.poolConexoes.releaseConnection(conexao);
     }
 }

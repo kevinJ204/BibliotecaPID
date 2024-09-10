@@ -10,7 +10,7 @@ class TituloServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (!response.ok) {
@@ -31,7 +31,7 @@ class TituloServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (!response.ok) {
@@ -53,7 +53,7 @@ class TituloServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(titulo),
             });
@@ -76,7 +76,7 @@ class TituloServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(titulo),
             });
@@ -99,7 +99,7 @@ class TituloServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (!response.ok) {

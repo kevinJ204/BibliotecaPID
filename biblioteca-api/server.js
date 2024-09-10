@@ -12,6 +12,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { verificarAutenticacao } from './Controles/authCtrl.js';
+import flash from 'connect-flash';
 
 dotenv.configDotenv();
 
@@ -24,6 +25,7 @@ app.use(cookieParser());
 
 const corsOptions = {
     origin: 'http://localhost:3000',
+    credentials: true,
     optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
@@ -31,20 +33,16 @@ app.use(cors(corsOptions));
 app.use(session({
     secret: process.env.CHAVE_SECRETA,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
         secure: false,
-        maxAge: 60 * 1000 * 30
+        httpOnly: true,
+        maxAge: 30 * 60 * 1000,
+        sameSite: 'none'
     }
 }));
 
-app.use((req, res, next) => {
-    res.cookie('SameSite', 'None', {
-        secure: true,
-        sameSite: 'None'
-    });
-    next();
-});
+app.use(flash());
 
 app.use(express.urlencoded({ extended: true }));
 

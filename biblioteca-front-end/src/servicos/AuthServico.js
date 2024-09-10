@@ -36,7 +36,7 @@ class AuthServico {
             TokenServico.removerToken();
 
             const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'

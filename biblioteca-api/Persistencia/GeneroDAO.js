@@ -11,6 +11,7 @@ export default class GeneroDAO {
             ];
             const [resultados, campos] = await conexao.execute(sql,parametros);
             genero.setId(resultados.insertId);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -24,6 +25,7 @@ export default class GeneroDAO {
             ];
 
             await conexao.execute(sql,parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -35,6 +37,7 @@ export default class GeneroDAO {
                 genero.getId()
             ]
             await conexao.execute(sql,parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
     
@@ -63,5 +66,6 @@ export default class GeneroDAO {
             listaGeneros.push(genero);
         }
         return listaGeneros;
+        global.poolConexoes.releaseConnection(conexao);
     }
 }

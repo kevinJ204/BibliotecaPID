@@ -1,19 +1,32 @@
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Home.css';
+import AuthServico from '../servicos/AuthServico';
 
 const Home = () => {
     const userEmail = "usuario@exemplo.com";
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        const authServico = new AuthServico();
+        const success = await authServico.logout();
+        if (success) {
+            navigate('/');
+        } else {
+            console.error('Erro ao fazer logout');
+        }
+    };
 
     return (
         <div className="home-page">
             <div className="menu-background">
-            <div className="logo-container">
+                <div className="logo-container">
                     <img src={logoImage} alt="Logo" className="logo" />
                 </div>
                 <div className="menu-options">
                     <div>
-                        <Link to="/GerenciarUsuarios"className="menu-option">Gerenciar Usuários</Link>
+                        <Link to="/GerenciarUsuarios" className="menu-option">Gerenciar Usuários</Link>
                     </div>
                     <div>
                         <Link to="/GerenciarAlunos" className="menu-option">Gerenciar Alunos</Link>
@@ -27,14 +40,10 @@ const Home = () => {
                     <div>
                         <Link to="/GerenciarAutores" className="menu-option">Gerenciar Autores</Link>
                     </div>
-                    {/* <div>
-                        <Link to="/GerenciarExemplares" className="menu-option">Gerenciar Exemplares</Link>
-                    </div>
-                    <div><Link to="/GerenciarEmprestimos" className="menu-option">Gerenciar empréstimos</Link></div> */}
                 </div>
-                <Link to="/" className="logout-button">
+                <button onClick={handleLogout} className="logout-button">
                     SAIR
-                </Link>
+                </button>
             </div>
             <div className="content-background">
                 <div className="content-container">
@@ -73,14 +82,6 @@ const Home = () => {
                                 <div className="square-background"></div>
                                 <div className="square-label">GERENCIAR Gêneros</div>
                             </Link>
-                            {/* <Link to="/GerenciarAutores" className="square">
-                                <div className="square-background"></div>
-                                <div className="square-label">GERENCIAR AUTORES</div>
-                            </Link>
-                            <Link to="/GerenciarExemplares" className="square">
-                                <div className="square-background"></div>
-                                <div className="square-label">GERENCIAR EXEMPLAR</div>
-                            </Link> */}
                         </div>
                     </div>
                 </div>

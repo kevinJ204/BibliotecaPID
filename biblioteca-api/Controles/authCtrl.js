@@ -10,6 +10,7 @@ export default class AuthCtrl {
             try {
                 const usuario = await Usuario.autenticar(email, senha);
                 requisicao.session.usuario = usuario;
+                console.log("Usuário login: " + JSON.stringify(requisicao.session.usuario));
                 resposta.status(200).json({
                     "status": true,
                     "mensagem": "Login bem-sucedido",
@@ -29,25 +30,46 @@ export default class AuthCtrl {
             });
         }
     }
+
     static async logout(requisicao, resposta) {
-        requisicao.session.destroy();
+        requisicao.session.destroy((erro) => {
+            if (erro) {
+                console.error("Erro ao destruir a sessão:", erro);
+                resposta.status(500).json({
+                    "status": false,
+                    "mensagem": "Erro ao fazer logout"
+                });
+            } else {
+                resposta.status(200).json({
+                    "status": true,
+                    "mensagem": "Logout bem-sucedido"
+                });
+            }
+        });
     }
-    
 }
+
 export function verificarAutenticacao(req, resp, next) {
-    const token = req.headers['authorization'];
+    const authHeader = req.headers['authorization'];
     let tokenVerificado = undefined;
-    if (token) {
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
         tokenVerificado = verificarAssinatura(token);
-        console.log(req.session.usuario);
-        if (tokenVerificado != undefined && tokenVerificado.usuario == req.session.usuario){
+        console.log("Usuário requisição: " + JSON.stringify(req.session.usuario));
+        
+        if (tokenVerificado != undefined && tokenVerificado.usuario == req.session.usuario) {
             next();
+        } else {
+            resp.status(403).json({
+                status: false,
+                mensagem: 'Acesso não autorizado! Token inválido ou usuário não corresponde!'
+            });
         }
-    }
-    else{
+    } else {
         resp.status(401).json({
             status: false,
             mensagem: 'Acesso não autorizado! Faça o login na aplicação!'
-        })
+        });
     }
 }

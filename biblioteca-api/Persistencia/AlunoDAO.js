@@ -14,6 +14,7 @@ export default class AlunoDAO {
             ];
             const [resultados, campos] = await conexao.execute(sql,parametros);
             aluno.setId(resultados.insertId);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -31,6 +32,7 @@ export default class AlunoDAO {
             ];
 
             await conexao.execute(sql,parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -42,6 +44,7 @@ export default class AlunoDAO {
                 aluno.getId()
             ]
             await conexao.execute(sql,parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
     
@@ -73,5 +76,6 @@ export default class AlunoDAO {
             listaAlunos.push(aluno);
         }
         return listaAlunos;
+        global.poolConexoes.releaseConnection(conexao);
     }
 }

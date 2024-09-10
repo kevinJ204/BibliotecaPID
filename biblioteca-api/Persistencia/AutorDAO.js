@@ -11,6 +11,7 @@ export default class AutorDAO {
             ];
             const [resultados, campos] = await conexao.execute(sql,parametros);
             autor.setId(resultados.insertId);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -24,6 +25,7 @@ export default class AutorDAO {
             ];
 
             await conexao.execute(sql,parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -35,6 +37,7 @@ export default class AutorDAO {
                 autor.getId()
             ]
             await conexao.execute(sql,parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
     
@@ -63,5 +66,6 @@ export default class AutorDAO {
             listaAutores.push(autor);
         }
         return listaAutores;
+        global.poolConexoes.releaseConnection(conexao);
     }
 }

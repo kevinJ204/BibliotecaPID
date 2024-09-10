@@ -14,6 +14,7 @@ export default class TituloDAO {
             ];
             const [resultados, campos] = await conexao.execute(sql, parametros);
             titulo.setId(resultados.insertId);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -29,6 +30,7 @@ export default class TituloDAO {
             ];
 
             await conexao.execute(sql, parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -40,6 +42,7 @@ export default class TituloDAO {
                 titulo.getId()
             ];
             await conexao.execute(sql, parametros);
+            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -79,5 +82,6 @@ export default class TituloDAO {
             listaTitulos.push(titulo);
         }
         return listaTitulos;
+        global.poolConexoes.releaseConnection(conexao);
     }
 }

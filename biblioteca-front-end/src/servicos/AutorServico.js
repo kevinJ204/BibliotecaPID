@@ -10,7 +10,7 @@ class AutorServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (!response.ok) {
@@ -31,16 +31,16 @@ class AutorServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar autores: ${response.statusText}`);
+                throw new Error(`Erro ao buscar autor: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
-            console.error("Erro ao obter autores por ID ou Nome:", error);
+            console.error("Erro ao obter autor por ID ou Nome:", error);
             return null;
         }
     }
@@ -53,7 +53,7 @@ class AutorServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(autor),
             });
@@ -76,7 +76,7 @@ class AutorServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(autor),
             });
@@ -99,7 +99,7 @@ class AutorServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `${token}`
+                    'Authorization': `Bearer ${token}`
                 },
             });
             if (!response.ok) {
