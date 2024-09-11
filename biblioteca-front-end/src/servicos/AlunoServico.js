@@ -11,7 +11,8 @@ class AlunoServico {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar alunos: ${response.statusText}`);
@@ -32,7 +33,8 @@ class AlunoServico {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar aluno: ${response.statusText}`);
@@ -55,6 +57,7 @@ class AlunoServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include',
                 body: JSON.stringify(aluno)
             });
             if (!response.ok) {
@@ -78,6 +81,7 @@ class AlunoServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include',
                 body: JSON.stringify(aluno)
             });
             if (!response.ok) {
@@ -100,7 +104,8 @@ class AlunoServico {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao deletar aluno: ${response.statusText}`);

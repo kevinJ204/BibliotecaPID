@@ -1,13 +1,18 @@
+import TokenServico from './TokenServico';
+
 const API_BASE_URL = "http://localhost:3001";
 
 class EmprestimoServico {
     async obterEmprestimos() {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/emprestimos`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar empréstimos: ${response.statusText}`);
@@ -22,11 +27,14 @@ class EmprestimoServico {
 
     async obterEmprestimoPorIdOuNome(termo) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/emprestimos/${termo}`, {
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar empréstimo: ${response.statusText}`);
@@ -41,12 +49,15 @@ class EmprestimoServico {
 
     async adicionarEmprestimo(emprestimo) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/emprestimos`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include',
                 body: JSON.stringify(emprestimo),
             });
             if (!response.ok) {
@@ -62,12 +73,15 @@ class EmprestimoServico {
 
     async atualizarEmprestimo(id, emprestimo) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/emprestimos/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include',
                 body: JSON.stringify(emprestimo),
             });
             if (!response.ok) {
@@ -83,12 +97,15 @@ class EmprestimoServico {
 
     async deletarEmprestimo(id) {
         try {
+            const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/emprestimos/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao deletar empréstimo: ${response.statusText}`);

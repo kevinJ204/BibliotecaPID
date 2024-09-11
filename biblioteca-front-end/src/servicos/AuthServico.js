@@ -9,9 +9,10 @@ class AuthServico {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, senha }),
+                credentials: 'include'
             });
 
             if (!response.ok) {
@@ -34,13 +35,14 @@ class AuthServico {
     async logout() {
         try {
             TokenServico.removerToken();
-
+            
             const response = await fetch(`${API_BASE_URL}/auth/logout`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include'
             });
 
             if (!response.ok) {

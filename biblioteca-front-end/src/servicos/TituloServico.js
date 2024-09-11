@@ -12,6 +12,7 @@ class TituloServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar títulos: ${response.statusText}`);
@@ -33,6 +34,7 @@ class TituloServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar título: ${response.statusText}`);
@@ -55,6 +57,7 @@ class TituloServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include',
                 body: JSON.stringify(titulo),
             });
             if (!response.ok) {
@@ -78,6 +81,7 @@ class TituloServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include',
                 body: JSON.stringify(titulo),
             });
             if (!response.ok) {
@@ -101,6 +105,7 @@ class TituloServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao deletar título: ${response.statusText}`);

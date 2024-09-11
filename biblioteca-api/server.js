@@ -12,7 +12,6 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { verificarAutenticacao } from './Controles/authCtrl.js';
-import flash from 'connect-flash';
 
 dotenv.configDotenv();
 
@@ -38,11 +37,9 @@ app.use(session({
         secure: false,
         httpOnly: true,
         maxAge: 30 * 60 * 1000,
-        sameSite: 'none'
+        sameSite: 'Lax'
     }
 }));
-
-app.use(flash());
 
 app.use(express.urlencoded({ extended: true }));
 

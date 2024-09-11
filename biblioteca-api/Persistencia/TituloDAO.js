@@ -81,7 +81,7 @@ export default class TituloDAO {
             );
             listaTitulos.push(titulo);
         }
-        return listaTitulos;
         global.poolConexoes.releaseConnection(conexao);
+        return listaTitulos;
     }
 }

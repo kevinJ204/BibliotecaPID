@@ -86,11 +86,11 @@ export default class UsuarioDAO {
             senha
         ]
         const result = await conexao.execute(sql,parametros);
+        global.poolConexoes.releaseConnection(conexao);
         if (result[0].length > 0) {
             return result[0];
         } else {
             throw new Error('Usuário ou senha inválidos');
         }
-        global.poolConexoes.releaseConnection(conexao);
     }
 }

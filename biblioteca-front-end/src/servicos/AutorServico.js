@@ -12,6 +12,7 @@ class AutorServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar autores: ${response.statusText}`);
@@ -33,6 +34,7 @@ class AutorServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar autor: ${response.statusText}`);
@@ -55,6 +57,7 @@ class AutorServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include',
                 body: JSON.stringify(autor),
             });
             if (!response.ok) {
@@ -78,6 +81,7 @@ class AutorServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include',
                 body: JSON.stringify(autor),
             });
             if (!response.ok) {
@@ -101,6 +105,7 @@ class AutorServico {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include'
             });
             if (!response.ok) {
                 throw new Error(`Erro ao deletar autor: ${response.statusText}`);

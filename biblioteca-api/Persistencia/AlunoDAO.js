@@ -75,7 +75,7 @@ export default class AlunoDAO {
             );
             listaAlunos.push(aluno);
         }
-        return listaAlunos;
         global.poolConexoes.releaseConnection(conexao);
+        return listaAlunos;
     }
 }

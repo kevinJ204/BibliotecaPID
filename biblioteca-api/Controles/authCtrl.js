@@ -10,12 +10,13 @@ export default class AuthCtrl {
             try {
                 const usuario = await Usuario.autenticar(email, senha);
                 requisicao.session.usuario = usuario;
-                console.log("Usuário login: " + JSON.stringify(requisicao.session.usuario));
+                const token = assinar(usuario);
+
                 resposta.status(200).json({
                     "status": true,
                     "mensagem": "Login bem-sucedido",
-                    "usuario": usuario,
-                    "token": assinar(JSON.stringify(usuario))
+                    "usuario": usuario[0].id,
+                    "token": token
                 });
             } catch (erro) {
                 resposta.status(401).json({
@@ -40,6 +41,7 @@ export default class AuthCtrl {
                     "mensagem": "Erro ao fazer logout"
                 });
             } else {
+                resposta.clearCookie('sessionId');
                 resposta.status(200).json({
                     "status": true,
                     "mensagem": "Logout bem-sucedido"
@@ -51,14 +53,12 @@ export default class AuthCtrl {
 
 export function verificarAutenticacao(req, resp, next) {
     const authHeader = req.headers['authorization'];
-    let tokenVerificado = undefined;
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1];
-        tokenVerificado = verificarAssinatura(token);
-        console.log("Usuário requisição: " + JSON.stringify(req.session.usuario));
-        
-        if (tokenVerificado != undefined && tokenVerificado.usuario == req.session.usuario) {
+        const token = authHeader.split('Bearer ')[1];
+        const tokenVerificado = verificarAssinatura(token);
+
+        if (tokenVerificado && JSON.stringify(tokenVerificado.usuario) == JSON.stringify(req.session.usuario) /*JSON.stringify(tokenVerificado.usuario) === usuarioSessao*/) {
             next();
         } else {
             resp.status(403).json({
@@ -72,4 +72,4 @@ export function verificarAutenticacao(req, resp, next) {
             mensagem: 'Acesso não autorizado! Faça o login na aplicação!'
         });
     }
-}
+}    

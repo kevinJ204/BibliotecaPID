@@ -65,7 +65,7 @@ export default class AutorDAO {
             );
             listaAutores.push(autor);
         }
-        return listaAutores;
         global.poolConexoes.releaseConnection(conexao);
+        return listaAutores;
     }
 }

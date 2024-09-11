@@ -10,8 +10,10 @@ class GeneroServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Secure': false,
                 },
+                credentials: 'include',
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar gêneros: ${response.statusText}`);
@@ -31,8 +33,10 @@ class GeneroServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Secure': false,
                 },
+                credentials: 'include',
             });
             if (!response.ok) {
                 throw new Error(`Erro ao buscar gênero: ${response.statusText}`);
@@ -53,8 +57,10 @@ class GeneroServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Secure': false,
                 },
+                credentials: 'include',
                 body: JSON.stringify(genero),
             });
             if (!response.ok) {
@@ -76,8 +82,10 @@ class GeneroServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Secure': false,
                 },
+                credentials: 'include',
                 body: JSON.stringify(genero),
             });
             if (!response.ok) {
@@ -99,8 +107,10 @@ class GeneroServico {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Secure': false,
                 },
+                credentials: 'include',
             });
             if (!response.ok) {
                 throw new Error(`Erro ao deletar gênero: ${response.statusText}`);

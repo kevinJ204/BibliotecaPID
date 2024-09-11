@@ -65,7 +65,7 @@ export default class GeneroDAO {
             );
             listaGeneros.push(genero);
         }
-        return listaGeneros;
         global.poolConexoes.releaseConnection(conexao);
+        return listaGeneros;
     }
 }
