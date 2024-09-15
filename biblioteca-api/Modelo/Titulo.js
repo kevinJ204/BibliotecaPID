@@ -1,17 +1,20 @@
 import TituloDAO from "../Persistencia/TituloDAO.js";
 import Genero from "../Modelo/Genero.js";
+import Autor from "../Modelo/Autor.js";
 
 export default class Titulo {
     #id;
     #nome;
     #genero;
     #assunto;
+    #autores;
 
-    constructor(id = 0, nome = "", genero = new Genero(), assunto = "") {
+    constructor(id = 0, nome = "", genero = new Genero(), assunto = "", autores = []) {
         this.#id = id;
         this.#nome = nome;
         this.#genero = genero;
         this.#assunto = assunto;
+        this.#autores = autores;
     }
 
     getId() {
@@ -46,6 +49,22 @@ export default class Titulo {
         this.#assunto = assunto;
     }
 
+    getAutores() {
+        return this.#autores;
+    }
+
+    setAutores(autores) {
+        if (Array.isArray(autores)) {
+            this.#autores = autores;
+        }
+    }
+
+    adicionarAutor(autor) {
+        if (autor instanceof Autor) {
+            this.#autores.push(autor);
+        }
+    }
+
     async gravar() {
         const dao = new TituloDAO();
         await dao.gravar(this);
@@ -66,14 +85,16 @@ export default class Titulo {
         const titulos = await dao.consultar(termoDePesquisa);
         const listaTitulos = titulos.map(titulo => {
             const genero = new Genero(titulo.#genero.id, titulo.#genero.genero);
-            return new Titulo(titulo.#id, titulo.#nome, genero, titulo.#assunto);
+            const autores = titulo.#autores.map(autor => new Autor(autor.id, autor.nome));
+            return new Titulo(titulo.#id, titulo.#nome, genero, titulo.#assunto, autores);
         });
 
         return listaTitulos;
     }
 
     toString() {
-        return `Titulo id: ${this.#id} - nome: ${this.#nome} - genero: ${this.#genero.toString()} - assunto: ${this.#assunto}`;
+        const autoresNomes = this.#autores.map(autor => autor.getNome()).join(', ');
+        return `Titulo id: ${this.#id} - nome: ${this.#nome} - genero: ${this.#genero.toString()} - assunto: ${this.#assunto} - autores: ${autoresNomes}`;
     }
 
     toJSON() {
@@ -81,7 +102,8 @@ export default class Titulo {
             "id": this.#id,
             "nome": this.#nome,
             "genero": this.#genero.toJSON(),
-            "assunto": this.#assunto
+            "assunto": this.#assunto,
+            "autores": this.#autores.map(autor => autor.toJSON())
         };
     }
 }

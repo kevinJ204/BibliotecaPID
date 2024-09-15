@@ -1,5 +1,6 @@
 import Titulo from "../Modelo/Titulo.js";
 import Genero from "../Modelo/Genero.js";
+import Autor from "../Modelo/Autor.js";
 
 export default class TituloCtrl {
 
@@ -11,9 +12,16 @@ export default class TituloCtrl {
             const nome = dados.nome;
             const genero = new Genero(dados.genero.id, dados.genero.genero);
             const assunto = dados.assunto;
+            const autores = dados.autores;
 
-            if (nome && genero.getId() && genero.getGenero() && assunto) {
+            if (nome && genero.getId() && genero.getGenero() && assunto && autores && autores.length > 0) {
                 const titulo = new Titulo(0, nome, genero, assunto);
+
+                for (const autorData of autores) {
+                    const autor = new Autor(autorData.id, autorData.nome);
+                    titulo.adicionarAutor(autor);
+                }
+
                 await titulo.gravar().then(() => {
                     resposta.status(201);
                     resposta.json({
@@ -32,7 +40,7 @@ export default class TituloCtrl {
                 resposta.status(400);
                 resposta.json({
                     "status": false,
-                    "mensagem": "Por favor, informe todos os dados do Titulo, conforme documentação da API"
+                    "mensagem": "Por favor, informe todos os dados do Titulo, incluindo autores, conforme documentação da API"
                 });
             }
         } else {
@@ -52,9 +60,17 @@ export default class TituloCtrl {
             const nome = dados.nome;
             const genero = new Genero(dados.genero.id, dados.genero.genero);
             const assunto = dados.assunto;
+            const autores = dados.autores;
 
-            if (id && id > 0 && nome && genero.getId() && genero.getGenero() && assunto) {
+            if (id && id > 0 && nome && genero.getId() && genero.getGenero() && assunto && autores && autores.length > 0) {
                 const titulo = new Titulo(id, nome, genero, assunto);
+
+                titulo.setAutores([]);
+                for (const autorData of autores) {
+                    const autor = new Autor(autorData.id, autorData.nome);
+                    titulo.adicionarAutor(autor);
+                }
+
                 await titulo.atualizar()
                     .then(() => {
                         resposta.status(200);
@@ -74,7 +90,7 @@ export default class TituloCtrl {
                 resposta.status(400);
                 resposta.json({
                     "status": false,
-                    "mensagem": "Por favor, informe todos os dados do Titulo, conforme documentação da API"
+                    "mensagem": "Por favor, informe todos os dados do Titulo, incluindo autores, conforme documentação da API"
                 });
             }
         } else {
@@ -131,7 +147,16 @@ export default class TituloCtrl {
             await titulo.consultar(termoDeQuery)
                 .then((titulos) => {
                     resposta.status(200);
-                    resposta.json(titulos);
+                    resposta.json(titulos.map(t => ({
+                        id: t.getId(),
+                        nome: t.getNome(),
+                        genero: t.getGenero(),
+                        assunto: t.getAssunto(),
+                        autores: t.getAutores().map(a => ({
+                            id: a.getId(),
+                            nome: a.getNome()
+                        }))
+                    })));
                 })
                 .catch((erro) => {
                     resposta.status(500);
@@ -148,5 +173,4 @@ export default class TituloCtrl {
             });
         }
     }
-
 }

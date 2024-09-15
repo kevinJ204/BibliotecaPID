@@ -2,15 +2,17 @@ import express from 'express';
 import process from 'process';
 import path from 'path';
 import session from 'express-session';
-import rotaUsuario from "./Rotas/rotaUsuario.js";
-import rotaAluno from "./Rotas/rotaAluno.js";
-import rotaTitulo from "./Rotas/rotaTitulo.js";
-import rotaGenero from "./Rotas/rotaGenero.js";
-import rotaAutor from "./Rotas/rotaAutor.js";
-import rotaAuth from "./Rotas/rotaAuth.js";
+import rotaUsuario from './Rotas/rotaUsuario.js';
+import rotaAluno from './Rotas/rotaAluno.js';
+import rotaTitulo from './Rotas/rotaTitulo.js';
+import rotaGenero from './Rotas/rotaGenero.js';
+import rotaAutor from './Rotas/rotaAutor.js';
+import rotaAuth from './Rotas/rotaAuth.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import https from 'https';
 import { verificarAutenticacao } from './Controles/authCtrl.js';
 
 dotenv.configDotenv();
@@ -18,12 +20,16 @@ dotenv.configDotenv();
 const host = 'localhost';
 const porta = 3001;
 
+const __dirname = path.resolve();
+const key = fs.readFileSync(path.join(__dirname, 'certs', 'chave.key'));
+const cert = fs.readFileSync(path.join(__dirname, 'certs', 'certificado.crt'));
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: 'https://localhost:3000',
     credentials: true,
     optionsSuccessStatus: 200
 };
@@ -34,10 +40,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false,
+        secure: true,
         httpOnly: true,
         maxAge: 30 * 60 * 1000,
-        sameSite: 'Lax'
+        sameSite: 'none'
     }
 }));
 
@@ -56,6 +62,11 @@ app.get('/', (req, res) => {
 
 app.use(express.static(path.join(process.cwd(), 'build')));
 
-app.listen(porta, host, () => {
-    console.log(`Servidor escutando em http://${host}:${porta}`);
+const httpsOptions = {
+    key: key,
+    cert: cert
+};
+
+https.createServer(httpsOptions, app).listen(porta, host, () => {
+    console.log(`Servidor escutando em https://${host}:${porta}`);
 });

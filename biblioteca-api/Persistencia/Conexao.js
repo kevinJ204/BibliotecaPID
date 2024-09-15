@@ -21,6 +21,6 @@ export default async function conectar() {
         });
 
         global.poolConexoes = pool;
-        return await pool.getConnection();
+        return await global.poolConexoes.getConnection();
     }
 }
