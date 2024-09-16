@@ -83,15 +83,16 @@ export default class Titulo {
     async consultar(termoDePesquisa) {
         const dao = new TituloDAO();
         const titulos = await dao.consultar(termoDePesquisa);
+    
         const listaTitulos = titulos.map(titulo => {
-            const genero = new Genero(titulo.#genero.id, titulo.#genero.genero);
-            const autores = titulo.#autores.map(autor => new Autor(autor.id, autor.nome));
-            return new Titulo(titulo.#id, titulo.#nome, genero, titulo.#assunto, autores);
+            const genero = new Genero(titulo.getGenero().getId(), titulo.getGenero().getGenero());
+            const autores = titulo.getAutores().map(autor => new Autor(autor.getId(), autor.getNome()));
+            return new Titulo(titulo.getId(), titulo.getNome(), genero, titulo.getAssunto(), autores);
         });
-
+    
         return listaTitulos;
     }
-
+    
     toString() {
         const autoresNomes = this.#autores.map(autor => autor.getNome()).join(', ');
         return `Titulo id: ${this.#id} - nome: ${this.#nome} - genero: ${this.#genero.toString()} - assunto: ${this.#assunto} - autores: ${autoresNomes}`;

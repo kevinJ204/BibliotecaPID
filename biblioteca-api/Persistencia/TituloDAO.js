@@ -1,6 +1,7 @@
 import conectar from './Conexao.js';
 import Titulo from '../Modelo/Titulo.js';
 import Autor from '../Modelo/Autor.js';
+import Genero from '../Modelo/Genero.js';
 
 export default class TituloDAO {
     async gravar(titulo) {
@@ -64,6 +65,9 @@ export default class TituloDAO {
     }
 
     async consultar(termoDePesquisa) {
+        if (termoDePesquisa === undefined) {
+            termoDePesquisa = "";
+        }
         let sql = "";
         if (isNaN(parseInt(termoDePesquisa))) {
             sql = `SELECT t.*, g.id AS genero_id, g.genero AS genero_nome
@@ -75,28 +79,42 @@ export default class TituloDAO {
             sql = `SELECT t.*, g.id AS genero_id, g.genero AS genero_nome
                    FROM titulos t 
                    JOIN generos g ON t.genero_id = g.id 
-                   WHERE t.id = ?`;
+                   WHERE t.id LIKE ?`;
+            termoDePesquisa = '%' + termoDePesquisa + '%';
         }
-
+    
         const conexao = await conectar();
         const [registros] = await conexao.execute(sql, [termoDePesquisa]);
         let listaTitulos = [];
-
+    
         for (const registro of registros) {
-            const genero = { id: registro.genero_id, genero: registro.genero_nome };
-            const titulo = new Titulo(registro.id, registro.nome, genero, registro.assunto);
-
-            const sqlAutores = `SELECT a.id, a.nome FROM autores a 
-                                JOIN titulos_autores ta ON ta.autor_id = a.id
-                                WHERE ta.titulo_id = ?`;
-            const [autores] = await conexao.execute(sqlAutores, [titulo.getId()]);
-            const listaAutores = autores.map(autor => new Autor(autor.id, autor.nome));
-            titulo.setAutores(listaAutores);
-
+            const genero = new Genero(registro.genero_id, registro.genero_nome);
+    
+            const autores = await this.consultarAutoresPorTituloId(registro.id);
+            
+            const titulo = new Titulo(
+                registro.id,
+                registro.nome,
+                genero, 
+                registro.assunto,
+                autores 
+            );
             listaTitulos.push(titulo);
         }
-
+    
         global.poolConexoes.releaseConnection(conexao);
         return listaTitulos;
     }
-}
+    
+    async consultarAutoresPorTituloId(tituloId) {
+        const conexao = await conectar();
+        const sql = `SELECT a.id, a.nome FROM autores a
+                     JOIN titulos_autores ta ON a.id = ta.autor_id
+                     WHERE ta.titulo_id = ?`;
+    
+        const [registros] = await conexao.execute(sql, [tituloId]);
+        global.poolConexoes.releaseConnection(conexao);
+    
+        return registros.map(registro => new Autor(registro.id, registro.nome));
+    }
+    }
