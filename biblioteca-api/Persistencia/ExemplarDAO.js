@@ -81,7 +81,7 @@ export default class ExemplarDAO {
                 titulos[0],
                 registro.status
             );
-            listaExemplares.push(exemplar.toJSON());
+            listaExemplares.push(exemplar);
         }
         global.poolConexoes.releaseConnection(conexao);
         return listaExemplares;

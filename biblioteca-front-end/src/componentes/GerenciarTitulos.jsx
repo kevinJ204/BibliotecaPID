@@ -4,7 +4,7 @@ import logoImage from './Logo.png';
 import './Usuarios.css';
 import TituloServico from '../servicos/TituloServico';
 import GeneroServico from '../servicos/GeneroServico';
-import AutorServico from '../servicos/AutorServico'; // Adiciona o serviço de autores
+import AutorServico from '../servicos/AutorServico';
 
 const GerenciarTitulos = () => {
     const [searchValue, setSearchValue] = useState('');
@@ -87,8 +87,12 @@ const GerenciarTitulos = () => {
 
     const handleChange = (field, value, index = null) => {
         if (field === 'genero') {
-            const generoSelecionado = generos.find(genero => genero.id === parseInt(value));
-            setNovoTitulo({ ...novoTitulo, genero: generoSelecionado });
+            if (parseInt(value) === 0) {
+                setNovoTitulo({ ...novoTitulo, genero: { id: 0, genero: '' } });
+            } else {
+                const generoSelecionado = generos.find(genero => genero.id === parseInt(value));
+                setNovoTitulo({ ...novoTitulo, genero: generoSelecionado });
+            }
         } else if (field === 'autor') {
             const updatedAutores = [...selectedAutores];
             updatedAutores[index] = { id: parseInt(value) };
@@ -99,6 +103,7 @@ const GerenciarTitulos = () => {
         }
         validateField(field, value);
     };
+    
 
     const handleAddAutorField = () => {
         setSelectedAutores([...selectedAutores, { id: 0 }]);
@@ -296,77 +301,90 @@ const handleEditTitulo = (index) => {
             </div>
 
             {modalIsOpen && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <span className="close" onClick={closeModal}>&times;</span>
-                            <h2>{selectedTituloIndex !== null ? 'Editar Livro' : 'Adicionar Novo Livro'}</h2>
-                            <div>
-                                <input
-                                    type="text"
-                                    placeholder="Nome"
-                                    id="nome"
-                                    value={novoTitulo.nome}
-                                    onChange={(e) => handleChange('nome', e.target.value)}
-                                />
-                                {errors.nome && <div className="error">{errors.nome}</div>}
-                            </div>
-                            <div className="form-group">
-                                <select
-                                    id="genero"
-                                    value={novoTitulo.genero.id}
-                                    onChange={(e) => handleChange('genero', e.target.value)}
-                                >
-                                    <option value="0">Selecione um gênero</option>
-                                    {generos.map((genero) => (
-                                        <option key={genero.id} value={genero.id}>
-                                            {genero.genero}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.genero && <span className="error">{errors.genero}</span>}
-                            </div>
-                            <div>
-                                <input
-                                    type="text"
-                                    id="assunto"
-                                    placeholder="Assunto"
-                                    value={novoTitulo.assunto}
-                                    onChange={(e) => handleChange('assunto', e.target.value)}
-                                />
-                                {errors.assunto && <div className="error">{errors.assunto}</div>}
-                            </div>
-                            <div>
-                                {selectedAutores.map((autor, index) => (
-                                    <div key={index} className="autor-field">
-                                        <select
-                                            id="autor"
-                                            value={autor.id}
-                                            onChange={(e) => handleChange('autor', e.target.value, index)}
-                                        >
-                                            <option value="0">Selecione um autor</option>
-                                            {autores.map((a) => (
-                                                <option key={a.id} value={a.id}>
-                                                    {a.nome}
-                                                </option>
-                                            ))}
-                                        </select>
+                <div className="modal">
+                    <div className="modal-content">
+                        <span className="close" onClick={closeModal}>&times;</span>
+                        <h2>{selectedTituloIndex !== null ? 'Editar Livro' : 'Adicionar Novo Livro'}</h2>
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Nome"
+                                id="nome"
+                                value={novoTitulo.nome}
+                                onChange={(e) => handleChange('nome', e.target.value)}
+                            />
+                            {errors.nome && <div className="error">{errors.nome}</div>}
+                        </div>
+                        <div className="form-group">
+                            <select
+                                id="genero"
+                                value={novoTitulo.genero.id}
+                                onChange={(e) => handleChange('genero', e.target.value)}
+                            >
+                                <option value="0">Selecione um gênero</option>
+                                {generos.map((genero) => (
+                                    <option key={genero.id} value={genero.id}>
+                                        {genero.genero}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.genero && <span className="error">{errors.genero}</span>}
+                        </div>
+                        <div>
+                            <input
+                                type="text"
+                                id="assunto"
+                                placeholder="Assunto"
+                                value={novoTitulo.assunto}
+                                onChange={(e) => handleChange('assunto', e.target.value)}
+                            />
+                            {errors.assunto && <div className="error">{errors.assunto}</div>}
+                        </div>
+                        <div>
+                        {selectedAutores.length > 0 ? (
+                            selectedAutores.map((autor, index) => (
+                                <div className="autor-field" key={index}>
+                                    <select
+                                        id="autor"
+                                        value={autor.id}
+                                        onChange={(e) => handleChange('autor', e.target.value, index)}
+                                    >
+                                        <option value="0">Selecione um autor</option>
+                                        {autores.map((a) => (
+                                            <option key={a.id} value={a.id}>
+                                                {a.nome}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="autor-actions">
                                         <button type="button" onClick={() => handleRemoveAutorField(index)}>
                                             Remover
                                         </button>
+                                        {index === selectedAutores.length - 1 && (
+                                            <button type="button" onClick={handleAddAutorField}>
+                                                Adicionar Autor
+                                            </button>
+                                        )}
                                     </div>
-                                ))}
-                                <button type="button" onClick={handleAddAutorField}>Adicionar Autor</button>
-                                {errors.autores && <div className="error">{errors.autores}</div>}
-                            </div>
-                            <div>
-                                <button type="button" onClick={handleAddTitulo}>
-                                    {selectedTituloIndex !== null ? 'Atualizar' : 'Cadastrar'}
+                                </div>
+                            ))
+                        ) : (
+                            <div className="autor-actions">
+                                <button type="button" onClick={handleAddAutorField}>
+                                    Adicionar Autor
                                 </button>
-                                <button type="button" onClick={closeModal}>Cancelar</button>
                             </div>
+                        )}
+                        </div>
+                        <div>
+                            <button type="button" onClick={handleAddTitulo}>
+                                {selectedTituloIndex !== null ? 'Atualizar' : 'Cadastrar'}
+                            </button>
+                            <button type="button" onClick={closeModal}>Cancelar</button>
                         </div>
                     </div>
-                )}
+                </div>
+            )}
 
             {confirmationModalIsOpen && (
                 <div className="confirmation-modal">
@@ -392,5 +410,4 @@ const handleEditTitulo = (index) => {
         </div>
     );
 };
- //teste
 export default GerenciarTitulos;

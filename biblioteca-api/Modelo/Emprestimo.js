@@ -1,7 +1,6 @@
 import Exemplar from "./Exemplar.js"
 import Aluno from "./Aluno.js"
 import EmprestimoDAO from "../Persistencia/EmprestimoDAO.js"
-import AlunoDAO from "../Persistencia/AlunoDAO.js";
 
 export default class Emprestimo {
     #id;

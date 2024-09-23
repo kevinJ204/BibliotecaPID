@@ -1,6 +1,5 @@
 import conectar from './Conexao.js';
 import Emprestimo from '../Modelo/Emprestimo.js';
-import Aluno from '../Modelo/Aluno.js';
 import AlunoDAO from './AlunoDAO.js';
 import ExemplarDAO from './ExemplarDAO.js';
 import Exemplar from '../Modelo/Exemplar.js';
@@ -109,7 +108,7 @@ export default class EmprestimoDAO {
                 registro.dataPrazo,
                 registro.status 
             );
-            listaEmprestimos.push(emprestimo.toJSON());
+            listaEmprestimos.push(emprestimo);
         }
     
         global.poolConexoes.releaseConnection(conexao);
@@ -131,10 +130,10 @@ export default class EmprestimoDAO {
 
         for (const registro of registros) {
             const exemplar = await dao.consultar(registro.id);
-            listaExemplares.push(exemplar);
+            listaExemplares.push(exemplar[0]);
         }
 
-        return listaExemplares.map(exemplar => new Exemplar(exemplar.id, exemplar.codigo, 
-            exemplar.titulo, exemplar.status));
+        return listaExemplares.map(exemplar => new Exemplar(exemplar.getId(), exemplar.getCodigo(), 
+            exemplar.getTitulo(), exemplar.getStatus()));
     }
 }
