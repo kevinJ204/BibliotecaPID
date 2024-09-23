@@ -4,13 +4,14 @@ import logoImage from './Logo.png';
 import './Usuarios.css';
 import TituloServico from '../servicos/TituloServico';
 import GeneroServico from '../servicos/GeneroServico';
+import AutorServico from '../servicos/AutorServico'; // Adiciona o serviço de autores
 
 const GerenciarTitulos = () => {
     const [searchValue, setSearchValue] = useState('');
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um Livro...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [titulos, setTitulos] = useState([]);
-    const [novoTitulo, setNovoTitulo] = useState({ id: '', nome: '', genero: { id: 0, genero: '' }, assunto: '' });
+    const [novoTitulo, setNovoTitulo] = useState({ id: '', nome: '', genero: { id: 0, genero: '' }, assunto: '', autores: [] });
     const [selectedTituloIndex, setSelectedTituloIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
@@ -20,10 +21,19 @@ const GerenciarTitulos = () => {
     const tituloServico = new TituloServico();
     const [generos, setGeneros] = useState([]);
     const generoServico = new GeneroServico();
-
+    const [autores, setAutores] = useState([]); 
+    const [selectedAutores, setSelectedAutores] = useState([{ id: 0 }]);
+    const autorServico = new AutorServico(); 
 
     useEffect(() => {
         fetchTitulos();
+        fetchAutores(); 
+    }, []);
+
+    useEffect(() => {
+        generoServico.obterGeneros()
+            .then(setGeneros)
+            .catch(error => alert('Erro ao buscar gêneros:', error));
     }, []);
 
     const fetchTitulos = async () => {
@@ -35,23 +45,14 @@ const GerenciarTitulos = () => {
         }
     };
 
-    useEffect(() => {
-        if (searchValue) {
-            tituloServico.obterTituloPorIdOuNome(searchValue)
-                .then(setTitulos)
-                .catch(error => alert('Erro ao buscar títulos: ' + error));
-        } else {
-            tituloServico.obterTitulos(searchValue)
-            .then(setTitulos)
-            .catch(error => alert('Erro ao buscar títulos: ' + error));
+    const fetchAutores = async () => {
+        try {
+            const dados = await autorServico.obterAutores();
+            setAutores(dados);
+        } catch (error) {
+            alert('Erro ao buscar autores: ' + error);
         }
-    }, [searchValue]);
-
-    useEffect(() => {
-        generoServico.obterGeneros()
-            .then(setGeneros)
-            .catch(error => alert('Erro ao buscar gêneros:', error));
-    }, []);
+    };
 
     const handleAddTitulo = async () => {
         const newErrors = validateForm();
@@ -72,7 +73,8 @@ const GerenciarTitulos = () => {
                 }
     
                 fetchTitulos();
-                setNovoTitulo({ nome: '', genero: { id: 0, genero: '' }, assunto: '' });
+                setNovoTitulo({ nome: '', genero: { id: 0, genero: '' }, assunto: '', autores: [] });
+                setSelectedAutores([{ id: 0 }]);
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
@@ -82,43 +84,31 @@ const GerenciarTitulos = () => {
             setErrors(newErrors);
         }
     };
-    
-    const handleChange = (field, value) => {
+
+    const handleChange = (field, value, index = null) => {
         if (field === 'genero') {
             const generoSelecionado = generos.find(genero => genero.id === parseInt(value));
             setNovoTitulo({ ...novoTitulo, genero: generoSelecionado });
+        } else if (field === 'autor') {
+            const updatedAutores = [...selectedAutores];
+            updatedAutores[index] = { id: parseInt(value) };
+            setSelectedAutores(updatedAutores);
+            setNovoTitulo({ ...novoTitulo, autores: updatedAutores });
         } else {
             setNovoTitulo({ ...novoTitulo, [field]: value });
         }
         validateField(field, value);
     };
-    
-    const handleDeleteTitulo = (index) => {
-        setTituloADeletar(index);
-        setDeleteConfirmationModalIsOpen(true);
+
+    const handleAddAutorField = () => {
+        setSelectedAutores([...selectedAutores, { id: 0 }]);
     };
 
-    const confirmDeleteTitulo = async () => {
-        try {
-            await tituloServico.deletarTitulo(titulos[tituloADeletar].id);
-            fetchTitulos();
-            setDeleteConfirmationModalIsOpen(false);
-            setTituloADeletar(null);
-        } catch (error) {
-            alert(error);
-        }
-    };
-
-    const handleEditTitulo = (index) => {
-        const titulo = titulos[index];
-        setNovoTitulo({ ...titulo });
-        setSelectedTituloIndex(index);
-        setErrors({});
-        setModalIsOpen(true);
-    };
-    
-    const handleSearchChange = (e) => {
-        setSearchValue(e.target.value);
+    const handleRemoveAutorField = (index) => {
+        const updatedAutores = [...selectedAutores];
+        updatedAutores.splice(index, 1);
+        setSelectedAutores(updatedAutores);
+        setNovoTitulo({ ...novoTitulo, autores: updatedAutores });
     };
 
     const validateForm = () => {
@@ -131,6 +121,9 @@ const GerenciarTitulos = () => {
         }
         if (novoTitulo.assunto.length < 2) {
             newErrors.assunto = 'Assunto deve ter pelo menos 2 caracteres.';
+        }
+        if (novoTitulo.autores.length === 0 || novoTitulo.autores.some(autor => autor.id === 0)) {
+            newErrors.autores = 'Selecione ao menos um autor.';
         }
         return newErrors;
     };
@@ -155,6 +148,12 @@ const GerenciarTitulos = () => {
             } else {
                 delete newErrors.assunto;
             }
+        } else if (field === 'autor') {
+            if (value === '0') {
+                newErrors.autores = 'Autor inválido';
+            } else {
+                delete newErrors.autores;
+            }
         }
         setErrors(newErrors);
     };
@@ -162,8 +161,38 @@ const GerenciarTitulos = () => {
     const closeModal = () => {
         setModalIsOpen(false);
         setErrors({});
-        setNovoTitulo({ nome: '', genero: { id: 0, genero: '' }, assunto: '' });
+        setNovoTitulo({ nome: '', genero: { id: 0, genero: '' }, assunto: '', autores: [] });
+        setSelectedAutores([{ id: 0 }]);
         setSelectedTituloIndex(null);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchValue(e.target.value);
+    };
+
+const handleEditTitulo = (index) => {
+    const titulo = titulos[index];
+    setNovoTitulo({ ...titulo });
+    setSelectedTituloIndex(index);
+    setSelectedAutores(titulo.autores || []);
+    setErrors({});
+    setModalIsOpen(true);
+    };
+
+    const handleDeleteTitulo = (index) => {
+        setTituloADeletar(index);
+        setDeleteConfirmationModalIsOpen(true);
+    };
+
+    const confirmDeleteTitulo = async () => {
+        try {
+            await tituloServico.deletarTitulo(titulos[tituloADeletar].id);
+            fetchTitulos();
+            setDeleteConfirmationModalIsOpen(false);
+            setTituloADeletar(null);
+        } catch (error) {
+            alert(error);
+        }
     };
 
     return (
@@ -187,12 +216,6 @@ const GerenciarTitulos = () => {
                     </div>
                     <div>
                         <Link to="/GerenciarAutores" className="menu-option">Gerenciar Autores</Link>
-                    </div>
-                    <div>
-                        <Link to="/GerenciarExemplares" className="menu-option">Gerenciar Exemplares</Link>
-                    </div>
-                    <div>
-                        <Link to="/GerenciarEmpréstimos" className="menu-option">Gerenciar Empréstimos</Link>
                     </div>
                 </div>
                 <Link to="/home" className="logout-button">
@@ -229,86 +252,121 @@ const GerenciarTitulos = () => {
                                 <th>Nome</th>
                                 <th>Gênero</th>
                                 <th>Assunto</th>
+                                <th>Autores</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {titulos.map((titulo, index) => (
-                                <tr key={index} className="table-row">
-                                    <td className="table-row-text">{titulo.id}</td>
-                                    <td className="table-row-text">{titulo.nome}</td>
-                                    <td className="table-row-text">{titulo.genero.genero}</td>
-                                    <td className="table-row-text">{titulo.assunto}</td>
-                                    <td className="table-row-text">
-                                        <button className="edit-button" onClick={() => {handleEditTitulo(index);
-                                        }}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M16 5L19 8M20.385 6.585C20.7788 6.19115 21.0001 5.65698 21.0001 5.1C21.0001 4.54302 20.7788 4.00885 20.385 3.615C19.9912 3.22115 19.457 2.99989 18.9 2.99989C18.343 2.99989 17.8088 3.22115 17.415 3.615L9 12V15H12L20.385 6.585Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </button>
-                                        <button className="delete-button" onClick={() => handleDeleteTitulo(index)}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                <path d="M4 7H20M10 11V17M14 11V17M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7M9 7V4C9 3.73478 9.10536 3.48043 9.29289 3.29289C9.48043 3.10536 9.73478 3 10 3H14C14.2652 3 14.5196 3.10536 14.7071 3.29289C14.8946 3.48043 15 3.73478 15 4V7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
+            {titulos.map((titulo, index) => (
+                <tr key={index} className="table-row">
+                    <td className="table-row-text">{titulo.id}</td>
+                    <td className="table-row-text">{titulo.nome}</td>
+                    <td className="table-row-text">{titulo.genero.genero}</td>
+                    <td className="table-row-text">{titulo.assunto}</td>
+                    <td className="table-row-text">
+                        {titulo.autores && titulo.autores.length > 0 ? (
+                            titulo.autores.map((autor, i) => (
+                                <span key={i}>
+                                    {autor.nome}
+                                    {i < titulo.autores.length - 1 ? ', ' : ''}
+                                </span>
+                            ))
+                        ) : (
+                            <span>Sem autor</span>
+                        )}
+                    </td>
+                    <td className="table-row-text">
+                        <button className="edit-button" onClick={() => { handleEditTitulo(index); }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 5L19 8M20.385 6.585C20.7788 6.19115 21.0001 5.65698 21.0001 5.1C21.0001 4.54302 20.7788 4.00885 20.385 3.615C19.9912 3.22115 19.457 2.99989 18.9 2.99989C18.343 2.99989 17.8088 3.22115 17.415 3.615L9 12V15H12L20.385 6.585Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button className="delete-button" onClick={() => handleDeleteTitulo(index)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 7H20M10 11V17M14 11V17M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7M9 7V4C9 3.73478 9.10536 3.48043 9.29289 3.29289C9.48043 3.10536 9.73478 3 10 3H14C14.2652 3 14.5196 3.10536 14.7071 3.29289C14.8946 3.48043 15 3.73478 15 4V7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            ))}
+        </tbody>
                     </table>
                 </div>
             </div>
 
             {modalIsOpen && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <span className="close" onClick={closeModal}>&times;</span>
-                        <h2>{selectedTituloIndex !== null ? 'Editar Livro' : 'Adicionar Novo Livro'}</h2>
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="Nome"
-                                id="nome"
-                                value={novoTitulo.nome}
-                                onChange={(e) => handleChange('nome', e.target.value)}
-                            />
-                            {errors.nome && <div className="error">{errors.nome}</div>}
-                        </div>
-                        <div className="form-group">
-                                    <select
-                                        id="genero"
-                                        value={novoTitulo.genero.id}
-                                        onChange={(e) => handleChange('genero', e.target.value)}
-                                    >
-                                        <option value="0">Selecione um gênero</option>
-                                        {generos.map((genero) => (
-                                            <option key={genero.id} value={genero.id}>
-                                                {genero.genero}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.genero && <span className="error">{errors.genero}</span>}
-                                </div>
-                        <div>
-                            <input
-                                type="text"
-                                id="assunto"
-                                placeholder="Assunto"
-                                value={novoTitulo.assunto}
-                                onChange={(e) => handleChange('assunto', e.target.value)}
-                            />
-                            {errors.assunto && <div className="error">{errors.assunto}</div>}
-                        </div>
-                        <div>
-                            <button className="cancel" onClick={closeModal}>Cancelar</button>
-                            <button className="add" onClick={handleAddTitulo} disabled={Object.keys(errors).length > 0}>
-                                {selectedTituloIndex !== null ? 'Salvar' : 'Adicionar'}
-                            </button>
+                    <div className="modal">
+                        <div className="modal-content">
+                            <span className="close" onClick={closeModal}>&times;</span>
+                            <h2>{selectedTituloIndex !== null ? 'Editar Livro' : 'Adicionar Novo Livro'}</h2>
+                            <div>
+                                <input
+                                    type="text"
+                                    placeholder="Nome"
+                                    id="nome"
+                                    value={novoTitulo.nome}
+                                    onChange={(e) => handleChange('nome', e.target.value)}
+                                />
+                                {errors.nome && <div className="error">{errors.nome}</div>}
+                            </div>
+                            <div className="form-group">
+                                <select
+                                    id="genero"
+                                    value={novoTitulo.genero.id}
+                                    onChange={(e) => handleChange('genero', e.target.value)}
+                                >
+                                    <option value="0">Selecione um gênero</option>
+                                    {generos.map((genero) => (
+                                        <option key={genero.id} value={genero.id}>
+                                            {genero.genero}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.genero && <span className="error">{errors.genero}</span>}
+                            </div>
+                            <div>
+                                <input
+                                    type="text"
+                                    id="assunto"
+                                    placeholder="Assunto"
+                                    value={novoTitulo.assunto}
+                                    onChange={(e) => handleChange('assunto', e.target.value)}
+                                />
+                                {errors.assunto && <div className="error">{errors.assunto}</div>}
+                            </div>
+                            <div>
+                                {selectedAutores.map((autor, index) => (
+                                    <div key={index} className="autor-field">
+                                        <select
+                                            id="autor"
+                                            value={autor.id}
+                                            onChange={(e) => handleChange('autor', e.target.value, index)}
+                                        >
+                                            <option value="0">Selecione um autor</option>
+                                            {autores.map((a) => (
+                                                <option key={a.id} value={a.id}>
+                                                    {a.nome}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <button type="button" onClick={() => handleRemoveAutorField(index)}>
+                                            Remover
+                                        </button>
+                                    </div>
+                                ))}
+                                <button type="button" onClick={handleAddAutorField}>Adicionar Autor</button>
+                                {errors.autores && <div className="error">{errors.autores}</div>}
+                            </div>
+                            <div>
+                                <button type="button" onClick={handleAddTitulo}>
+                                    {selectedTituloIndex !== null ? 'Atualizar' : 'Cadastrar'}
+                                </button>
+                                <button type="button" onClick={closeModal}>Cancelar</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
             {confirmationModalIsOpen && (
                 <div className="confirmation-modal">
@@ -324,7 +382,7 @@ const GerenciarTitulos = () => {
                 <div className="confirmation-modal">
                     <div className="confirmation-modal-content">
                         <span className="close" onClick={() => setDeleteConfirmationModalIsOpen(false)}>&times;</span>
-                        <h2>Tem certeza que deseja deletar este aluno?</h2>
+                        <h2>Tem certeza que deseja deletar este titulo?</h2>
                         <button onClick={confirmDeleteTitulo}>Confirmar</button>
                         <button onClick={() => setDeleteConfirmationModalIsOpen(false)}>Cancelar</button>
                     </div>

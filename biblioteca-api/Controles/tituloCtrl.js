@@ -58,35 +58,33 @@ export default class TituloCtrl {
             const dados = requisicao.body;
             const titulosAtualizados = [];
     
-            for (const dado of dados) {
-                const id = dado.id;
-                const nome = dado.nome;
-                const genero = new Genero(dado.genero.id, dado.genero.genero);
-                const assunto = dado.assunto;
-                const autores = dado.autores;
-    
-                if (id && id > 0 && nome && genero.getId() && genero.getGenero() && assunto && Array.isArray(autores)) {
-                    const titulo = new Titulo(id, nome, genero, assunto, autores.map(autor => new Autor(autor.id, autor.nome)));
-    
-                    try {
-                        await titulo.atualizar();
-                        titulosAtualizados.push(titulo);
-                    } catch (erro) {
-                        resposta.status(500);
-                        return resposta.json({
-                            "status": false,
-                            "mensagem": "Não foi possível atualizar o Titulo! " + erro.message
-                        });
-                    }
-                } else {
-                    resposta.status(400);
+            const id = dados.id;
+            const nome = dados.nome;
+            const genero = new Genero(dados.genero.id, dados.genero.genero);
+            const assunto = dados.assunto;
+            const autores = dados.autores;
+
+            if (id && id > 0 && nome && genero.getId() && genero.getGenero() && assunto && Array.isArray(autores)) {
+                const titulo = new Titulo(id, nome, genero, assunto, autores.map(autor => new Autor(autor.id, autor.nome)));
+
+                try {
+                    await titulo.atualizar();
+                    titulosAtualizados.push(titulo);
+                } catch (erro) {
+                    resposta.status(500);
                     return resposta.json({
                         "status": false,
-                        "mensagem": "Por favor, informe todos os dados do Titulo, incluindo autores, conforme documentação da API"
+                        "mensagem": "Não foi possível atualizar o Titulo! " + erro.message
                     });
                 }
+            } else {
+                resposta.status(400);
+                return resposta.json({
+                    "status": false,
+                    "mensagem": "Por favor, informe todos os dados do Titulo, incluindo autores, conforme documentação da API"
+                });
             }
-    
+
             resposta.status(200);
             return resposta.json({
                 "status": true,
