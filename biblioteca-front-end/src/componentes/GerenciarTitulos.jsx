@@ -34,7 +34,7 @@ const GerenciarTitulos = () => {
         generoServico.obterGeneros()
             .then(setGeneros)
             .catch(error => alert('Erro ao buscar gêneros:', error));
-    }, []);
+    }, []);
 
     const fetchTitulos = async () => {
         try {
@@ -168,7 +168,7 @@ const GerenciarTitulos = () => {
 
     const handleSearchChange = (e) => {
         setSearchValue(e.target.value);
-    };
+    };
 
 const handleEditTitulo = (index) => {
     const titulo = titulos[index];
@@ -177,7 +177,7 @@ const handleEditTitulo = (index) => {
     setSelectedAutores(titulo.autores || []);
     setErrors({});
     setModalIsOpen(true);
-    };
+    };
 
     const handleDeleteTitulo = (index) => {
         setTituloADeletar(index);
@@ -192,8 +192,8 @@ const handleEditTitulo = (index) => {
             setTituloADeletar(null);
         } catch (error) {
             alert(error);
-        }
-    };
+        }
+    };
 
     return (
         <div className="home-page">
@@ -290,7 +290,7 @@ const handleEditTitulo = (index) => {
                     </td>
                 </tr>
             ))}
-        </tbody>
+        </tbody>
                     </table>
                 </div>
             </div>
@@ -382,7 +382,7 @@ const handleEditTitulo = (index) => {
                 <div className="confirmation-modal">
                     <div className="confirmation-modal-content">
                         <span className="close" onClick={() => setDeleteConfirmationModalIsOpen(false)}>&times;</span>
-                        <h2>Tem certeza que deseja deletar este titulo?</h2>
+                        <h2>Você deseja deletar este titulo?</h2>
                         <button onClick={confirmDeleteTitulo}>Confirmar</button>
                         <button onClick={() => setDeleteConfirmationModalIsOpen(false)}>Cancelar</button>
                     </div>
@@ -392,5 +392,5 @@ const handleEditTitulo = (index) => {
         </div>
     );
 };
-
+ //teste
 export default GerenciarTitulos;
