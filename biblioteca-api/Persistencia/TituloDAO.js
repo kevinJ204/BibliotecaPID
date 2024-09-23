@@ -117,4 +117,4 @@ export default class TituloDAO {
     
         return registros.map(registro => new Autor(registro.id, registro.nome));
     }
-    }
+}

@@ -7,6 +7,8 @@ import rotaAluno from './Rotas/rotaAluno.js';
 import rotaTitulo from './Rotas/rotaTitulo.js';
 import rotaGenero from './Rotas/rotaGenero.js';
 import rotaAutor from './Rotas/rotaAutor.js';
+import rotaExemplar from './Rotas/rotaExemplar.js';
+import rotaEmprestimo from './Rotas/rotaEmprestimo.js';
 import rotaAuth from './Rotas/rotaAuth.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -54,6 +56,8 @@ app.use('/alunos', verificarAutenticacao, rotaAluno);
 app.use('/titulos', verificarAutenticacao, rotaTitulo);
 app.use('/generos', verificarAutenticacao, rotaGenero);
 app.use('/autores', verificarAutenticacao, rotaAutor);
+app.use('/exemplares', verificarAutenticacao, rotaExemplar);
+app.use('/emprestimos', verificarAutenticacao, rotaEmprestimo);
 app.use('/auth', rotaAuth);
 
 app.get('/', (req, res) => {
