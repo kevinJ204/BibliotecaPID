@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './Alunos.css';
+import logoImage from './Logo.png';
+import './Usuarios.css';
 
 const GerenciarUsuarios = () => {
     const [searchValue, setSearchValue] = useState('');
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um Exemplar...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [usuarios, setUsuarios] = useState([]);
-    const [novoUsuario, setNovoUsuario] = useState({ codigo: '', titulo: '', devolvido: false });
+    const [novoExemplar, setnovoExemplar] = useState({ codigo: '', titulo: '', devolvido: false });
     const [selectedRowIndex, setSelectedRowIndex] = useState(null);
 
     const handleAddUsuario = () => {
-        setUsuarios([...usuarios, novoUsuario]);
-        setNovoUsuario({ codigo: '', titulo: '', devolvido: false });
+        setUsuarios([...usuarios, novoExemplar]);
+        setnovoExemplar({ codigo: '', titulo: '', devolvido: false });
         setModalIsOpen(false);
     };
 
@@ -48,7 +49,9 @@ const GerenciarUsuarios = () => {
     return (
         <div className="home-page">
             <div className="menu-background">
-                <div className="logo"></div>
+            <div className="logo-container">
+                    <img src={logoImage} alt="Logo" className="logo" />
+                </div>
                 <div className="menu-options">
                     <div>
                         <Link to="/GerenciarUsuarios" className="menu-option">Gerenciar Usuários</Link>
@@ -87,17 +90,20 @@ const GerenciarUsuarios = () => {
                             onBlur={() => setSearchPlaceholder('Pesquisar um aluno...')}
                         />
                         <span className="search-icon">
-                            {/* Coloque o SVG do ícone de pesquisa aqui */}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                <path d="M12.5 11H11.71L11.43 10.73C12.4439 9.55402 13.0011 8.0527 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="#575757"/>
+                            </svg>
                         </span>
                     </div>
                     <button className="add-button" onClick={() => setModalIsOpen(true)}>NOVO +</button>
-                    <button className="delete-button" onClick={handleDeleteSelectedUsuario}>EXCLUIR</button>
+                    {/* <button className="delete-button" onClick={handleDeleteSelectedUsuario}>EXCLUIR</button> */}
                 </div>
 
                 <div className="table-background">
                     <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Código</th>
                                 <th>Título</th>
                                 <th>Status</th>
@@ -123,12 +129,12 @@ const GerenciarUsuarios = () => {
                 <div className="modal">
                     <div className="modal-content">
                         <span className="close" onClick={() => setModalIsOpen(false)}>&times;</span>
-                        <h2>Adicionar Novo Exemplar</h2>
+                        <h2>Registrar Novo Exemplar</h2>
                         <div>
-                            <input type="text" placeholder="Código" value={novoUsuario.codigo} onChange={(e) => setNovoUsuario({ ...novoUsuario, codigo: e.target.value })} />
+                            <input type="text" placeholder="Insira o Código ISBN" value={novoExemplar.codigo} onChange={(e) => setnovoExemplar({ ...novoExemplar, codigo: e.target.value })} />
                         </div>
                         <div>
-                            <input type="text" placeholder="Título" value={novoUsuario.titulo} onChange={(e) => setNovoUsuario({ ...novoUsuario, titulo: e.target.value })} />
+                            <input type="text" placeholder="Insira o Título do Livro" value={novoExemplar.titulo} onChange={(e) => setnovoExemplar({ ...novoExemplar, titulo: e.target.value })} />
                         </div>
                         <div>
                             <button onClick={() => setModalIsOpen(false)}>Cancelar</button>
