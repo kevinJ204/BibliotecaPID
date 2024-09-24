@@ -9,7 +9,7 @@ export default class ExemplarDAO {
             const sql = `INSERT INTO exemplares (codigo,titulo_id,status) values (?,?,?)`;
             const parametros = [
                 exemplar.getCodigo(),
-                exemplar.getTitulo.getId(),
+                exemplar.getTitulo().getId(),
                 exemplar.getStatus()
             ];
             const [resultados] = await conexao.execute(sql,parametros);
@@ -46,35 +46,35 @@ export default class ExemplarDAO {
         }
     }
     
-    async consultar(termoDePesquisa){
-        if (termoDePesquisa === undefined){
+    async consultar(termoDePesquisa) {
+        // Verifica se termoDePesquisa é undefined e define como string vazia
+        if (termoDePesquisa === undefined) {
             termoDePesquisa = "";
         }
-        let sql="";
-        const conexao = await conectar();
-        const registros = [];
-        if (isNaN(parseInt(termoDePesquisa))){
-            sql = `SELECT e.*, t.nome AS titulo_nome 
+    
+        let sql = "";
+    
+        // Verifica se termoDePesquisa não é um número
+        if (isNaN(parseInt(termoDePesquisa))) {
+            sql = `SELECT e.*, t.nome 
                    FROM exemplares e 
                    JOIN titulos t ON e.titulo_id = t.id
-                   WHERE titulo_nome LIKE ? OR e.codigo LIKE ?`;
-            termoDePesquisa= '%' + termoDePesquisa + '%';
-            [registros] = await conexao.execute(sql,[termoDePesquisa,termoDePesquisa]);
+                   WHERE t.nome LIKE ? ;`;
+            termoDePesquisa = '%' + termoDePesquisa + '%'; // Usando uma nova variável
+        } else {
+            sql = `SELECT * FROM exemplares WHERE id LIKE ? ;`;
+            termoDePesquisa = '%' + termoDePesquisa + '%'; // Usando uma nova variável
         }
-        else{
-            sql = `SELECT * FROM exemplares WHERE id LIKE ?`;
-            termoDePesquisa= '%' + termoDePesquisa + '%';
-            [registros] = await conexao.execute(sql,[termoDePesquisa]);
-        }
+        const conexao = await conectar();
+        const [registros] = await conexao.execute(sql, [termoDePesquisa]);
 
         let listaExemplares = [];
-
         const dao = new TituloDAO();
-
-        for (const registro of registros){
-
+    
+        // Itera sobre os registros e cria os objetos Exemplar
+        for (const registro of registros) {
             const titulos = await dao.consultar(registro.titulo_id);
-
+    
             const exemplar = new Exemplar(
                 registro.id,
                 registro.codigo,
@@ -83,7 +83,8 @@ export default class ExemplarDAO {
             );
             listaExemplares.push(exemplar);
         }
-        global.poolConexoes.releaseConnection(conexao);
-        return listaExemplares;
+    
+        global.poolConexoes.releaseConnection(conexao); // Libera a conexão
+        return listaExemplares; // Retorna a lista de exemplares
     }
 }

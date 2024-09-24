@@ -9,13 +9,11 @@ export default class ExemplarCtrl {
         if (requisicao.method === "POST" && requisicao.is('application/json')) {
             const dados = requisicao.body;
             const codigo = dados.codigo;
-            const titulo = new Titulo(dados.titulo.id, dados.titulo.nome, dados.titulo.genero, 
+            const titulo = new Titulo(parseInt(dados.titulo.id), dados.titulo.nome, dados.titulo.genero, 
                 dados.titulo.assunto, dados.titulo.autores);
             const status = "Disponível";
 
-            if (codigo && titulo.getId() && titulo.getNome() && titulo.getGenero().getId() && 
-            titulo.getGenero().getGenero() && titulo.getAssunto() && titulo.getAutores().length > 0 
-            && status) {
+            if (codigo && titulo.getId() && titulo.getNome() && status) {
                 const exemplar = new Exemplar(0, codigo, titulo, status);
                 try {
                     await exemplar.gravar();
@@ -55,9 +53,7 @@ export default class ExemplarCtrl {
                 dados.titulo.assunto, dados.titulo.autores);
             const status = dados.status;
 
-            if (id && codigo && titulo.getId() && titulo.getNome() && titulo.getGenero().getId() && 
-            titulo.getGenero().getGenero() && titulo.getAssunto() && titulo.getAutores().length > 0 
-            && status) {
+            if (id && codigo && titulo.getId() && titulo.getNome() && status) {
                     const exemplar = new Exemplar(id, codigo, titulo, status);
                 try {
                     await exemplar.atualizar();
