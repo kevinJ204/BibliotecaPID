@@ -3,7 +3,7 @@ import TokenServico from './TokenServico';
 const API_BASE_URL = "https://localhost:3001";
 
 class ExemplarServico {
-    static async obterExemplares() {
+    async obterExemplares() {
         try {
             const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/exemplares`, {
@@ -25,7 +25,7 @@ class ExemplarServico {
         }
     }
 
-    static async obterExemplarPorIdOuNome(termo) {
+    async obterExemplarPorIdOuNome(termo) {
         try {
             const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/exemplares/${termo}`, {
@@ -47,7 +47,7 @@ class ExemplarServico {
         }
     }
 
-    static async adicionarExemplar(exemplar) {
+    async adicionarExemplar(exemplar) {
         try {
             const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/exemplares`, {
@@ -71,7 +71,7 @@ class ExemplarServico {
         }
     }
 
-    static async atualizarExemplar(id, exemplar) {
+    async atualizarExemplar(id, exemplar) {
         try {
             const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/exemplares/${id}`, {
@@ -95,7 +95,7 @@ class ExemplarServico {
         }
     }
 
-    static async deletarExemplar(id) {
+    async deletarExemplar(id) {
         try {
             const token = TokenServico.recuperarToken();
             const response = await fetch(`${API_BASE_URL}/exemplares/${id}`, {
