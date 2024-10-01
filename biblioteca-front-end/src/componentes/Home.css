@@ -103,6 +103,7 @@
     bottom: 20px; 
     left: 3.5%; 
     text-decoration: none;
+    border: 1px solid #fff;
 }
 
 .logout-button:hover {

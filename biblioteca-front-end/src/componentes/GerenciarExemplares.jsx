@@ -212,6 +212,12 @@ const GerenciarExemplares = () => {
                     <div>
                         <Link to="/GerenciarAutores" className="menu-option">Gerenciar Autores</Link>
                     </div>
+                    <div>
+                        <Link to="/GerenciarExemplares" className="menu-option">Gerenciar Exemplares</Link>
+                    </div>
+                    <div>
+                        <Link to="/GerenciarEmprestimos" className="menu-option">Gerenciar Empréstimos</Link>
+                    </div>
                 </div>
                 <Link to="/home" className="logout-button">
                     VOLTAR
@@ -270,10 +276,9 @@ const GerenciarExemplares = () => {
                                             </svg>
                                         </button>
                                         <button className="baixa-button" onClick={() => handleBaixaExemplar(index)}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                <path d="M12 2L12 22" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M19 9L12 2L5 9" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M8.97503 19.95C7.70836 19.8167 6.52936 19.4627 5.43802 18.888C4.34669 18.3133 3.40069 17.58 2.60002 16.688C1.79936 15.796 1.17036 14.775 0.713024 13.625C0.255691 12.475 0.0263577 11.2583 0.0250244 9.975C0.0250244 7.39167 0.879357 5.15433 2.58802 3.263C4.29669 1.37167 6.43402 0.284 9.00002 0V2C6.98336 2.28333 5.31669 3.17933 4.00002 4.688C2.68336 6.19667 2.02502 7.959 2.02502 9.975C2.02502 11.991 2.68336 13.7537 4.00002 15.263C5.31669 16.7723 6.97503 17.668 8.97503 17.95V19.95ZM9.97503 15L4.95002 9.95L6.37502 8.525L8.97503 11.125V5H10.975V11.125L13.55 8.55L14.975 10L9.97503 15ZM10.975 19.95V17.95C11.6917 17.85 12.3794 17.6583 13.038 17.375C13.6967 17.0917 14.309 16.7333 14.875 16.3L16.325 17.75C15.5417 18.3667 14.7 18.8627 13.8 19.238C12.9 19.6133 11.9584 19.8507 10.975 19.95ZM14.925 3.65C14.3417 3.21667 13.721 2.85833 13.063 2.575C12.405 2.29167 11.7174 2.1 11 2V0C11.9834 0.1 12.925 0.337667 13.825 0.713C14.725 1.08833 15.5584 1.584 16.325 2.2L14.925 3.65ZM17.725 16.3L16.325 14.875C16.7584 14.3083 17.1084 13.696 17.375 13.038C17.6417 12.38 17.825 11.6923 17.925 10.975H19.975C19.8417 11.9583 19.5917 12.9043 19.225 13.813C18.8584 14.7217 18.3584 15.5507 17.725 16.3ZM17.925 8.975C17.825 8.25833 17.6417 7.571 17.375 6.913C17.1084 6.255 16.7584 5.64233 16.325 5.075L17.725 3.65C18.3584 4.4 18.8667 5.22933 19.25 6.138C19.6334 7.04667 19.875 7.99233 19.975 8.975H17.925Z" fill="black"/>
+                                        </svg>
                                         </button>
                                     </td>
                                 </tr>

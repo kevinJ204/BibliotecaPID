@@ -154,7 +154,7 @@ const GerenciarGeneros = () => {
                         <Link to="/GerenciarExemplares" className="menu-option">Gerenciar Exemplares</Link>
                     </div>
                     <div>
-                        <Link to="/GerenciarEmpréstimos" className="menu-option">Gerenciar Empréstimos</Link>
+                        <Link to="/GerenciarEmprestimos" className="menu-option">Gerenciar Empréstimos</Link>
                     </div>
                 </div>
                 <Link to="/home" className="logout-button">

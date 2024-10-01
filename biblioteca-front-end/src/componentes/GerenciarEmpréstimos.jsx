@@ -12,7 +12,7 @@ const GerenciarEmprestimos = () => {
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um Empréstimo...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [emprestimos, setEmprestimos] = useState([]);
-    const [novoEmprestimo, setNovoEmprestimo] = useState({ id: '', nomeexemplar: '', nomealuno: '', dataemprestimo: '', dataentrega: '' });
+    const [novoEmprestimo, setNovoEmprestimo] = useState({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataemprestimo: '', dataentrega: '' });
     const [selectedEmprestimoIndex, setSelectedEmprestimoIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
@@ -22,7 +22,8 @@ const GerenciarEmprestimos = () => {
     const [loading, setLoading] = useState(false); // Spinner loading
     const [generos, setGeneros] = useState([]);
     const [alunos, setAlunos] = useState([]);
-    const [exemplares, setExemplares] = useState([]);
+    const [exemplares, setExemplares] = useState([]); 
+    const [selectedExemplares, setSelectedExemplares] = useState([{ id: '' }]);
     const generoServico = new GeneroServico();
     const alunoServico = new AlunoServico();
     const exemplarServico = new ExemplarServico();
@@ -30,7 +31,19 @@ const GerenciarEmprestimos = () => {
 
     useEffect(() => {
         fetchEmprestimos();
+        fetchAlunos();
+        fetchExemplares();
     }, []);
+
+    useEffect(() => {
+        if (searchValue) {
+            emprestimoServico.obterEmprestimoPorIdOuNome(searchValue)
+                .then(setEmprestimos)
+                .catch(error => alert('Erro ao buscar empréstimos: ' + error));
+        } else {
+            fetchEmprestimos();
+        }
+    }, [searchValue]);
 
     const fetchEmprestimos = async () => {
         try {
@@ -43,55 +56,44 @@ const GerenciarEmprestimos = () => {
             setLoading(false);  // Hide spinner on error
         }
     };
-
-    useEffect(() => {
-        if (searchValue) {
-            emprestimoServico.obterEmprestimoPorIdOuNome(searchValue)
-                .then(setEmprestimos)
-                .catch(error => alert('Erro ao buscar empréstimos: ' + error));
-        } else {
-            fetchEmprestimos();
-        }
-    }, [searchValue]);
-
-    useEffect(() => {
-        fetchGeneros();
-        fetchAlunos();
-        fetchExemplares();
-    }, []);
-
-    const fetchGeneros = async () => {
-        try {
-            const dados = await generoServico.obterGeneros();
-            setGeneros(dados);
-        } catch (error) {
-            alert('Erro ao buscar gêneros: ' + error);
-        }
+    
+    //Spinner Exemplares
+    const handleAddExemplarField = () => {
+        setSelectedExemplares([...selectedExemplares, { id: 0 }]);
     };
+
+    //Spinner Exemplares
+    const handleRemoveExemplarField = (index) => {
+        const updatedExemplares = [...selectedExemplares];
+        updatedExemplares.splice(index, 1);
+        setSelectedExemplares(updatedExemplares);
+        setNovoEmprestimo({ ...novoEmprestimo, exemplares: updatedExemplares });
+    };
+
+    
+
+    
 
     const fetchAlunos = async () => {
         try {
-            setLoading(true);  // Show spinner
+            setLoading(true);  
             const dados = await alunoServico.obterAlunos();
             setAlunos(dados);
-            setLoading(false);  // Hide spinner
+            setLoading(false);  
         } catch (error) {
             alert('Erro ao buscar alunos: ' + error);
-            setLoading(false);  // Hide spinner on error
+            setLoading(false);  
         }
     };
 
     const fetchExemplares = async () => {
         try {
-            setLoading(true);  // Show spinner
             const dados = await exemplarServico.obterExemplares();
             setExemplares(dados);
-            setLoading(false);  // Hide spinner
         } catch (error) {
             alert('Erro ao buscar exemplares: ' + error);
-            setLoading(false);  // Hide spinner on error
-        }
-    };
+        }
+    };
 
     const handleAddEmprestimo = async () => {
         const newErrors = validateForm();
@@ -214,18 +216,55 @@ const GerenciarEmprestimos = () => {
                     <img src={logoImage} alt="Logo" className="logo" />
                 </div>
                 <div className="menu-options">
-                    <Link to="/GerenciarUsuarios" className="menu-option">Gerenciar Usuários</Link>
-                    <Link to="/GerenciarAlunos" className="menu-option">Gerenciar Alunos</Link>
-                    <Link to="/GerenciarTitulos" className="menu-option">Gerenciar Títulos</Link>
-                    <Link to="/GerenciarAutores" className="menu-option">Gerenciar Autores</Link>
-                    <Link to="/GerenciarExemplares" className="menu-option">Gerenciar Exemplares</Link>
-                    <Link to="/GerenciarEmprestimos" className="menu-option">Gerenciar Empréstimos</Link>
-                    <Link to="/GerenciarGeneros" className="menu-option">Gerenciar Gêneros</Link>
+                    <div>
+                        <Link to="/GerenciarUsuarios"className="menu-option">Gerenciar Usuários</Link>
+                    </div>
+                    <div>
+                        <Link to="/GerenciarAlunos" className="menu-option">Gerenciar Alunos</Link>
+                    </div>
+                    <div>
+                        <Link to="/GerenciarTitulos" className="menu-option">Gerenciar Títulos</Link>
+                    </div>
+                    <div>
+                        <Link to="/GerenciarGeneros" className="menu-option">Gerenciar Gêneros</Link>
+                    </div>
+                    <div>
+                        <Link to="/GerenciarAutores" className="menu-option">Gerenciar Autores</Link>
+                    </div>
+                    <div>
+                        <Link to="/GerenciarExemplares" className="menu-option">Gerenciar Exemplares</Link>
+                    </div>
+                    <div>
+                        <Link to="/GerenciarEmprestimos" className="menu-option">Gerenciar Empréstimos</Link>
+                    </div>
                 </div>
+                <Link to="/home" className="logout-button">
+                    VOLTAR
+                </Link>
             </div>
+       
 
             <div className="content-background">
                 <h1 className="page-title">Gerenciamento de Empréstimos</h1>
+                <div className="search-add">
+                    <div className="search-container">
+                        <input
+                            type="text"
+                            placeholder={searchPlaceholder}
+                            className="search-box"
+                            value={searchValue}
+                            onChange={handleSearchChange}
+                            onFocus={() => setSearchPlaceholder('')}
+                            onBlur={() => setSearchPlaceholder('Pesquisar um livro...')}
+                        />
+                        <span className="search-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                <path d="M12.5 11H11.71L11.43 10.73C12.4439 9.55402 13.0011 8.0527 13 6.5C13 5.21442 12.6188 3.95772 11.9046 2.8888C11.1903 1.81988 10.1752 0.986756 8.98744 0.494786C7.79973 0.00281635 6.49279 -0.125905 5.23192 0.124899C3.97104 0.375703 2.81285 0.994767 1.90381 1.90381C0.994767 2.81285 0.375703 3.97104 0.124899 5.23192C-0.125905 6.49279 0.00281635 7.79973 0.494786 8.98744C0.986756 10.1752 1.81988 11.1903 2.8888 11.9046C3.95772 12.6188 5.21442 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="#575757"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <button className="add-button" onClick={() => setModalIsOpen(true)}>NOVO +</button>
+                </div>
 
                 {loading ? (
                     <div className="spinner-container">
@@ -237,7 +276,7 @@ const GerenciarEmprestimos = () => {
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Nome dos exemplares</th>
+                                    {/* <th>Nome dos exemplares</th> */}
                                     <th>Nome do aluno</th>
                                     <th>Data do empréstimo</th>
                                     <th>Data da entrega</th>
@@ -273,7 +312,7 @@ const GerenciarEmprestimos = () => {
                     <div className="modal-content">
                         <span className="close" onClick={closeModal}>&times;</span>
                         <h2>{selectedEmprestimoIndex !== null ? 'Editar Emprestimo' : 'Adicionar Novo Emprestimo'}</h2>
-                        <div>
+                        {/* <div>
                             <input
                                 type="text"
                                 placeholder="Nomes dos exemplares"
@@ -282,8 +321,59 @@ const GerenciarEmprestimos = () => {
                                 onChange={(e) => handleChange('nomeexemplar', e.target.value)}
                             />
                             {errors.nomeexemplar && <div className="error">{errors.nomeexemplar}</div>}
-                        </div>
+                        </div> */}
                         <div>
+                        {selectedExemplares.length > 0 ? (
+                            selectedExemplares.map((exemplar, index) => (
+                                <div className="autor-field" key={index}>
+                                    <select
+                                        id="exemplar"
+                                        value={exemplar.id}
+                                        onChange={(e) => handleChange('exemplar', e.target.value, index)}
+                                    >
+                                        <option value="0">Selecione um Exemplar</option>
+                                        {exemplares.map((a) => (
+                                            <option key={a.id} value={a.id}>
+                                                {a.nome}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="autor-actions">
+                                        <button type="button" onClick={() => handleRemoveExemplarField(index)}>
+                                            Remover
+                                        </button>
+                                        {index === selectedExemplares.length - 1 && (
+                                            <button type="button" onClick={handleAddExemplarField}>
+                                                Adicionar Exemplar
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="exemplar-actions">
+                                <button type="button" onClick={handleAddExemplarField}>
+                                    Adicionar Exemplar
+                                </button>
+                            </div>
+                        )}
+                        </div>
+                        <div className="form-group">
+                            <select
+                                id="aluno"
+                                value={novoEmprestimo.aluno.id}
+                                onChange={(e) => handleChange('aluno', e.target.value)}
+                            >
+                                <option value="0">Selecione um aluno</option>
+                                {alunos.map((aluno) => (
+                                    <option key={aluno.id} value={aluno.id}>
+                                        {aluno.nome}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.aluno && <span className="error">{errors.aluno}</span>}
+                        </div>
+                        {/* <div>
                             <input
                                 type="text"
                                 placeholder="Nome do aluno"
@@ -292,7 +382,7 @@ const GerenciarEmprestimos = () => {
                                 onChange={(e) => handleChange('nomealuno', e.target.value)}
                             />
                             {errors.nomealuno && <div className="error">{errors.nomealuno}</div>}
-                        </div>
+                        </div> */}
                         <div>
                             <small>Data do empréstimo</small>
                             <input
