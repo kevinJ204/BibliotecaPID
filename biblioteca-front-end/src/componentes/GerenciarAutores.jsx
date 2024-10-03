@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Usuarios.css';
@@ -18,8 +18,13 @@ const GerenciarAutores = () => {
     const [autorADeletar, setAutorADeletar] = useState(null);
     const autorServico = new AutorServico();
 
+    const hasFetchedAutores = useRef(false);
+
     useEffect(() => {
-        fetchAutores();
+        if (!hasFetchedAutores.current) {
+            fetchAutores();
+            hasFetchedAutores.current = true; 
+        }
     }, []);
 
     const fetchAutores = async () => {
@@ -31,15 +36,20 @@ const GerenciarAutores = () => {
         }
     };
 
+    const hasSearchedAutor = useRef(false);
+
     useEffect(() => {
-        if (searchValue) {
-            autorServico.obterAutorPorIdOuNome(searchValue)
-                .then(setAutores)
-                .catch(error => console.error('Erro ao buscar autores:', error));
-        } else {
-            autorServico.obterAutores(searchValue)
-            .then(setAutores)
-            .catch(error => console.error('Erro ao buscar autores:', error));
+        if (!hasSearchedAutor.current || searchValue) {
+            if (searchValue) {
+                autorServico.obterAutorPorIdOuNome(searchValue)
+                    .then(setAutores)
+                    .catch(error => console.error('Erro ao buscar autores:', error));
+            } else {
+                autorServico.obterAutores()
+                    .then(setAutores)
+                    .catch(error => console.error('Erro ao buscar autores:', error));
+            }
+            hasSearchedAutor.current = true;
         }
     }, [searchValue]);
 

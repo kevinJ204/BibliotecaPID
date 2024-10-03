@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Usuarios.css';
 import EmprestimoServico from '../servicos/EmprestimoServico';
-import GeneroServico from '../servicos/GeneroServico';
 import AlunoServico from '../servicos/AlunoServico';
 import ExemplarServico from '../servicos/ExemplarServico';
 
@@ -12,27 +11,39 @@ const GerenciarEmprestimos = () => {
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um Empréstimo...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [emprestimos, setEmprestimos] = useState([]);
-    const [novoEmprestimo, setNovoEmprestimo] = useState({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataemprestimo: '', dataentrega: '' });
+    const [novoEmprestimo, setNovoEmprestimo] = useState({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '' });
     const [selectedEmprestimoIndex, setSelectedEmprestimoIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [deleteConfirmationModalIsOpen, setDeleteConfirmationModalIsOpen] = useState(false);
     const [emprestimoADeletar, setEmprestimoADeletar] = useState(null);
-    const [loading, setLoading] = useState(false); // Spinner loading
-    const [generos, setGeneros] = useState([]);
     const [alunos, setAlunos] = useState([]);
     const [exemplares, setExemplares] = useState([]); 
-    const [selectedExemplares, setSelectedExemplares] = useState([{ id: '' }]);
-    const generoServico = new GeneroServico();
+    const [selectedExemplares, setSelectedExemplares] = useState([{ id: '' }]);
     const alunoServico = new AlunoServico();
     const exemplarServico = new ExemplarServico();
     const emprestimoServico = new EmprestimoServico();
 
+    const hasFetchedEmprestimos = useRef(false);
+    const hasFetchedAlunos = useRef(false);
+    const hasFetchedExemplares = useRef(false);
+
     useEffect(() => {
-        fetchEmprestimos();
-        fetchAlunos();
-        fetchExemplares();
+        if (!hasFetchedEmprestimos.current) {
+            fetchEmprestimos();
+            hasFetchedEmprestimos.current = true;
+        }
+
+        if (!hasFetchedAlunos.current) {
+            fetchAlunos();
+            hasFetchedAlunos.current = true;
+        }
+
+        if (!hasFetchedExemplares.current) {
+            fetchExemplares();
+            hasFetchedExemplares.current = true;
+        }
     }, []);
 
     useEffect(() => {
@@ -40,60 +51,49 @@ const GerenciarEmprestimos = () => {
             emprestimoServico.obterEmprestimoPorIdOuNome(searchValue)
                 .then(setEmprestimos)
                 .catch(error => alert('Erro ao buscar empréstimos: ' + error));
-        } else {
+        } else if (!hasFetchedEmprestimos.current) {
             fetchEmprestimos();
         }
     }, [searchValue]);
 
     const fetchEmprestimos = async () => {
         try {
-            setLoading(true);  // Show spinner
             const dados = await emprestimoServico.obterEmprestimos();
             setEmprestimos(dados);
-            setLoading(false);  // Hide spinner
         } catch (error) {
             alert('Erro ao buscar empréstimos: ' + error);
-            setLoading(false);  // Hide spinner on error
         }
     };
-    
-    //Spinner Exemplares
-    const handleAddExemplarField = () => {
-        setSelectedExemplares([...selectedExemplares, { id: 0 }]);
-    };
-
-    //Spinner Exemplares
-    const handleRemoveExemplarField = (index) => {
-        const updatedExemplares = [...selectedExemplares];
-        updatedExemplares.splice(index, 1);
-        setSelectedExemplares(updatedExemplares);
-        setNovoEmprestimo({ ...novoEmprestimo, exemplares: updatedExemplares });
-    };
-
-    
-
-    
 
     const fetchAlunos = async () => {
         try {
-            setLoading(true);  
             const dados = await alunoServico.obterAlunos();
             setAlunos(dados);
-            setLoading(false);  
         } catch (error) {
             alert('Erro ao buscar alunos: ' + error);
-            setLoading(false);  
         }
     };
 
     const fetchExemplares = async () => {
         try {
             const dados = await exemplarServico.obterExemplares();
-            setExemplares(dados);
+            const exemplaresDisponiveis = dados.filter(exemplar => exemplar.status === "Disponível");
+            setExemplares(exemplaresDisponiveis);
         } catch (error) {
             alert('Erro ao buscar exemplares: ' + error);
-        }
-    };
+        }
+    };
+    
+    const handleAddExemplarField = () => {
+        setSelectedExemplares([...selectedExemplares, { id: 0 }]);
+    };
+
+    const handleRemoveExemplarField = (index) => {
+        const updatedExemplares = [...selectedExemplares];
+        updatedExemplares.splice(index, 1);
+        setSelectedExemplares(updatedExemplares);
+        setNovoEmprestimo({ ...novoEmprestimo, exemplares: updatedExemplares });
+    };
 
     const handleAddEmprestimo = async () => {
         const newErrors = validateForm();
@@ -114,7 +114,7 @@ const GerenciarEmprestimos = () => {
                 }
 
                 fetchEmprestimos();
-                setNovoEmprestimo({ id: '', nomeexemplar: '', nomealuno: '', dataemprestimo: '', dataentrega: '' });
+                setNovoEmprestimo({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '' });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
@@ -125,8 +125,22 @@ const GerenciarEmprestimos = () => {
         }
     };
 
-    const handleChange = (field, value) => {
-        setNovoEmprestimo({ ...novoEmprestimo, [field]: value });
+    const handleChange = (field, value, index = null) => {
+        if (field === 'aluno') {
+            if (parseInt(value) === 0) {
+                setNovoEmprestimo({ ...novoEmprestimo, aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 } });
+            } else {
+                const alunoSelecionado = alunos.find(aluno => aluno.id === parseInt(value));
+                setNovoEmprestimo({ ...novoEmprestimo, aluno: alunoSelecionado });
+            }
+        } else if (field === 'exemplar') {
+            const updatedExemplares = [...selectedExemplares];
+            updatedExemplares[index] = { id: parseInt(value) };
+            setSelectedExemplares(updatedExemplares);
+            setNovoEmprestimo({ ...novoEmprestimo, exemplares: updatedExemplares });
+        } else {
+            setNovoEmprestimo({ ...novoEmprestimo, [field]: value });
+        }
         validateField(field, value);
     };
 
@@ -150,6 +164,7 @@ const GerenciarEmprestimos = () => {
         const emprestimo = emprestimos[index];
         setNovoEmprestimo({ ...emprestimo });
         setSelectedEmprestimoIndex(index);
+        setSelectedExemplares(emprestimo.exemplares || []);
         setErrors({});
         setModalIsOpen(true);
     };
@@ -160,52 +175,82 @@ const GerenciarEmprestimos = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (novoEmprestimo.nomeexemplar.length < 3) {
-            newErrors.nomeexemplar = 'Nome do exemplar deve ter mais que 3 letras.';
+    
+        if (novoEmprestimo.exemplares.length === 0 || novoEmprestimo.exemplares.some(exemplar => exemplar.id === 0)) {
+            newErrors.exemplares = 'Selecione ao menos um exemplar';
         }
-        if (novoEmprestimo.nomealuno.length < 3) {
-            newErrors.nomealuno = 'Nome do aluno deve ter mais que 3 letras.';
+    
+        if (!novoEmprestimo.aluno || novoEmprestimo.aluno.id === 0) {
+            newErrors.aluno = 'Selecione um aluno.';
         }
-        let date1 = novoEmprestimo.dataemprestimo;
-        let date2 = novoEmprestimo.dataentrega;
-        if (date1 > date2) {
-            newErrors.dataemprestimo = 'A data de empréstimo não pode ser depois da data de entrega.';
+    
+        const parseDate = (dateString) => {
+            return new Date(dateString);
+        };
+    
+        if (!novoEmprestimo.dataEmprestimo) {
+            newErrors.dataEmprestimo = 'Insira uma data de empréstimo válida.';
         }
+    
+        if (!novoEmprestimo.dataPrazo) {
+            newErrors.dataPrazo = 'Insira uma data de prazo válida.';
+        }
+    
+        if (novoEmprestimo.dataEmprestimo && novoEmprestimo.dataPrazo) {
+            const dateEmprestimo = parseDate(novoEmprestimo.dataEmprestimo);
+            const datePrazo = parseDate(novoEmprestimo.dataPrazo);
+    
+            if (isNaN(dateEmprestimo.getTime())) {
+                newErrors.dataEmprestimo = 'Insira uma data de empréstimo válida.';
+            }
+    
+            if (isNaN(datePrazo.getTime())) {
+                newErrors.dataPrazo = 'Insira uma data de prazo válida.';
+            }
+    
+            if (dateEmprestimo > datePrazo) {
+                newErrors.dataEmprestimo = 'A data de empréstimo não pode ser depois da data de entrega.';
+            }
+        }
+    
         return newErrors;
     };
-
+            
     const validateField = (field, value) => {
         const newErrors = { ...errors };
-        if (field === 'nomeexemplar') {
-            if (value.length < 3) {
-                newErrors.nomeexemplar = 'Nome do exemplar deve ter no mínimo 3 caracteres';
+        
+        if (field === 'exemplares') {
+            if (value.length === 0 || value.some(exemplar => exemplar.id === 0)) {
+                newErrors.exemplares = 'Selecione ao menos um exemplar válido.';
             } else {
-                delete newErrors.nomeexemplar;
+                delete newErrors.exemplares;
             }
-        }
-        if (field === 'nomealuno') {
-            if (value.length < 3) {
-                newErrors.nomealuno = 'Nome do aluno deve ter no mínimo 3 caracteres';
+        } else if (field === 'aluno') {
+            if (!value || value.id === 0) {
+                newErrors.aluno = 'Selecione um aluno válido.';
             } else {
-                delete newErrors.nomealuno;
+                delete newErrors.aluno;
             }
-        }
-        if (field === 'dataemprestimo' || field === 'dataentrega') {
-            let date1 = novoEmprestimo.dataemprestimo;
-            let date2 = novoEmprestimo.dataentrega;
-            if (date1 > date2) {
-                newErrors.dataemprestimo = 'A data de empréstimo não pode ser depois da data de entrega.';
+        } else if (field === 'dataEmprestimo') {
+            if (value.length === 0) {
+                newErrors.dataEmprestimo = 'Insira uma data de empréstimo válida no formato dd/mm/aaaa.';
             } else {
-                delete newErrors.dataemprestimo;
+                delete newErrors.dataEmprestimo;
+            }
+        } else if (field === 'dataPrazo') {
+            if (value.length === 0) {
+                newErrors.dataPrazo = 'Insira uma data de prazo válida no formato dd/mm/aaaa.';
+            } else {
+                delete newErrors.dataPrazo;
             }
         }
         setErrors(newErrors);
     };
-
+    
     const closeModal = () => {
         setModalIsOpen(false);
         setErrors({});
-        setNovoEmprestimo({ id: '', nomeexemplar: '', nomealuno: '', dataemprestimo: '', dataentrega: '' });
+        setNovoEmprestimo({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '' });
         setSelectedEmprestimoIndex(null);
     };
 
@@ -255,7 +300,7 @@ const GerenciarEmprestimos = () => {
                             value={searchValue}
                             onChange={handleSearchChange}
                             onFocus={() => setSearchPlaceholder('')}
-                            onBlur={() => setSearchPlaceholder('Pesquisar um livro...')}
+                            onBlur={() => setSearchPlaceholder('Pesquisar um empréstimo...')}
                         />
                         <span className="search-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -266,45 +311,46 @@ const GerenciarEmprestimos = () => {
                     <button className="add-button" onClick={() => setModalIsOpen(true)}>NOVO +</button>
                 </div>
 
-                {loading ? (
-                    <div className="spinner-container">
-                        <div className="spinner"></div>
-                    </div>
-                ) : (
-                    <div className="table-background">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    {/* <th>Nome dos exemplares</th> */}
-                                    <th>Nome do aluno</th>
-                                    <th>Data do empréstimo</th>
-                                    <th>Data da entrega</th>
-                                    <th>Status</th>
+                
+                <div className="table-background">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome dos exemplares</th>
+                                <th>Nome do aluno</th>
+                                <th>Data do empréstimo</th>
+                                <th>Data Prazo</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {emprestimos.map((emprestimo, index) => (
+                                <tr key={index} className="table-row">
+                                    <td className="table-row-text">{emprestimo.id}</td>
+                                    <td className="table-row-text">{emprestimo.exemplares}</td>
+                                    <td className="table-row-text">{emprestimo.aluno}</td>
+                                    <td className="table-row-text">{emprestimo.dataEmprestimo}</td>
+                                    <td className="table-row-text">{emprestimo.dataPrazo}</td>
+                                    <td className="table-row-text">
+                                        <button className="edit-button" onClick={() => { handleEditEmprestimo(index); }}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M16 5L19 8M20.385 6.585C20.7788 6.19115 21.0001 5.65698 21.0001 5.1C21.0001 4.54302 20.7788 4.00885 20.385 3.615C19.9912 3.22115 19.457 2.99989 18.9 2.99989C18.343 2.99989 17.8088 3.22115 17.415 3.615L9 12V15H12L20.385 6.585Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                        <button className="delete-button" onClick={() => handleDeleteEmprestimo(index)}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 7H20M10 11V17M14 11V17M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7M9 7V4C9 3.73478 9.10536 3.48043 9.29289 3.29289C9.48043 3.10536 9.73478 3 10 3H14C14.2652 3 14.5196 3.10536 14.7071 3.29289C14.8946 3.48043 15 3.73478 15 4V7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {emprestimos.map((emprestimo, index) => (
-                                    <tr key={index} className="table-row">
-                                        <td className="table-row-text">{emprestimo.id}</td>
-                                        <td className="table-row-text">{emprestimo.nomeexemplar}</td>
-                                        <td className="table-row-text">{emprestimo.nomealuno}</td>
-                                        <td className="table-row-text">{emprestimo.dataemprestimo}</td>
-                                        <td className="table-row-text">{emprestimo.dataentrega}</td>
-                                        <td className="table-row-text">
-                                            <button className="edit-button" onClick={() => handleEditEmprestimo(index)}>
-                                                Editar
-                                            </button>
-                                            <button className="delete-button" onClick={() => handleDeleteEmprestimo(index)}>
-                                                Deletar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {modalIsOpen && (
@@ -312,16 +358,6 @@ const GerenciarEmprestimos = () => {
                     <div className="modal-content">
                         <span className="close" onClick={closeModal}>&times;</span>
                         <h2>{selectedEmprestimoIndex !== null ? 'Editar Emprestimo' : 'Adicionar Novo Emprestimo'}</h2>
-                        {/* <div>
-                            <input
-                                type="text"
-                                placeholder="Nomes dos exemplares"
-                                id="nomeexemplar"
-                                value={novoEmprestimo.nomeexemplar}
-                                onChange={(e) => handleChange('nomeexemplar', e.target.value)}
-                            />
-                            {errors.nomeexemplar && <div className="error">{errors.nomeexemplar}</div>}
-                        </div> */}
                         <div>
                         {selectedExemplares.length > 0 ? (
                             selectedExemplares.map((exemplar, index) => (
@@ -332,9 +368,9 @@ const GerenciarEmprestimos = () => {
                                         onChange={(e) => handleChange('exemplar', e.target.value, index)}
                                     >
                                         <option value="0">Selecione um Exemplar</option>
-                                        {exemplares.map((a) => (
-                                            <option key={a.id} value={a.id}>
-                                                {a.nome}
+                                        {exemplares.map((exemplar) => (
+                                            <option key={exemplar.id} value={exemplar.id}>
+                                                {exemplar.titulo.nome}
                                             </option>
                                         ))}
                                     </select>
@@ -373,37 +409,27 @@ const GerenciarEmprestimos = () => {
                             </select>
                             {errors.aluno && <span className="error">{errors.aluno}</span>}
                         </div>
-                        {/* <div>
-                            <input
-                                type="text"
-                                placeholder="Nome do aluno"
-                                id="nomealuno"
-                                value={novoEmprestimo.nomealuno}
-                                onChange={(e) => handleChange('nomealuno', e.target.value)}
-                            />
-                            {errors.nomealuno && <div className="error">{errors.nomealuno}</div>}
-                        </div> */}
                         <div>
                             <small>Data do empréstimo</small>
                             <input
                                 type="date"
                                 placeholder="Data do empréstimo"
-                                id="dataemprestimo"
-                                value={novoEmprestimo.dataemprestimo}
-                                onChange={(e) => handleChange('dataemprestimo', e.target.value)}
+                                id="dataEmprestimo"
+                                value={novoEmprestimo.dataEmprestimo}
+                                onChange={(e) => handleChange('dataEmprestimo', e.target.value)}
                             />
-                            {errors.dataemprestimo && <div className="error">{errors.dataemprestimo}</div>}
+                            {errors.dataEmprestimo && <div className="error">{errors.dataEmprestimo}</div>}
                         </div>
                         <div>
                             <small>Data da entrega</small>
                             <input
                                 type="date"
                                 placeholder="Data do empréstimo"
-                                id="dataentrega"
-                                value={novoEmprestimo.dataentrega}
-                                onChange={(e) => handleChange('dataentrega', e.target.value)}
+                                id="dataPrazo"
+                                value={novoEmprestimo.dataPrazo}
+                                onChange={(e) => handleChange('dataPrazo', e.target.value)}
                             />
-                            {errors.dataentrega && <div className="error">{errors.dataentrega}</div>}
+                            {errors.dataPrazo && <div className="error">{errors.dataPrazo}</div>}
                         </div>
                         <div>
                             <button className="cancel" onClick={closeModal}>Cancelar</button>

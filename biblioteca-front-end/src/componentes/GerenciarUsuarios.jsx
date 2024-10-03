@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Usuarios.css';
@@ -18,9 +18,37 @@ const GerenciarUsuarios = () => {
     const [usuarioADeletar, setUsuarioADeletar] = useState(null);
     const usuarioServico = new UsuarioServico();
 
+    const hasFetchedUsuarios = useRef(false);
+
     useEffect(() => {
-        fetchUsuarios();
+        if (!hasFetchedUsuarios.current) {
+            fetchUsuarios();
+            hasFetchedUsuarios.current = true;
+        }
     }, []);
+
+    const fetchUsuarios = async () => {
+        try {
+            const dados = await usuarioServico.obterUsuarios();
+            setUsuarios(dados);
+        } catch (error) {
+            alert('Erro ao buscar usuários: ' + error);
+        }
+    };
+
+    const hasSearchedUsuario = useRef(false);
+
+    useEffect(() => {
+        if (searchValue && !hasSearchedUsuario.current) {
+            usuarioServico.obterUsuarioPorIdOuNome(searchValue)
+                .then(setUsuarios)
+                .catch(error => alert('Erro ao buscar usuários: ' + error));
+            hasSearchedUsuario.current = true;
+        } else if (!searchValue && hasSearchedUsuario.current) {
+            fetchUsuarios();
+            hasSearchedUsuario.current = false;
+        }
+    }, [searchValue]);
 
     const validateForm = () => {
         const newErrors = {};
@@ -29,27 +57,6 @@ const GerenciarUsuarios = () => {
         if (novoUsuario.senha.length < 6) newErrors.senha = 'Senha deve ter no mínimo 6 caracteres';
         return newErrors;
     };    
-
-    const fetchUsuarios = async () => {
-        try {
-            const dados = await usuarioServico.obterUsuarios();
-            setUsuarios(dados);
-        } catch (error) {
-            alert(error);
-        }
-    };
-
-    useEffect(() => {
-        if (searchValue) {
-            usuarioServico.obterUsuarioPorIdOuNome(searchValue)
-                .then(setUsuarios)
-                .catch(error => console.error('Erro ao buscar usuários:', error));
-        } else {
-            usuarioServico.obterUsuarios(searchValue)
-            .then(setUsuarios)
-            .catch(error => console.error('Erro ao buscar usuários:', error));
-        }
-    }, [searchValue]);
 
     const validateField = (field, value) => {
         const newErrors = { ...errors };
@@ -194,7 +201,16 @@ const GerenciarUsuarios = () => {
                         </svg>
                         </span>
                     </div>
-                    <button className="add-button" onClick={() => setModalIsOpen(true)}>NOVO +</button>
+                    <button
+                        className="add-button"
+                        onClick={() => {
+                            setNovoUsuario({ nome: '', email: '', senha: '', nivel: 'Básico' });
+                            setSelectedUsuarioIndex(null);
+                            setModalIsOpen(true);
+                        }}
+                        >
+                        NOVO +
+                    </button>
                 </div>
                 <div className="table-background">
                     <table>
@@ -218,14 +234,14 @@ const GerenciarUsuarios = () => {
                                         <button className="edit-button" onClick={() => handleEditUsuario(index)}>
                                             <span className="edit-icon">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                            <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M9 11L17.385 2.615C17.7788 2.22115 18.313 2 18.87 2C19.427 2 19.9612 2.22115 20.355 2.615C20.7488 3.00885 20.9701 3.54302 20.9701 4.1C20.9701 4.65698 20.7488 5.19115 20.355 5.585L12 14H9V11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <path d="M9 11L17.385 2.615C17.7788 2.22115 18.313 2 18.87 2C19.427 2 19.9612 2.22115 20.355 2.615C20.7488 3.00885 20.9701 3.54302 20.9701 4.1C20.9701 4.65698 20.7488 5.19115 20.355 5.585L12 14H9V11Z" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                             </svg>
                                             </span>
                                         </button>
                                         <button className="delete-button" onClick={() => handleDeleteUsuario(index)}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                <path d="M4 7H20M10 11V17M14 11V17M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7M9 7V4C9 3.73478 9.10536 3.48043 9.29289 3.29289C9.48043 3.10536 9.73478 3 10 3H14C14.2652 3 14.5196 3.10536 14.7071 3.29289C14.8946 3.48043 15 3.73478 15 4V7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M4 7H20M10 11V17M14 11V17M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7M9 7V4C9 3.73478 9.10536 3.48043 9.29289 3.29289C9.48043 3.10536 9.73478 3 10 3H14C14.2652 3 14.5196 3.10536 14.7071 3.29289C14.8946 3.48043 15 3.73478 15 4V7" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                                 </svg>
                                         </button>
                                     </td>

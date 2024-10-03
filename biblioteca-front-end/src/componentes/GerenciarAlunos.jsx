@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Alunos.css';
@@ -19,9 +19,34 @@ const GerenciarAlunos = () => {
     const [alunoADeletar, setAlunoADeletar] = useState(null);
     const alunoServico = new AlunoServico();
 
+    const hasFetchedAlunos = useRef(false);
+
     useEffect(() => {
-        fetchAlunos();
+        if (!hasFetchedAlunos.current) {
+            fetchAlunos();
+            hasFetchedAlunos.current = true;
+        }
     }, []);
+
+    const fetchAlunos = async () => {
+        try {
+            const dados = await alunoServico.obterAlunos();
+            setAlunos(dados);
+        } catch (error) {
+            alert(error);
+        }
+    };
+
+    const hasSearchedAluno = useRef(false);
+
+    useEffect(() => {
+        if (!hasSearchedAluno.current || searchValue) {
+            alunoServico.obterAlunoPorIdOuNome(searchValue)
+                .then(setAlunos)
+                .catch(error => console.error('Erro ao buscar alunos:', error));
+            hasSearchedAluno.current = true;
+        }
+    }, [searchValue]);
 
     const validateForm = () => {
         const newErrors = {};
@@ -64,27 +89,6 @@ const GerenciarAlunos = () => {
         setErrors(newErrors);
     };
     
-    const fetchAlunos = async () => {
-        try {
-            const dados = await alunoServico.obterAlunos();
-            setAlunos(dados);
-        } catch (error) {
-            alert(error);
-        }
-    };
-
-    useEffect(() => {
-        if (searchValue) {
-            alunoServico.obterAlunoPorIdOuNome(searchValue)
-                .then(setAlunos)
-                .catch(error => console.error('Erro ao buscar alunos:', error));
-        } else {
-            alunoServico.obterAlunos(searchValue)
-            .then(setAlunos)
-            .catch(error => console.error('Erro ao buscar alunos:', error));
-        }
-    }, [searchValue]);
-
     const handleChange = (field, value) => {
         if (field === 'telefone') {
             value = value.replace(/\D/g, '');

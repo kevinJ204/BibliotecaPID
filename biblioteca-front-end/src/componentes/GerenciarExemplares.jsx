@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Usuarios.css';
@@ -11,7 +11,12 @@ const GerenciarExemplares = () => {
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um Livro...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [exemplares, setExemplares] = useState([]);
-    const [novoExemplar, setNovoExemplar] = useState({ id: 0, codigo: '', titulo: { id: 0, nome: '', genero: { id: 0, genero: ''}, autores: [] }, status: ''});
+    const [novoExemplar, setNovoExemplar] = useState({ 
+        id: 0, 
+        codigo: '', 
+        titulo: { id: 0, nome: '', genero: { id: 0, genero: '' }, autores: [] }, 
+        status: ''
+    });
     const [selectedExemplarIndex, setSelectedExemplarIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
@@ -23,15 +28,29 @@ const GerenciarExemplares = () => {
     const tituloServico = new TituloServico();
     const [baixaConfirmationModalIsOpen, setBaixaConfirmationModalIsOpen] = useState(false);
 
-    useEffect(() => {
-        fetchExemplares();
-    }, []);
+    const hasFetchedExemplares = useRef(false);
+    const hasFetchedTitulos = useRef(false);
 
     useEffect(() => {
-        tituloServico.obterTitulos()
-            .then(setTitulos)
-            .catch(error => alert('Erro ao buscar titulos:', error));
-    }, []);
+        if (!hasFetchedExemplares.current) {
+            fetchExemplares();
+            hasFetchedExemplares.current = true;
+        }
+
+        if (!hasFetchedTitulos.current) {
+            fetchTitulos();
+            hasFetchedTitulos.current = true;
+        }
+    }, []);
+
+    const fetchTitulos = async () => {
+        try {
+            const dados = await tituloServico.obterTitulos();
+            setTitulos(dados);
+        } catch (error) {
+            alert('Erro ao buscar títulos: ' + error);
+        }
+    };
 
     const fetchExemplares = async () => {
         try {
@@ -41,6 +60,20 @@ const GerenciarExemplares = () => {
             alert('Erro ao buscar exemplares: ' + error);
         }
     };
+
+    const hasSearchedExemplar = useRef(false);
+
+    useEffect(() => {
+        if (searchValue && !hasSearchedExemplar.current) {
+            exemplarServico.obterExemplarPorIdOuNome(searchValue)
+                .then(setExemplares)
+                .catch(error => alert('Erro ao buscar exemplares: ' + error));
+            hasSearchedExemplar.current = true; 
+        } else if (!searchValue && hasSearchedExemplar.current) {
+            fetchExemplares(); 
+            hasSearchedExemplar.current = false;
+        }
+    }, [searchValue]);
 
     const handleAddExemplar = async () => {
         const newErrors = validateForm();

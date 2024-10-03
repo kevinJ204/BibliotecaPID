@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Usuarios.css';
@@ -18,8 +18,13 @@ const GerenciarGeneros = () => {
     const [generoADeletar, setGeneroADeletar] = useState(null);
     const generoServico = new GeneroServico();
 
+    const hasFetchedGeneros = useRef(false);
+
     useEffect(() => {
-        fetchGeneros();
+        if (!hasFetchedGeneros.current) {
+            fetchGeneros();
+            hasFetchedGeneros.current = true;
+        }
     }, []);
 
     const fetchGeneros = async () => {
@@ -31,15 +36,14 @@ const GerenciarGeneros = () => {
         }
     };
 
+    const hasSearchedGenero = useRef(false);
+
     useEffect(() => {
-        if (searchValue) {
+        if (!hasSearchedGenero.current || searchValue) {
             generoServico.obterGeneroPorIdOuNome(searchValue)
                 .then(setGeneros)
                 .catch(error => console.error('Erro ao buscar gêneros:', error));
-        } else {
-            generoServico.obterGeneros(searchValue)
-            .then(setGeneros)
-            .catch(error => console.error('Erro ao buscar gêneros:', error));
+            hasSearchedGenero.current = true;
         }
     }, [searchValue]);
 

@@ -12,9 +12,9 @@ export default async function conectar() {
             port: 3306,
             database: 'biblioteca',
             waitForConnections: true,
-            connectionLimit: 10,
-            maxIdle: 10,
-            idleTimeout: 60000,
+            connectionLimit: 25,
+            maxIdle: 20,
+            idleTimeout: 30000,
             queueLimit: 0,
             enableKeepAlive: true,
             keepAliveInitialDelay: 0
