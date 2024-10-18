@@ -31,23 +31,43 @@ const GerenciarAlunos = () => {
     const fetchAlunos = async () => {
         try {
             const dados = await alunoServico.obterAlunos();
-            setAlunos(dados);
+            if (dados.length > 0 && !dados.message) {
+                setAlunos(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum aluno encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
-            alert(error);
+            alert('Erro ao buscar alunos: ' + error);
         }
     };
-
     const hasSearchedAluno = useRef(false);
 
     useEffect(() => {
-        if (!hasSearchedAluno.current || searchValue) {
-            alunoServico.obterAlunoPorIdOuNome(searchValue)
-                .then(setAlunos)
-                .catch(error => console.error('Erro ao buscar alunos:', error));
-            hasSearchedAluno.current = true;
-        }
+        const delayDebounceFn = setTimeout(() => {
+            if (searchValue && !hasSearchedAluno.current) {
+                alunoServico.obterAlunoPorIdOuNome(searchValue)
+                    .then((dados) => {
+                        if (dados.length > 0 && !dados.message) {
+                            setAlunos(dados);
+                        } else {
+                            setConfirmationMessage(dados.message || 'Nenhum aluno encontrado.');
+                            setConfirmationModalIsOpen(true);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro ao buscar alunos: ' + error);
+                    });
+                hasSearchedAluno.current = true;
+            } else if (!searchValue && hasSearchedAluno.current) {
+                fetchAlunos();
+                hasSearchedAluno.current = false;
+            }
+        }, 500);
+    
+        return () => clearTimeout(delayDebounceFn);
     }, [searchValue]);
-
+    
     const validateForm = () => {
         const newErrors = {};
         const telefoneNumerico = novoAluno.telefone.toString().replace(/\D/g, '');    
@@ -111,20 +131,20 @@ const GerenciarAlunos = () => {
                 if (resposta && resposta.status === true) {
                     setConfirmationMessage(selectedAlunoIndex !== null ? 'Aluno atualizado com sucesso!' : 'Aluno cadastrado com sucesso');
                 } else {
-                    setConfirmationMessage('Erro ao salvar aluno!');
+                    setConfirmationMessage(resposta.message || 'Erro ao salvar aluno!');
                 }
                 fetchAlunos();
-                setNovoAluno({ nome: '', email: '', ra: '', telefone: '' });
+                setNovoAluno({ nome: '', email: '', ra: 0, telefone: 0 });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
-                alert(error);
+                alert('Erro ao salvar aluno: ' + error);
             }
         } else {
             setErrors(newErrors);
         }
     };
-
+    
     const handleDeleteAluno = (index) => {
         setAlunoADeletar(index);
         setDeleteConfirmationModalIsOpen(true);
@@ -132,12 +152,17 @@ const GerenciarAlunos = () => {
 
     const confirmDeleteAluno = async () => {
         try {
-            await alunoServico.deletarAluno(alunos[alunoADeletar].id);
-            fetchAlunos();
+            const resposta = await alunoServico.deletarAluno(alunos[alunoADeletar].id);
+            if (resposta && resposta.status === true) {
+                fetchAlunos();
+            } else {
+                setConfirmationMessage(resposta.message || 'Erro ao deletar aluno!');
+                setConfirmationModalIsOpen(true);
+            }
             setDeleteConfirmationModalIsOpen(false);
             setAlunoADeletar(null);
         } catch (error) {
-            alert(error);
+            alert('Erro ao deletar aluno: ' + error);
         }
     };
 

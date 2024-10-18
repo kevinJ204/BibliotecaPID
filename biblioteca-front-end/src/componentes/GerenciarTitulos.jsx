@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Usuarios.css';
@@ -25,21 +25,36 @@ const GerenciarTitulos = () => {
     const [selectedAutores, setSelectedAutores] = useState([{ id: 0 }]);
     const autorServico = new AutorServico(); 
 
-    useEffect(() => {
-        fetchTitulos();
-        fetchAutores(); 
-    }, []);
+    const hasFetchedTitulos = useRef(false);
+    const hasFetchedAutores = useRef(false);
+    const hasFetchedGeneros = useRef(false);
 
     useEffect(() => {
-        generoServico.obterGeneros()
-            .then(setGeneros)
-            .catch(error => alert('Erro ao buscar gêneros:', error));
-    }, []);
+        if (!hasFetchedTitulos.current) {
+            fetchTitulos();
+            hasFetchedTitulos.current = true;
+        }
+
+        if (!hasFetchedAutores.current) {
+            fetchAutores();
+            hasFetchedAutores.current = true;
+        }
+
+        if (!hasFetchedGeneros.current) {
+            fetchGeneros();
+            hasFetchedGeneros.current = true;
+        }
+    }, []);
 
     const fetchTitulos = async () => {
         try {
             const dados = await tituloServico.obterTitulos();
-            setTitulos(dados);
+            if (dados.length > 0 && !dados.message) {
+                setTitulos(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum título encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
             alert('Erro ao buscar títulos: ' + error);
         }
@@ -48,12 +63,58 @@ const GerenciarTitulos = () => {
     const fetchAutores = async () => {
         try {
             const dados = await autorServico.obterAutores();
-            setAutores(dados);
+            if (dados.length > 0 && !dados.message) {
+                setAutores(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum autor encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
             alert('Erro ao buscar autores: ' + error);
         }
     };
 
+    const fetchGeneros = async () => {
+        try {
+            const dados = await generoServico.obterGeneros();
+            if (dados.length > 0 && !dados.message) {
+                setGeneros(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum gênero encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
+        } catch (error) {
+            alert('Erro ao buscar gêneros: ' + error);
+        }
+    };    
+
+    const hasSearchedTitulo = useRef(false);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            if (searchValue && !hasSearchedTitulo.current) {
+                tituloServico.obterTituloPorIdOuNome(searchValue)
+                    .then((dados) => {
+                        if (dados.length > 0 && !dados.message) {
+                            setTitulos(dados);
+                        } else {
+                            setConfirmationMessage(dados.message || 'Nenhum título encontrado.');
+                            setConfirmationModalIsOpen(true);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro ao buscar títulos: ' + error);
+                    });
+                hasSearchedTitulo.current = true;
+            } else if (!searchValue && hasSearchedTitulo.current) {
+                fetchTitulos();
+                hasSearchedTitulo.current = false;
+            }
+        }, 500);
+    
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchValue]);
+    
     const handleAddTitulo = async () => {
         const newErrors = validateForm();
         if (Object.keys(newErrors).length === 0) {
@@ -65,25 +126,22 @@ const GerenciarTitulos = () => {
                 } else {
                     resposta = await tituloServico.adicionarTitulo(novoTitulo);
                 }
-    
                 if (resposta && resposta.status === true) {
-                    setConfirmationMessage(selectedTituloIndex !== null ? 'Título atualizado com sucesso!' : 'Título cadastrado com sucesso!');
+                    setConfirmationMessage(selectedTituloIndex !== null ? 'Título atualizado com sucesso!' : 'Título cadastrado com sucesso');
                 } else {
-                    setConfirmationMessage('Erro ao salvar título!');
+                    setConfirmationMessage(resposta.message || 'Erro ao salvar título!');
                 }
-    
                 fetchTitulos();
-                setNovoTitulo({ nome: '', genero: { id: 0, genero: '' }, assunto: '', autores: [] });
-                setSelectedAutores([{ id: 0 }]);
+                setNovoTitulo({ id: '', nome: '', genero: { id: 0, genero: '' }, assunto: '', autores: [] });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
-                alert(error);
+                alert('Erro ao salvar título: ' + error);
             }
         } else {
             setErrors(newErrors);
         }
-    };
+    };    
 
     const handleChange = (field, value, index = null) => {
         if (field === 'genero') {
@@ -175,13 +233,13 @@ const GerenciarTitulos = () => {
         setSearchValue(e.target.value);
     };
 
-const handleEditTitulo = (index) => {
-    const titulo = titulos[index];
-    setNovoTitulo({ ...titulo });
-    setSelectedTituloIndex(index);
-    setSelectedAutores(titulo.autores || []);
-    setErrors({});
-    setModalIsOpen(true);
+    const handleEditTitulo = (index) => {
+        const titulo = titulos[index];
+        setNovoTitulo({ ...titulo });
+        setSelectedTituloIndex(index);
+        setSelectedAutores(titulo.autores || []);
+        setErrors({});
+        setModalIsOpen(true);
     };
 
     const handleDeleteTitulo = (index) => {
@@ -191,15 +249,20 @@ const handleEditTitulo = (index) => {
 
     const confirmDeleteTitulo = async () => {
         try {
-            await tituloServico.deletarTitulo(titulos[tituloADeletar].id);
-            fetchTitulos();
+            const resposta = await tituloServico.deletarTitulo(titulos[tituloADeletar].id);
+            if (resposta && resposta.status === true) {
+                fetchTitulos();
+            } else {
+                setConfirmationMessage(resposta.message || 'Erro ao deletar título!');
+                setConfirmationModalIsOpen(true);
+            }
             setDeleteConfirmationModalIsOpen(false);
             setTituloADeletar(null);
         } catch (error) {
-            alert(error);
-        }
-    };
-
+            alert('Erro ao deletar título: ' + error);
+        }
+    };
+    
     return (
         <div className="home-page">
             <div className="menu-background">

@@ -16,6 +16,7 @@ export default class AuthCtrl {
                     "status": true,
                     "mensagem": "Login bem-sucedido",
                     "usuario": usuario[0].id,
+                    "nivel": usuario[0].nivel,
                     "token": token
                 });
             } catch (erro) {
@@ -50,26 +51,3 @@ export default class AuthCtrl {
         });
     }
 }
-
-export function verificarAutenticacao(req, resp, next) {
-    const authHeader = req.headers['authorization'];
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split('Bearer ')[1];
-        const tokenVerificado = verificarAssinatura(token);
-
-        if (tokenVerificado && JSON.stringify(tokenVerificado.usuario) == JSON.stringify(req.session.usuario) /*JSON.stringify(tokenVerificado.usuario) === usuarioSessao*/) {
-            next();
-        } else {
-            resp.status(403).json({
-                status: false,
-                mensagem: 'Acesso não autorizado! Token inválido ou usuário não corresponde!'
-            });
-        }
-    } else {
-        resp.status(401).json({
-            status: false,
-            mensagem: 'Acesso não autorizado! Faça o login na aplicação!'
-        });
-    }
-}    

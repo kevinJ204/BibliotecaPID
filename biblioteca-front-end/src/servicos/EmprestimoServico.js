@@ -21,7 +21,8 @@ class EmprestimoServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter empréstimos:", error);
-            return [];
+            const dados = { message: error.message }; // Criando a constante dados com a mensagem de erro
+            return dados; // Retornando dados com a mensagem de erro
         }
     }
 
@@ -43,7 +44,7 @@ class EmprestimoServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter empréstimo por ID ou Nome:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -67,7 +68,7 @@ class EmprestimoServico {
             return novoEmprestimo;
         } catch (error) {
             console.error("Erro ao adicionar empréstimo:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -91,7 +92,7 @@ class EmprestimoServico {
             return emprestimoAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar empréstimo:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -114,6 +115,7 @@ class EmprestimoServico {
             return emprestimoDeletado;
         } catch (error) {
             console.error("Erro ao deletar empréstimo:", error);
+            return error; // Retornando apenas o objeto error
         }
     }
 }

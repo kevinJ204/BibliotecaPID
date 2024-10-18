@@ -21,7 +21,8 @@ class UsuarioServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter usuários:", error);
-            return [];
+            const dados = { message: error.message}
+            return dados;
         }
     }
 
@@ -43,7 +44,7 @@ class UsuarioServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter usuário por ID ou Nome:", error);
-            return null;
+            return error;
         }
     }
 
@@ -67,7 +68,7 @@ class UsuarioServico {
             return novoUsuario;
         } catch (error) {
             console.error("Erro ao adicionar usuário:", error);
-            return null;
+            return error;
         }
     }
 
@@ -91,7 +92,7 @@ class UsuarioServico {
             return usuarioAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar usuário:", error);
-            return null;
+            return error;
         }
     }
 
@@ -110,8 +111,11 @@ class UsuarioServico {
             if (!response.ok) {
                 throw new Error(`Erro ao deletar usuário: ${response.statusText}`);
             }
+            const usuarioDeletado = await response.json();
+            return usuarioDeletado;
         } catch (error) {
             console.error("Erro ao deletar usuário:", error);
+            return error;
         }
     }
 }

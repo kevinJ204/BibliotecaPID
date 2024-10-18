@@ -46,7 +46,12 @@ const GerenciarExemplares = () => {
     const fetchTitulos = async () => {
         try {
             const dados = await tituloServico.obterTitulos();
-            setTitulos(dados);
+            if (dados.length > 0 && !dados.message) {
+                setTitulos(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum título encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
             alert('Erro ao buscar títulos: ' + error);
         }
@@ -55,25 +60,45 @@ const GerenciarExemplares = () => {
     const fetchExemplares = async () => {
         try {
             const dados = await exemplarServico.obterExemplares();
-            setExemplares(dados);
+            if (dados.length > 0 && !dados.message) {
+                setExemplares(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum exemplar encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
             alert('Erro ao buscar exemplares: ' + error);
         }
     };
+    
 
     const hasSearchedExemplar = useRef(false);
 
     useEffect(() => {
-        if (searchValue && !hasSearchedExemplar.current) {
-            exemplarServico.obterExemplarPorIdOuNome(searchValue)
-                .then(setExemplares)
-                .catch(error => alert('Erro ao buscar exemplares: ' + error));
-            hasSearchedExemplar.current = true; 
-        } else if (!searchValue && hasSearchedExemplar.current) {
-            fetchExemplares(); 
-            hasSearchedExemplar.current = false;
-        }
+        const delayDebounceFn = setTimeout(() => {
+            if (searchValue && !hasSearchedExemplar.current) {
+                exemplarServico.obterExemplarPorIdOuNome(searchValue)
+                    .then((dados) => {
+                        if (dados.length > 0 && !dados.message) {
+                            setExemplares(dados);
+                        } else {
+                            setConfirmationMessage(dados.message || 'Nenhum exemplar encontrado.');
+                            setConfirmationModalIsOpen(true);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro ao buscar exemplares: ' + error);
+                    });
+                hasSearchedExemplar.current = true;
+            } else if (!searchValue && hasSearchedExemplar.current) {
+                fetchExemplares();
+                hasSearchedExemplar.current = false;
+            }
+        }, 500);
+    
+        return () => clearTimeout(delayDebounceFn);
     }, [searchValue]);
+    
 
     const handleAddExemplar = async () => {
         const newErrors = validateForm();
@@ -86,24 +111,28 @@ const GerenciarExemplares = () => {
                 } else {
                     resposta = await exemplarServico.adicionarExemplar(novoExemplar);
                 }
-    
                 if (resposta && resposta.status === true) {
-                    setConfirmationMessage(selectedExemplarIndex !== null ? 'Exemplar atualizado com sucesso!' : 'Exemplar cadastrado com sucesso!');
+                    setConfirmationMessage(selectedExemplarIndex !== null ? 'Exemplar atualizado com sucesso!' : 'Exemplar cadastrado com sucesso');
                 } else {
-                    setConfirmationMessage('Erro ao salvar Exemplar!');
+                    setConfirmationMessage(resposta.message || 'Erro ao salvar exemplar!');
                 }
-    
                 fetchExemplares();
-                setNovoExemplar({ codigo: '', titulo: { id: 0, nome: '', genero: { id: 0, genero: ''}, autores: [] }, status: ''});
+                setNovoExemplar({ 
+                    id: 0, 
+                    codigo: '', 
+                    titulo: { id: 0, nome: '', genero: { id: 0, genero: '' }, autores: [] }, 
+                    status: ''
+                });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
-                alert(error);
+                alert('Erro ao salvar exemplar: ' + error);
             }
         } else {
             setErrors(newErrors);
         }
     };
+    
 
     const handleChange = (field, value, index = null) => {
         if (field === 'titulo') {
@@ -192,14 +221,20 @@ const GerenciarExemplares = () => {
 
     const confirmDeleteExemplar = async () => {
         try {
-            await exemplarServico.deletarExemplar(exemplares[exemplarADeletar].id);
-            fetchExemplares();
+            const resposta = await exemplarServico.deletarExemplar(exemplares[exemplarADeletar].id);
+            if (resposta && resposta.status === true) {
+                fetchExemplares();
+            } else {
+                setConfirmationMessage(resposta.message || 'Erro ao deletar exemplar!');
+                setConfirmationModalIsOpen(true);
+            }
             setDeleteConfirmationModalIsOpen(false);
             setExemplarADeletar(null);
         } catch (error) {
-            alert(error);
-        }
-    };
+            alert('Erro ao deletar exemplar: ' + error);
+        }
+    };
+    
 
     const handleBaixaExemplar = (index) => {
         setSelectedExemplarIndex(index);

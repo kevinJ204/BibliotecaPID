@@ -21,7 +21,8 @@ class ExemplarServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter exemplares:", error);
-            return [];
+            const dados = { message: error.message }; // Criando a constante dados com a mensagem de erro
+            return dados; // Retornando dados com a mensagem de erro
         }
     }
 
@@ -43,7 +44,7 @@ class ExemplarServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter exemplar por ID ou Nome:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -67,7 +68,7 @@ class ExemplarServico {
             return novoExemplar;
         } catch (error) {
             console.error("Erro ao adicionar exemplar:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -91,7 +92,7 @@ class ExemplarServico {
             return exemplarAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar exemplar:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -110,8 +111,11 @@ class ExemplarServico {
             if (!response.ok) {
                 throw new Error(`Erro ao deletar exemplar: ${response.statusText}`);
             }
+            const exemplarDeletado = await response.json();
+            return exemplarDeletado; // Retornando o resultado da operação
         } catch (error) {
             console.error("Erro ao deletar exemplar:", error);
+            return error; // Retornando apenas o objeto error
         }
     }
 }

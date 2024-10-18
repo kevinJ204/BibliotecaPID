@@ -1,17 +1,28 @@
-
 import { Router } from 'express';
 import AlunoCtrl from '../Controles/alunoCtrl.js';
+import MiddlewareAutenticacao from '../Seguranca/MiddlewareAutenticacao.js';
 
 const rotaAluno = new Router();
 const aluCtrl = new AlunoCtrl();
 
 rotaAluno
-.get('/', aluCtrl.consultar)
-.get('/:termo', aluCtrl.consultar)
-.post('/', aluCtrl.gravar)
-.put('/:id', aluCtrl.atualizar)
-.patch('/:id', aluCtrl.atualizar)
-.delete('/:id', aluCtrl.excluir);
-
+    .get('/', 
+        MiddlewareAutenticacao.verificarNivelAcesso('aluno'), 
+        aluCtrl.consultar)
+    .get('/:termo', 
+        MiddlewareAutenticacao.verificarNivelAcesso('aluno'), 
+        aluCtrl.consultar)
+    .post('/', 
+        MiddlewareAutenticacao.verificarNivelAcesso('aluno'), 
+        aluCtrl.gravar)
+    .put('/:id', 
+        MiddlewareAutenticacao.verificarNivelAcesso('aluno'), 
+        aluCtrl.atualizar)
+    .patch('/:id', 
+        MiddlewareAutenticacao.verificarNivelAcesso('aluno'), 
+        aluCtrl.atualizar)
+    .delete('/:id', 
+        MiddlewareAutenticacao.verificarNivelAcesso('aluno'), 
+        aluCtrl.excluir);
 
 export default rotaAluno;

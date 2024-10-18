@@ -30,26 +30,45 @@ const GerenciarUsuarios = () => {
     const fetchUsuarios = async () => {
         try {
             const dados = await usuarioServico.obterUsuarios();
-            setUsuarios(dados);
+            if (dados.length > 0 && !dados.message) {
+                setUsuarios(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum usuário encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
             alert('Erro ao buscar usuários: ' + error);
         }
     };
+    
 
     const hasSearchedUsuario = useRef(false);
 
     useEffect(() => {
-        if (searchValue && !hasSearchedUsuario.current) {
-            usuarioServico.obterUsuarioPorIdOuNome(searchValue)
-                .then(setUsuarios)
-                .catch(error => alert('Erro ao buscar usuários: ' + error));
-            hasSearchedUsuario.current = true;
-        } else if (!searchValue && hasSearchedUsuario.current) {
-            fetchUsuarios();
-            hasSearchedUsuario.current = false;
-        }
+        const delayDebounceFn = setTimeout(() => {
+            if (searchValue && !hasSearchedUsuario.current) {
+                usuarioServico.obterUsuarioPorIdOuNome(searchValue)
+                    .then((dados) => {
+                        if (dados.length > 0 && !dados.message) {
+                            setUsuarios(dados);
+                        } else {
+                            setConfirmationMessage(dados.message || 'Nenhum usuário encontrado.');
+                            setConfirmationModalIsOpen(true);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro ao buscar usuários: ' + error);
+                    });
+                hasSearchedUsuario.current = true;
+            } else if (!searchValue && hasSearchedUsuario.current) {
+                fetchUsuarios();
+                hasSearchedUsuario.current = false;
+            }
+        }, 500);
+    
+        return () => clearTimeout(delayDebounceFn);
     }, [searchValue]);
-
+    
     const validateForm = () => {
         const newErrors = {};
         if (novoUsuario.nome.length < 3) newErrors.nome = 'Usuário deve ter no mínimo 3 caracteres';
@@ -101,14 +120,14 @@ const GerenciarUsuarios = () => {
                 if (resposta && resposta.status === true) {
                     setConfirmationMessage(selectedUsuarioIndex !== null ? 'Usuário atualizado com sucesso!' : 'Usuário cadastrado com sucesso');
                 } else {
-                    setConfirmationMessage('Erro ao salvar usuário!');
+                    setConfirmationMessage(resposta.message || 'Erro ao salvar usuário!');
                 }
                 fetchUsuarios();
                 setNovoUsuario({ nome: '', email: '', senha: '', nivel: 'Basico' });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
-                alert(error);
+                alert('Erro ao salvar usuário: ' + error);
             }
         } else {
             setErrors(newErrors);
@@ -122,12 +141,17 @@ const GerenciarUsuarios = () => {
 
     const confirmDeleteUsuario = async () => {
         try {
-            await usuarioServico.deletarUsuario(usuarios[usuarioADeletar].id);
-            fetchUsuarios();
+            const resposta = await usuarioServico.deletarUsuario(usuarios[usuarioADeletar].id);
+            if (resposta && resposta.status === true) {
+                fetchUsuarios();
+            } else {
+                setConfirmationMessage(resposta.message || 'Erro ao deletar usuário!');
+                setConfirmationModalIsOpen(true);
+            }
             setDeleteConfirmationModalIsOpen(false);
             setUsuarioADeletar(null);
         } catch (error) {
-            alert(error);
+            alert('Erro ao deletar usuário: ' + error);
         }
     };
 

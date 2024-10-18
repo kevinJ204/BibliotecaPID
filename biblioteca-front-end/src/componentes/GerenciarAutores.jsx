@@ -30,28 +30,45 @@ const GerenciarAutores = () => {
     const fetchAutores = async () => {
         try {
             const dados = await autorServico.obterAutores();
-            setAutores(dados);
+            if (dados.length > 0 && !dados.message) {
+                setAutores(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum autor encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
-            alert(error);
+            alert('Erro ao buscar autores: ' + error);
         }
     };
+    
 
     const hasSearchedAutor = useRef(false);
 
     useEffect(() => {
-        if (!hasSearchedAutor.current || searchValue) {
-            if (searchValue) {
+        const delayDebounceFn = setTimeout(() => {
+            if (searchValue && !hasSearchedAutor.current) {
                 autorServico.obterAutorPorIdOuNome(searchValue)
-                    .then(setAutores)
-                    .catch(error => console.error('Erro ao buscar autores:', error));
-            } else {
-                autorServico.obterAutores()
-                    .then(setAutores)
-                    .catch(error => console.error('Erro ao buscar autores:', error));
+                    .then((dados) => {
+                        if (dados.length > 0 && !dados.message) {
+                            setAutores(dados);
+                        } else {
+                            setConfirmationMessage(dados.message || 'Nenhum autor encontrado.');
+                            setConfirmationModalIsOpen(true);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro ao buscar autores: ' + error);
+                    });
+                hasSearchedAutor.current = true;
+            } else if (!searchValue && hasSearchedAutor.current) {
+                fetchAutores();
+                hasSearchedAutor.current = false;
             }
-            hasSearchedAutor.current = true;
-        }
+        }, 500);
+    
+        return () => clearTimeout(delayDebounceFn);
     }, [searchValue]);
+    
 
     const validateForm = () => {
         const newErrors = {};
@@ -85,19 +102,20 @@ const GerenciarAutores = () => {
                 if (resposta && resposta.status === true) {
                     setConfirmationMessage(selectedAutorIndex !== null ? 'Autor atualizado com sucesso!' : 'Autor cadastrado com sucesso');
                 } else {
-                    setConfirmationMessage('Erro ao salvar autor!');
+                    setConfirmationMessage(resposta.message || 'Erro ao salvar autor!');
                 }
                 fetchAutores();
-                setNovoAutor({ id: '', nome: ''});
+                setNovoAutor({ id: '', nome: '' });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
-                alert(error);
+                alert('Erro ao salvar autor: ' + error);
             }
         } else {
             setErrors(newErrors);
         }
     };
+    
 
     const handleDeleteAutor = (index) => {
         setAutorADeletar(index);
@@ -106,14 +124,19 @@ const GerenciarAutores = () => {
 
     const confirmDeleteAutor = async () => {
         try {
-            await autorServico.deletarAutor(autores[autorADeletar].id);
-            fetchAutores();
+            const resposta = await autorServico.deletarAutor(autores[autorADeletar].id);
+            if (resposta && resposta.status === true) {
+                fetchAutores();
+            } else {
+                setConfirmationMessage(resposta.message || 'Erro ao deletar autor!');
+                setConfirmationModalIsOpen(true);
+            }
             setDeleteConfirmationModalIsOpen(false);
             setAutorADeletar(null);
         } catch (error) {
-            alert(error);
+            alert('Erro ao deletar autor: ' + error);
         }
-    };
+    };    
 
     const handleChange = (field, value) => {
         setNovoAutor({ ...novoAutor, [field]: value });
@@ -257,7 +280,7 @@ const GerenciarAutores = () => {
                 <div className="confirmation-modal">
                     <div className="confirmation-modal-content">
                         <span className="close" onClick={() => setConfirmationModalIsOpen(false)}>&times;</span>
-                        <h2>Autor cadastrado com sucesso!</h2>
+                        <h2>{confirmationMessage}</h2>
                         <button onClick={() => setConfirmationModalIsOpen(false)}>Fechar</button>
                     </div>
                 </div>

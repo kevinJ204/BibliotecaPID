@@ -30,22 +30,44 @@ const GerenciarGeneros = () => {
     const fetchGeneros = async () => {
         try {
             const dados = await generoServico.obterGeneros();
-            setGeneros(dados);
+            if (dados.length > 0 && !dados.message) {
+                setGeneros(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum gênero encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
-            alert(error);
+            alert('Erro ao buscar gêneros: ' + error);
         }
-    };
+    };    
 
     const hasSearchedGenero = useRef(false);
 
     useEffect(() => {
-        if (!hasSearchedGenero.current || searchValue) {
-            generoServico.obterGeneroPorIdOuNome(searchValue)
-                .then(setGeneros)
-                .catch(error => console.error('Erro ao buscar gêneros:', error));
-            hasSearchedGenero.current = true;
-        }
+        const delayDebounceFn = setTimeout(() => {
+            if (searchValue && !hasSearchedGenero.current) {
+                generoServico.obterGeneroPorIdOuNome(searchValue)
+                    .then((dados) => {
+                        if (dados.length > 0 && !dados.message) {
+                            setGeneros(dados);
+                        } else {
+                            setConfirmationMessage(dados.message || 'Nenhum gênero encontrado.');
+                            setConfirmationModalIsOpen(true);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro ao buscar gêneros: ' + error);
+                    });
+                hasSearchedGenero.current = true;
+            } else if (!searchValue && hasSearchedGenero.current) {
+                fetchGeneros();
+                hasSearchedGenero.current = false;
+            }
+        }, 500);
+    
+        return () => clearTimeout(delayDebounceFn);
     }, [searchValue]);
+    
 
     const validateForm = () => {
         const newErrors = {};
@@ -79,19 +101,20 @@ const GerenciarGeneros = () => {
                 if (resposta && resposta.status === true) {
                     setConfirmationMessage(selectedGeneroIndex !== null ? 'Gênero atualizado com sucesso!' : 'Gênero cadastrado com sucesso');
                 } else {
-                    setConfirmationMessage('Erro ao salvar gênero!');
+                    setConfirmationMessage(resposta.message || 'Erro ao salvar gênero!');
                 }
                 fetchGeneros();
-                setNovoGenero({ id: '', genero: ''});
+                setNovoGenero({ id: '', genero: '' });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
-                alert(error);
+                alert('Erro ao salvar gênero: ' + error);
             }
         } else {
             setErrors(newErrors);
         }
     };
+    
 
     const handleDeleteGenero = (index) => {
         setGeneroADeletar(index);
@@ -100,14 +123,20 @@ const GerenciarGeneros = () => {
 
     const confirmDeleteGenero = async () => {
         try {
-            await generoServico.deletarGenero(generos[generoADeletar].id);
-            fetchGeneros();
+            const resposta = await generoServico.deletarGenero(generos[generoADeletar].id);
+            if (resposta && resposta.status === true) {
+                fetchGeneros();
+            } else {
+                setConfirmationMessage(resposta.message || 'Erro ao deletar gênero!');
+                setConfirmationModalIsOpen(true);
+            }
             setDeleteConfirmationModalIsOpen(false);
             setGeneroADeletar(null);
         } catch (error) {
-            alert(error);
+            alert('Erro ao deletar gênero: ' + error);
         }
     };
+    
 
     const handleEditGenero = (index) => {
         setNovoGenero(generos[index]);

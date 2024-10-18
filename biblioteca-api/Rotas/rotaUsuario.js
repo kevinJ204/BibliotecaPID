@@ -1,17 +1,28 @@
-
 import { Router } from 'express';
 import UsuarioCtrl from '../Controles/usuarioCtrl.js';
+import MiddlewareAutenticacao from '../Seguranca/MiddlewareAutenticacao.js';
 
 const rotaUsuario = new Router();
 const usuCtrl = new UsuarioCtrl();
 
 rotaUsuario
-.get('/', usuCtrl.consultar)
-.get('/:termo', usuCtrl.consultar)
-.post('/', usuCtrl.gravar)
-.put('/:id', usuCtrl.atualizar)
-.patch('/:id', usuCtrl.atualizar)
-.delete('/:id', usuCtrl.excluir);
-
+    .get('/', 
+        MiddlewareAutenticacao.verificarNivelAcesso('usuario'), 
+        usuCtrl.consultar)
+    .get('/:termo', 
+        MiddlewareAutenticacao.verificarNivelAcesso('usuario'), 
+        usuCtrl.consultar)
+    .post('/', 
+        MiddlewareAutenticacao.verificarNivelAcesso('usuario'), 
+        usuCtrl.gravar)
+    .put('/:id', 
+        MiddlewareAutenticacao.verificarNivelAcesso('usuario'), 
+        usuCtrl.atualizar)
+    .patch('/:id', 
+        MiddlewareAutenticacao.verificarNivelAcesso('usuario'), 
+        usuCtrl.atualizar)
+    .delete('/:id', 
+        MiddlewareAutenticacao.verificarNivelAcesso('usuario'), 
+        usuCtrl.excluir);
 
 export default rotaUsuario;

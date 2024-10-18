@@ -21,7 +21,8 @@ class AlunoServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter alunos:", error);
-            return [];
+            const dados = { message: error.message };
+            return dados; // Retorna o objeto com a mensagem de erro
         }
     }
 
@@ -43,7 +44,7 @@ class AlunoServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter aluno por ID ou Nome:", error);
-            return null;
+            return error; // Retorna o objeto error
         }
     }
 
@@ -67,7 +68,7 @@ class AlunoServico {
             return novoAluno;
         } catch (error) {
             console.error("Erro ao adicionar aluno:", error);
-            return null;
+            return error; // Retorna o objeto error
         }
     }
 
@@ -91,7 +92,7 @@ class AlunoServico {
             return alunoAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar aluno:", error);
-            return null;
+            return error; // Retorna o objeto error
         }
     }
 
@@ -110,8 +111,11 @@ class AlunoServico {
             if (!response.ok) {
                 throw new Error(`Erro ao deletar aluno: ${response.statusText}`);
             }
+            const alunoDeletado = await response.json();
+            return alunoDeletado;
         } catch (error) {
             console.error("Erro ao deletar aluno:", error);
+            return error; // Retorna o objeto error
         }
     }
 }

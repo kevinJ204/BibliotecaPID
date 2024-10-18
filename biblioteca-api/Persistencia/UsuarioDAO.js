@@ -52,17 +52,20 @@ export default class UsuarioDAO {
             termoDePesquisa = "";
         }
         let sql="";
+        const conexao = await conectar();
+        let registros = [];
+
         if (isNaN(parseInt(termoDePesquisa))){
-            sql = `SELECT * FROM usuarios WHERE nome LIKE ?`;
+            sql = `SELECT * FROM usuarios WHERE nome LIKE ? OR email LIKE ?`;
             termoDePesquisa= '%' + termoDePesquisa + '%';
+            [registros] = await conexao.execute(sql,[termoDePesquisa, termoDePesquisa]);
         }
         else{
             sql = `SELECT * FROM usuarios WHERE id LIKE ?`;
             termoDePesquisa= '%' + termoDePesquisa + '%';
+            [registros] = await conexao.execute(sql,[termoDePesquisa]);
         }
 
-        const conexao = await conectar();
-        const [registros] = await conexao.execute(sql,[termoDePesquisa]);
         let listaUsuarios = [];
         for (const registro of registros){
             const usuario = new Usuario(

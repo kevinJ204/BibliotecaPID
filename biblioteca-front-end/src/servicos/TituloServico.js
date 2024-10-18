@@ -21,7 +21,8 @@ class TituloServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter títulos:", error);
-            return [];
+            const dados = { message: error.message }; // Criando a constante dados com a mensagem de erro
+            return dados; // Retornando dados com a mensagem de erro
         }
     }
 
@@ -43,7 +44,7 @@ class TituloServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter título por ID ou Nome:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -67,7 +68,7 @@ class TituloServico {
             return novoTitulo;
         } catch (error) {
             console.error("Erro ao adicionar título:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -91,7 +92,7 @@ class TituloServico {
             return tituloAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar título:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -110,11 +111,11 @@ class TituloServico {
             if (!response.ok) {
                 throw new Error(`Erro ao deletar título: ${response.statusText}`);
             }
-            const tituloDeletado = await response.json();
-            return tituloDeletado;
+            const tituloDeletado = await response.json(); // Capturando o resultado da operação
+            return tituloDeletado; // Retornando o resultado
         } catch (error) {
             console.error("Erro ao deletar título:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 }

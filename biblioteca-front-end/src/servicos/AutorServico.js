@@ -21,7 +21,8 @@ class AutorServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter autores:", error);
-            return [];
+            const dados = { message: error.message };
+            return dados; // Retornando dados com a mensagem de erro
         }
     }
 
@@ -43,7 +44,7 @@ class AutorServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter autor por ID ou Nome:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -67,7 +68,7 @@ class AutorServico {
             return novoAutor;
         } catch (error) {
             console.error("Erro ao adicionar autor:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -91,7 +92,7 @@ class AutorServico {
             return autorAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar autor:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -110,8 +111,11 @@ class AutorServico {
             if (!response.ok) {
                 throw new Error(`Erro ao deletar autor: ${response.statusText}`);
             }
+            const autorDeletado = await response.json();
+            return autorDeletado;
         } catch (error) {
             console.error("Erro ao deletar autor:", error);
+            return error; // Retornando apenas o objeto error
         }
     }
 }

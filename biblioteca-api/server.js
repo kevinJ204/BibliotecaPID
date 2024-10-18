@@ -15,7 +15,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import https from 'https';
-import { verificarAutenticacao } from './Controles/authCtrl.js';
+import MiddlewareAutenticacao from './Seguranca/MiddlewareAutenticacao.js';
 
 dotenv.configDotenv();
 
@@ -51,13 +51,13 @@ app.use(session({
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/usuarios', verificarAutenticacao, rotaUsuario);
-app.use('/alunos', verificarAutenticacao, rotaAluno);
-app.use('/titulos', verificarAutenticacao, rotaTitulo);
-app.use('/generos', verificarAutenticacao, rotaGenero);
-app.use('/autores', verificarAutenticacao, rotaAutor);
-app.use('/exemplares', verificarAutenticacao, rotaExemplar);
-app.use('/emprestimos', verificarAutenticacao, rotaEmprestimo);
+app.use('/usuarios', MiddlewareAutenticacao.verificarAutenticacao, rotaUsuario);
+app.use('/alunos', MiddlewareAutenticacao.verificarAutenticacao, rotaAluno);
+app.use('/titulos', MiddlewareAutenticacao.verificarAutenticacao, rotaTitulo);
+app.use('/generos', MiddlewareAutenticacao.verificarAutenticacao, rotaGenero);
+app.use('/autores', MiddlewareAutenticacao.verificarAutenticacao, rotaAutor);
+app.use('/exemplares', MiddlewareAutenticacao.verificarAutenticacao, rotaExemplar);
+app.use('/emprestimos', MiddlewareAutenticacao.verificarAutenticacao, rotaEmprestimo);
 app.use('/auth', rotaAuth);
 
 app.get('/', (req, res) => {

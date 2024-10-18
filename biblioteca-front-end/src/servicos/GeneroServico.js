@@ -21,7 +21,8 @@ class GeneroServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter gêneros:", error);
-            return [];
+            const dados = { message: error.message }; // Criando a constante dados com a mensagem de erro
+            return dados; // Retornando dados com a mensagem de erro
         }
     }
 
@@ -43,7 +44,7 @@ class GeneroServico {
             return dados;
         } catch (error) {
             console.error("Erro ao obter gênero por ID ou Nome:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -67,7 +68,7 @@ class GeneroServico {
             return novoGenero;
         } catch (error) {
             console.error("Erro ao adicionar gênero:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -91,7 +92,7 @@ class GeneroServico {
             return generoAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar gênero:", error);
-            return null;
+            return error; // Retornando apenas o objeto error
         }
     }
 
@@ -110,8 +111,11 @@ class GeneroServico {
             if (!response.ok) {
                 throw new Error(`Erro ao deletar gênero: ${response.statusText}`);
             }
+            const generoDeletado = await response.json(); // Capturando o resultado da operação
+            return generoDeletado; // Retornando o resultado
         } catch (error) {
             console.error("Erro ao deletar gênero:", error);
+            return error; // Retornando apenas o objeto error
         }
     }
 }

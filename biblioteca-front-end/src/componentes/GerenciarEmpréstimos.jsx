@@ -46,29 +46,58 @@ const GerenciarEmprestimos = () => {
         }
     }, []);
 
+    const hasSearchedEmprestimo = useRef(false);
+
     useEffect(() => {
-        if (searchValue) {
-            emprestimoServico.obterEmprestimoPorIdOuNome(searchValue)
-                .then(setEmprestimos)
-                .catch(error => alert('Erro ao buscar empréstimos: ' + error));
-        } else if (!hasFetchedEmprestimos.current) {
-            fetchEmprestimos();
-        }
+        const delayDebounceFn = setTimeout(() => {
+            if (searchValue && !hasSearchedEmprestimo.current) {
+                emprestimoServico.obterEmprestimoPorIdOuNome(searchValue)
+                    .then((dados) => {
+                        if (dados.length > 0 && !dados.message) {
+                            setEmprestimos(dados);
+                        } else {
+                            setConfirmationMessage(dados.message || 'Nenhum empréstimo encontrado.');
+                            setConfirmationModalIsOpen(true);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro ao buscar empréstimos: ' + error);
+                    });
+                hasSearchedEmprestimo.current = true;
+            } else if (!searchValue && hasSearchedEmprestimo.current) {
+                fetchEmprestimos();
+                hasSearchedEmprestimo.current = false;
+            }
+        }, 500);
+    
+        return () => clearTimeout(delayDebounceFn);
     }, [searchValue]);
+    
 
     const fetchEmprestimos = async () => {
         try {
             const dados = await emprestimoServico.obterEmprestimos();
-            setEmprestimos(dados);
+            if (dados.length > 0 && !dados.message) {
+                setEmprestimos(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum empréstimo encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
             alert('Erro ao buscar empréstimos: ' + error);
         }
     };
+    
 
     const fetchAlunos = async () => {
         try {
             const dados = await alunoServico.obterAlunos();
-            setAlunos(dados);
+            if (dados.length > 0 && !dados.message) {
+                setAlunos(dados);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum aluno encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
             alert('Erro ao buscar alunos: ' + error);
         }
@@ -77,8 +106,13 @@ const GerenciarEmprestimos = () => {
     const fetchExemplares = async () => {
         try {
             const dados = await exemplarServico.obterExemplares();
-            const exemplaresDisponiveis = dados.filter(exemplar => exemplar.status === "Disponível");
-            setExemplares(exemplaresDisponiveis);
+            if (dados.length > 0 && !dados.message) {
+                const exemplaresDisponiveis = dados.filter(exemplar => exemplar.status === "Disponível");
+                setExemplares(exemplaresDisponiveis);
+            } else {
+                setConfirmationMessage(dados.message || 'Nenhum exemplar encontrado.');
+                setConfirmationModalIsOpen(true);
+            }
         } catch (error) {
             alert('Erro ao buscar exemplares: ' + error);
         }
@@ -106,25 +140,23 @@ const GerenciarEmprestimos = () => {
                 } else {
                     resposta = await emprestimoServico.adicionarEmprestimo(novoEmprestimo);
                 }
-
                 if (resposta && resposta.status === true) {
-                    setConfirmationMessage(selectedEmprestimoIndex !== null ? 'Empréstimo atualizado com sucesso!' : 'Empréstimo cadastrado com sucesso!');
+                    setConfirmationMessage(selectedEmprestimoIndex !== null ? 'Empréstimo atualizado com sucesso!' : 'Empréstimo cadastrado com sucesso');
                 } else {
-                    setConfirmationMessage('Erro ao salvar empréstimo!');
+                    setConfirmationMessage(resposta.message || 'Erro ao salvar empréstimo!');
                 }
-
                 fetchEmprestimos();
                 setNovoEmprestimo({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '' });
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
-                alert(error);
+                alert('Erro ao salvar empréstimo: ' + error);
             }
         } else {
             setErrors(newErrors);
         }
     };
-
+    
     const handleChange = (field, value, index = null) => {
         if (field === 'aluno') {
             if (parseInt(value) === 0) {
@@ -151,14 +183,20 @@ const GerenciarEmprestimos = () => {
 
     const confirmDeleteEmprestimo = async () => {
         try {
-            await emprestimoServico.deletarEmprestimo(emprestimos[emprestimoADeletar].id);
-            fetchEmprestimos();
+            const resposta = await emprestimoServico.deletarEmprestimo(emprestimos[emprestimoADeletar].id);
+            if (resposta && resposta.status === true) {
+                fetchEmprestimos();
+            } else {
+                setConfirmationMessage(resposta.message || 'Erro ao deletar empréstimo!');
+                setConfirmationModalIsOpen(true);
+            }
             setDeleteConfirmationModalIsOpen(false);
             setEmprestimoADeletar(null);
         } catch (error) {
-            alert(error);
+            alert('Erro ao deletar empréstimo: ' + error);
         }
     };
+    
 
     const handleEditEmprestimo = (index) => {
         const emprestimo = emprestimos[index];
