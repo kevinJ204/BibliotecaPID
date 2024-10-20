@@ -36,7 +36,8 @@ export default class EmprestimoDAO {
                 emprestimo.getAluno().getId(),
                 emprestimo.getDataEmprestimo(),
                 emprestimo.getdataPrazo(),
-                emprestimo.getStatus()
+                emprestimo.getStatus(),
+                emprestimo.getId()
             ];
 
             await conexao.execute(sql, parametros);
@@ -46,7 +47,7 @@ export default class EmprestimoDAO {
 
             for (const exemplar of emprestimo.getExemplares()) {
                 const sqlExemplar = `INSERT INTO emprestimos_exemplares (emprestimo_id, exemplar_id) VALUES (?, ?)`;
-                await conexao.execute(sqlAutor, [emprestimo.getId(), exemplar.getId()]);
+                await conexao.execute(sqlExemplar, [emprestimo.getId(), exemplar.getId()]);
             }
 
             global.poolConexoes.releaseConnection(conexao);
@@ -73,20 +74,22 @@ export default class EmprestimoDAO {
         }
         let sql = "";
         const conexao = await conectar();
-        const [registros] = null;
+        let registros = [];
         if (isNaN(parseInt(termoDePesquisa))) {
             sql = `SELECT em.* FROM emprestimos em 
                    JOIN alunos a ON em.aluno_id = a.id 
                    JOIN emprestimos_exemplares ee ON em.id = ee.emprestimo_id 
                    JOIN exemplares ex ON ex.id = ee.exemplar_id 
                    JOIN titulos t ON t.id = ex.titulo_id
-                   WHERE a.nome LIKE ? OR t.nome LIKE ?;`;
+                   WHERE a.nome LIKE ? OR t.nome LIKE ?
+                   GROUP BY em.id;`;
             termoDePesquisa = '%' + termoDePesquisa + '%';
             [registros] = await conexao.execute(sql, [termoDePesquisa, termoDePesquisa]);
         } else {
             sql = `SELECT em.* 
                    FROM emprestimos em 
-                   WHERE em.id = ?;`;
+                   WHERE em.id = ?
+                   GROUP BY em.id;`;
             termoDePesquisa = '%' + termoDePesquisa + '%';
             [registros] = await conexao.execute(sql, [termoDePesquisa]);
         }

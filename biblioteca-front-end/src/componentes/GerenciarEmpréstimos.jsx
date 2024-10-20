@@ -11,7 +11,7 @@ const GerenciarEmprestimos = () => {
     const [searchPlaceholder, setSearchPlaceholder] = useState("Pesquisar um Empréstimo...");
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [emprestimos, setEmprestimos] = useState([]);
-    const [novoEmprestimo, setNovoEmprestimo] = useState({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '' });
+    const [novoEmprestimo, setNovoEmprestimo] = useState({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '', status: 'Ativo' });
     const [selectedEmprestimoIndex, setSelectedEmprestimoIndex] = useState(null);
     const [errors, setErrors] = useState({});
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
@@ -118,6 +118,19 @@ const GerenciarEmprestimos = () => {
         }
     };
     
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${day}/${month}/${year}`;
+    }
+
+    const formatarDataParaInputDate = (dataString) => {
+        return dataString.split('T')[0];
+    };
+    
     const handleAddExemplarField = () => {
         setSelectedExemplares([...selectedExemplares, { id: 0 }]);
     };
@@ -146,7 +159,8 @@ const GerenciarEmprestimos = () => {
                     setConfirmationMessage(resposta.message || 'Erro ao salvar empréstimo!');
                 }
                 fetchEmprestimos();
-                setNovoEmprestimo({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '' });
+                setNovoEmprestimo({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '', status: 'Ativo' });
+                setSelectedExemplares([{ id: '' }])
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {
@@ -170,6 +184,14 @@ const GerenciarEmprestimos = () => {
             updatedExemplares[index] = { id: parseInt(value) };
             setSelectedExemplares(updatedExemplares);
             setNovoEmprestimo({ ...novoEmprestimo, exemplares: updatedExemplares });
+        } else if (field === 'dataEmprestimo') {
+            if (value.length === 10) {
+                setNovoEmprestimo({ ...novoEmprestimo, dataEmprestimo: value })    
+            }
+        } else if (field === 'dataPrazo') {
+            if (value.length === 10) {
+                setNovoEmprestimo({ ...novoEmprestimo, dataPrazo: value })
+            }
         } else {
             setNovoEmprestimo({ ...novoEmprestimo, [field]: value });
         }
@@ -200,7 +222,11 @@ const GerenciarEmprestimos = () => {
 
     const handleEditEmprestimo = (index) => {
         const emprestimo = emprestimos[index];
-        setNovoEmprestimo({ ...emprestimo });
+        setNovoEmprestimo({ 
+            ...emprestimo, 
+            dataEmprestimo: formatarDataParaInputDate(emprestimo.dataEmprestimo),
+            dataPrazo: formatarDataParaInputDate(emprestimo.dataPrazo)
+        });
         setSelectedEmprestimoIndex(index);
         setSelectedExemplares(emprestimo.exemplares || []);
         setErrors({});
@@ -288,7 +314,8 @@ const GerenciarEmprestimos = () => {
     const closeModal = () => {
         setModalIsOpen(false);
         setErrors({});
-        setNovoEmprestimo({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '' });
+        setNovoEmprestimo({ id: '', exemplares: [], aluno: { id: 0, nome: '', email: '', ra: 0, telefone: 0 }, dataEmprestimo: '', dataPrazo: '', status: 'Ativo' });
+        setSelectedExemplares([{ id: '' }])
         setSelectedEmprestimoIndex(null);
     };
 
@@ -367,10 +394,11 @@ const GerenciarEmprestimos = () => {
                             {emprestimos.map((emprestimo, index) => (
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{emprestimo.id}</td>
-                                    <td className="table-row-text">{emprestimo.exemplares}</td>
-                                    <td className="table-row-text">{emprestimo.aluno}</td>
-                                    <td className="table-row-text">{emprestimo.dataEmprestimo}</td>
-                                    <td className="table-row-text">{emprestimo.dataPrazo}</td>
+                                    <td className="table-row-text">{emprestimo.exemplares.map((exemplar) => exemplar.titulo.nome).join(', ')}</td>
+                                    <td className="table-row-text">{emprestimo.aluno.nome}</td>
+                                    <td className="table-row-text">{formatDate(emprestimo.dataEmprestimo)}</td>
+                                    <td className="table-row-text">{formatDate(emprestimo.dataPrazo)}</td>
+                                    <td className="table-row-text">{emprestimo.status}</td>
                                     <td className="table-row-text">
                                         <button className="edit-button" onClick={() => { handleEditEmprestimo(index); }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -453,7 +481,7 @@ const GerenciarEmprestimos = () => {
                                 type="date"
                                 placeholder="Data do empréstimo"
                                 id="dataEmprestimo"
-                                value={novoEmprestimo.dataEmprestimo}
+                                value={formatarDataParaInputDate(novoEmprestimo.dataEmprestimo)}
                                 onChange={(e) => handleChange('dataEmprestimo', e.target.value)}
                             />
                             {errors.dataEmprestimo && <div className="error">{errors.dataEmprestimo}</div>}
@@ -464,7 +492,7 @@ const GerenciarEmprestimos = () => {
                                 type="date"
                                 placeholder="Data do empréstimo"
                                 id="dataPrazo"
-                                value={novoEmprestimo.dataPrazo}
+                                value={formatarDataParaInputDate(novoEmprestimo.dataPrazo)}
                                 onChange={(e) => handleChange('dataPrazo', e.target.value)}
                             />
                             {errors.dataPrazo && <div className="error">{errors.dataPrazo}</div>}

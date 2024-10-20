@@ -86,15 +86,7 @@ export default class Emprestimo {
 
     async consultar(termoDePesquisa) {
         const dao = new EmprestimoDAO();
-        const emprestimos = await dao.consultar(termoDePesquisa);
-    
-        const listaEmprestimos = emprestimos.map(emprestimo => {
-            const aluno = new Aluno(emprestimo.getAluno().getId(), emprestimo.getAluno().getNome(), emprestimo.getAluno().getEmail(), emprestimo.getAluno().getRa(), emprestimo.getAluno().getTelefone());
-            const exemplares = emprestimo.getExemplares().map(exemplar => new Exemplar(exemplar.getId(), exemplar.getCodigo(), exemplar.getTitulo(), exemplar.getStatus()));
-            return new Emprestimo(emprestimo.getId(), exemplares, aluno, emprestimo.getDataEmprestimo(), emprestimo.getdataPrazo());
-        });
-    
-        return listaEmprestimos;
+        return await dao.consultar(termoDePesquisa);
     }
     
     toString() {
@@ -108,7 +100,8 @@ export default class Emprestimo {
             "exemplares": this.#exemplares.map(exemplar => exemplar.toJSON()),
             "aluno": this.#aluno.toJSON(),
             "dataEmprestimo": this.#dataEmprestimo,
-            "dataPrazo": this.#dataPrazo
+            "dataPrazo": this.#dataPrazo,
+            "status": this.#status
         };
     }
 }

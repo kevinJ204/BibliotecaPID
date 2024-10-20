@@ -9,8 +9,7 @@ export default class EmprestimoCtrl {
 
         if (requisicao.method === "POST" && requisicao.is('application/json')) {
             const dados = requisicao.body;
-            const exemplares = dados.exemplares.map(exemplar => new Exemplar(exemplar.id, 
-                exemplar.codigo, exemplar.titulo, exemplar.status));
+            const exemplares = dados.exemplares.map(exemplar => new Exemplar(exemplar.id));
             const aluno = new Aluno(dados.aluno.id, dados.aluno.nome, dados.aluno.email, 
                 dados.aluno.ra, dados.aluno.telefone);
             const dataEmprestimo = dados.dataEmprestimo;
@@ -57,8 +56,7 @@ export default class EmprestimoCtrl {
             const dados = requisicao.body;
             const id = dados.id;
     
-            const exemplares = dados.exemplares.map(exemplar => new Exemplar(exemplar.id, 
-                exemplar.codigo, exemplar.titulo, exemplar.status));
+            const exemplares = dados.exemplares.map(exemplar => new Exemplar(exemplar.id));
             const aluno = new Aluno(dados.aluno.id, dados.aluno.nome, dados.aluno.email, 
                 dados.aluno.ra, dados.aluno.telefone);
             const dataEmprestimo = dados.dataEmprestimo;
@@ -73,8 +71,7 @@ export default class EmprestimoCtrl {
                 await emprestimo.atualizar().then(() => {
                     resposta.status(200).json({
                         "status": true,
-                        "mensagem": "Todos os emprestimos foram atualizados com sucesso!",
-                        "emprestimoAtualizado": emprestimo.map(em => em.toJSON())
+                        "mensagem": "Todos os emprestimos foram atualizados com sucesso!"
                     });            
                 }).catch((erro) => {
                     resposta.status(500).json({
@@ -141,17 +138,17 @@ export default class EmprestimoCtrl {
             if (termoDeQuery === undefined || termoDeQuery.trim() === "") {
                 termoDeQuery = "";
             }
-    
             const emprestimo = new Emprestimo();
-            const emprestimos = await emprestimo.consultar(termoDeQuery)
-            .then(() => {
+
+            try {
+                const emprestimos = await emprestimo.consultar(termoDeQuery)
                 resposta.status(200).json(emprestimos);
-            }).catch((erro) => {
+            } catch (erro) {
                 resposta.status(500).json({
                     "status": false,
                     "mensagem": "Não foi possível consultar os Emprestimos! " + erro.message
                 });
-            });
+            }
         } else {
             resposta.status(405);
             resposta.json({
