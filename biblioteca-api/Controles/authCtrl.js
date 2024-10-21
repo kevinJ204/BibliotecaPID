@@ -50,4 +50,30 @@ export default class AuthCtrl {
             }
         });
     }
+
+    static async obterUsuarioLogado(requisicao, resposta) {
+        resposta.type('application/json');
+        try {
+            const usuario = requisicao.session.usuario; 
+            if (usuario) {
+                resposta.status(200).json({
+                    "status": true,
+                    "nome": usuario[0].nome, 
+                    "email": usuario[0].email
+                });
+            } else {
+                resposta.status(401).json({
+                    "status": false,
+                    "mensagem": "Usuário não autenticado"
+                });
+            }
+        } catch (erro) {
+            resposta.status(500).json({
+                "status": false,
+                "mensagem": "Erro ao obter usuário logado"
+            });
+        }
+    }
+    
+    
 }

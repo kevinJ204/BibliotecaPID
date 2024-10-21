@@ -1,12 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Home.css';
 import AuthServico from '../servicos/AuthServico';
 
 const Home = () => {
-    const userEmail = "usuario@exemplo.com";
+    const [userNome, setUserNome] = useState('');
+    const [userEmail, setUserEmail] = useState('');
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const authServico = new AuthServico();
+        const carregarUsuario = async () => {
+            const usuario = await authServico.obterUsuarioLogado();
+            if (usuario) {
+                setUserNome(usuario.nome);
+                setUserEmail(usuario.email);
+            } else {
+                console.error('Erro ao carregar o usuário');
+            }
+        };
+        carregarUsuario();
+    }, []);
 
     const handleLogout = async () => {
         const authServico = new AuthServico();
@@ -54,7 +69,7 @@ const Home = () => {
             <div className="content-background">
                 <div className="content-container">
                     <div className="welcome-message">
-                        Bem-vindo, {userEmail}
+                        Bem-vindo, {userNome || "carregando..."}
                     </div>
                     <div className="info-message">
                         Este é o seu painel de gerenciamento, fique à vontade para consultar, adicionar, excluir e confirmar dados.
@@ -62,7 +77,7 @@ const Home = () => {
                 </div>
                 <div className="custom-rectangle">
                     <div className="rectangle-content">
-                        <div className="rectangle-title">Bem-vindo, usuário.</div>
+                        <div className="rectangle-title">Bem-vindo, {userNome|| "usuário"}</div>
                         <div className="rectangle-subtitle">Use a nossa nova função, cadastrar livros.</div>
                         <Link to="/GerenciarTitulos" className="rectangle-button">CADASTRAR</Link>
                     </div>

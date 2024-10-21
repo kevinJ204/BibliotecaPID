@@ -55,6 +55,31 @@ class AuthServico {
             return false;
         }
     }
+
+    async obterUsuarioLogado() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/usuario-logado`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${TokenServico.recuperarToken()}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
+    
+            if (!response.ok) {
+                throw new Error('Erro ao obter usuário logado');
+            }
+    
+            const dados = await response.json();
+            return { nome: dados.nome, email: dados.email };
+        } catch (error) {
+            console.error('Erro ao obter usuário logado:', error);
+            return null;
+        }
+    }
+    
 }
 
 export default AuthServico;
