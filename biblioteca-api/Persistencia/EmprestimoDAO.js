@@ -21,6 +21,11 @@ export default class EmprestimoDAO {
             for (const exemplar of emprestimo.getExemplares()) {
                 const sqlExemplar = `INSERT INTO emprestimos_exemplares (emprestimo_id, exemplar_id) VALUES (?, ?)`;
                 await conexao.execute(sqlExemplar, [emprestimo.getId(), exemplar.getId()]);
+                const [exemplarCompleto] = await dao.consultar(exemplar.getId());
+                if (exemplarCompleto) {
+                    exemplarCompleto.setStatus("Emprestado");
+                    await dao.atualizar(exemplarCompleto);
+                }
             }
 
             global.poolConexoes.releaseConnection(conexao);
@@ -30,41 +35,94 @@ export default class EmprestimoDAO {
     async atualizar(emprestimo) {
         if (emprestimo instanceof Emprestimo) {
             const conexao = await conectar();
-            const sql = `UPDATE emprestimos SET aluno_id = ?, dataEmprestimo = ?, dataPrazo = ?, 
-                status = ? WHERE id = ?`;
-            const parametros = [
-                emprestimo.getAluno().getId(),
-                emprestimo.getDataEmprestimo(),
-                emprestimo.getdataPrazo(),
-                emprestimo.getStatus(),
-                emprestimo.getId()
-            ];
-
-            await conexao.execute(sql, parametros);
-
-            const sqlDeleteExemplares = `DELETE FROM emprestimos_exemplares WHERE emprestimo_id = ?`;
-            await conexao.execute(sqlDeleteExemplares, [emprestimo.getId()]);
-
-            for (const exemplar of emprestimo.getExemplares()) {
-                const sqlExemplar = `INSERT INTO emprestimos_exemplares (emprestimo_id, exemplar_id) VALUES (?, ?)`;
-                await conexao.execute(sqlExemplar, [emprestimo.getId(), exemplar.getId()]);
+            try {
+                const sqlEmprestimo = `
+                    UPDATE emprestimos
+                    SET aluno_id = ?, dataEmprestimo = ?, dataPrazo = ?, status = ?
+                    WHERE id = ?`;
+                const parametrosEmprestimo = [
+                    emprestimo.getAluno().getId(),
+                    emprestimo.getDataEmprestimo(),
+                    emprestimo.getdataPrazo(),
+                    emprestimo.getStatus(),
+                    emprestimo.getId()
+                ];
+                await conexao.execute(sqlEmprestimo, parametrosEmprestimo);
+        
+                const sqlConsultaExemplares = `
+                    SELECT exemplar_id
+                    FROM emprestimos_exemplares
+                    WHERE emprestimo_id = ?`;
+                const [exemplaresAtuais] = await conexao.execute(sqlConsultaExemplares, [emprestimo.getId()]);
+                const idsExemplaresAtuais = exemplaresAtuais.map(e => e.exemplar_id);
+        
+                for (const exemplar of emprestimo.getExemplares()) {
+                    const dao = new ExemplarDAO();
+                    if (!idsExemplaresAtuais.includes(exemplar.getId())) {
+                        const sqlInserirExemplar = `
+                            INSERT INTO emprestimos_exemplares (emprestimo_id, exemplar_id)
+                            VALUES (?, ?)`;
+                        await conexao.execute(sqlInserirExemplar, [emprestimo.getId(), exemplar.getId()]);
+                    }
+                    const [exemplarCompleto] = await dao.consultar(exemplar.getId());
+                    if (exemplarCompleto) {
+                        exemplarCompleto.setStatus("Emprestado");
+                        await dao.atualizar(exemplarCompleto);
+                    }
+                }
+        
+                const idsExemplaresNovos = emprestimo.getExemplares().map(e => e.getId());
+                for (const idExemplarAtual of idsExemplaresAtuais) {
+                    if (!idsExemplaresNovos.includes(idExemplarAtual)) {
+                        const sqlRemoverExemplar = `
+                            DELETE FROM emprestimos_exemplares
+                            WHERE emprestimo_id = ? AND exemplar_id = ?`;
+                        await conexao.execute(sqlRemoverExemplar, [emprestimo.getId(), idExemplarAtual]);
+                        const [exemplarCompleto] = await dao.consultar(idExemplarAtual);
+                        if (exemplarCompleto) {
+                            exemplarCompleto.setStatus("Disponível");
+                            await dao.atualizar(exemplarCompleto);
+                        }   
+                    }
+                }
+            } finally {
+                global.poolConexoes.releaseConnection(conexao);
             }
-
-            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
     async excluir(emprestimo) {
         if (emprestimo instanceof Emprestimo) {
             const conexao = await conectar();
-            
-            const sqlDeleteExemplares = `DELETE FROM emprestimos_exemplares WHERE emprestimo_id = ?`;
-            await conexao.execute(sqlDeleteExemplares, [emprestimo.getId()]);
-            
-            const sql = `DELETE FROM emprestimos WHERE id = ?`;
-            await conexao.execute(sql, [emprestimo.getId()]);
+            try {
+                const dao = new ExemplarDAO();
 
-            global.poolConexoes.releaseConnection(conexao);
+                const sqlSelectExemplares = `
+                    SELECT exemplar_id 
+                    FROM emprestimos_exemplares 
+                    WHERE emprestimo_id = ?`;
+                const [exemplaresAssociados] = await conexao.execute(sqlSelectExemplares, [emprestimo.getId()]);
+
+                for (const registro of exemplaresAssociados) {
+                    const [exemplarCompleto] = await dao.consultar(registro.exemplar_id);
+                    if (exemplarCompleto) {
+                        exemplarCompleto.setStatus("Disponível");
+                        await dao.atualizar(exemplarCompleto);
+                    }
+                }
+
+                const sqlDeleteExemplares = `
+                    DELETE FROM emprestimos_exemplares 
+                    WHERE emprestimo_id = ?`;
+                await conexao.execute(sqlDeleteExemplares, [emprestimo.getId()]);
+
+                const sqlDeleteEmprestimo = `
+                    DELETE FROM emprestimos 
+                    WHERE id = ?`;
+                await conexao.execute(sqlDeleteEmprestimo, [emprestimo.getId()]);
+            } finally {
+                global.poolConexoes.releaseConnection(conexao);
+            }
         }
     }
 
