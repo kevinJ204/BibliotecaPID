@@ -74,6 +74,7 @@ export default class EmprestimoDAO {
                 const idsExemplaresNovos = emprestimo.getExemplares().map(e => e.getId());
                 for (const idExemplarAtual of idsExemplaresAtuais) {
                     if (!idsExemplaresNovos.includes(idExemplarAtual)) {
+                        const dao = new ExemplarDAO();
                         const sqlRemoverExemplar = `
                             DELETE FROM emprestimos_exemplares
                             WHERE emprestimo_id = ? AND exemplar_id = ?`;
