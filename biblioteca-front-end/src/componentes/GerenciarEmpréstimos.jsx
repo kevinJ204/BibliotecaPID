@@ -546,7 +546,7 @@ const GerenciarEmprestimos = () => {
                 <div className="confirmation-modal">
                     <div className="confirmation-modal-content">
                         <span className="close" onClick={() => setDeleteConfirmationModalIsOpen(false)}>&times;</span>
-                        <h2>Tem certeza que deseja deletar este aluno?</h2>
+                        <h2>Tem certeza que deseja deletar este empréstimo?</h2>
                         <button onClick={confirmDeleteEmprestimo}>Confirmar</button>
                         <button onClick={() => setDeleteConfirmationModalIsOpen(false)}>Cancelar</button>
                     </div>

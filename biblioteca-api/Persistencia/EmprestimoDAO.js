@@ -19,6 +19,7 @@ export default class EmprestimoDAO {
             emprestimo.setId(resultados.insertId);
 
             for (const exemplar of emprestimo.getExemplares()) {
+                const dao = new ExemplarDAO();
                 const sqlExemplar = `INSERT INTO emprestimos_exemplares (emprestimo_id, exemplar_id) VALUES (?, ?)`;
                 await conexao.execute(sqlExemplar, [emprestimo.getId(), exemplar.getId()]);
                 const [exemplarCompleto] = await dao.consultar(exemplar.getId());
