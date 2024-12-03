@@ -5,6 +5,8 @@ const rotaAuth = new Router();
 
 rotaAuth.get('/usuario-logado', AuthCtrl.obterUsuarioLogado);
 rotaAuth.post('/login', AuthCtrl.login);
+rotaAuth.post('/resetPassword', AuthCtrl.resetPassword);
+rotaAuth.post('/handlePassword', AuthCtrl.handlePassword);
 rotaAuth.get('/logout', AuthCtrl.logout);
 
 

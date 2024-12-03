@@ -56,6 +56,60 @@ class AuthServico {
         }
     }
 
+    async resetPassword(email) {
+        console.log('controller',email)
+        try {
+            TokenServico.removerToken();
+            
+            const response = await fetch(`${API_BASE_URL}/auth/resetPassword`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ email }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro ao fazer logout: ${response.statusText}`);
+            }
+
+            return true;
+        } catch (error) {
+            console.error("Erro ao fazer logout:", error);
+            return false;
+        }
+    }
+
+    async handlePassword(token,password) {
+        console.log('controller',token, password)
+        try {
+            TokenServico.removerToken();
+            
+            const response = await fetch(`${API_BASE_URL}/auth/handlePassword`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ token, password }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro ao fazer logout: ${response.statusText}`);
+            }
+
+            return true;
+        } catch (error) {
+            console.error("Erro ao fazer logout:", error);
+            return false;
+        }
+    }
+    
+    
+
     async obterUsuarioLogado() {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/usuario-logado`, {

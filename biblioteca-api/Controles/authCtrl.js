@@ -1,5 +1,8 @@
 import Usuario from "../Modelo/Usuario.js";
 import { assinar, verificarAssinatura } from "../Seguranca/funcoesJWT.js";
+import jwt from 'jsonwebtoken';
+import NodeMailer from 'nodemailer'
+import conectar from '../Persistencia/Conexao.js'
 
 export default class AuthCtrl {
     static async login(requisicao, resposta) {
@@ -50,6 +53,70 @@ export default class AuthCtrl {
             }
         });
     }
+
+    static async resetPassword(req, res) {
+        try {
+            const token = jwt.sign({ email: req.body.email },
+                process.env.CHAVE_SECRETA,
+                { expiresIn: '1h' } // Token expir  a em 1 hora
+            );
+            const transporter = NodeMailer.createTransport({
+                host: "sandbox.smtp.mailtrap.io",
+                port: 2525,
+                auth: {
+                  user: "d18b36cbe6401a",
+                  pass: "d09032ab9bdee6"
+                }
+            });
+            console.log('tranasporter',token)
+            const resetLink = `https://localhost:3000/ConfirmarRedefinicao/${token}`;
+            console.log(resetLink)
+            const mailOptions = {
+                from: 'noreplay@shangDesign.com',
+                to: req.body.email,
+                subject: 'Password Reset',
+                text: `Você solicitou uma redefinição de senha. Clique no link para redefinir sua senha: ${resetLink}`,
+                html: `<p>Você solicitou uma redefinição de senha. Clique no link para redefinir sua senha:<br><br><a>${resetLink}</a> </p>`
+            };
+    
+            transporter.sendMail(mailOptions,function(error){
+                if(error) {
+                    console.log(error)
+                    return {success: false, message: error };
+                }
+            });
+            return {success: true,  message: 'If your email is registered, a reset link has been sent.' };
+
+        } catch(error ) {
+
+        }
+    }
+
+    static async handlePassword(req, res) {
+        try {
+            const {token, password} = req.body
+
+            const decoded = jwt.verify(token, process.env.CHAVE_SECRETA);
+            if(decoded) {
+                const userEmail = decoded.email;
+
+                const conexao = await conectar();
+                const sql = `UPDATE usuarios SET senha = ? WHERE email = ? `;
+                const [resultados] = await conexao.execute(sql, [password,userEmail]);
+                
+                console.log('confirma usuaruio trocar',userEmail,password)
+
+                return {success: true,  message: 'If your email is registered, a reset link has been sent.' };
+            }
+          
+          
+
+        } catch(error ) {
+
+        }
+    }
+
+    
 
     static async obterUsuarioLogado(requisicao, resposta) {
         resposta.type('application/json');

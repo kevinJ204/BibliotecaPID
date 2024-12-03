@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Login.css';
 import AuthServico from '../servicos/AuthServico';
@@ -57,6 +57,11 @@ const Login = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
+                    <div>
+                        <Link to="/redefinirsenha" className="redefinir-senha-link">
+                            Esqueci minha senha
+                        </Link>
+                    </div>
                     <button type="submit">LOGIN</button>
                 </form>
             </div>
