@@ -15,14 +15,15 @@ class EmprestimoServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar empréstimos: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar empréstimos: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter empréstimos:", error);
-            const dados = { message: error.message }; // Criando a constante dados com a mensagem de erro
-            return dados; // Retornando dados com a mensagem de erro
+            const dados = { message: error.message };
+            return dados; 
         }
     }
 
@@ -38,13 +39,14 @@ class EmprestimoServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar empréstimo: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar empréstimo: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter empréstimo por ID ou Nome:", error);
-            return error; // Retornando apenas o objeto error
+            return error;
         }
     }
 
@@ -62,13 +64,14 @@ class EmprestimoServico {
                 body: JSON.stringify(emprestimo),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao adicionar empréstimo: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao adicionar empréstimo: ${response.statusText}`);
             }
             const novoEmprestimo = await response.json();
             return novoEmprestimo;
         } catch (error) {
             console.error("Erro ao adicionar empréstimo:", error);
-            return error; // Retornando apenas o objeto error
+            return error;
         }
     }
 
@@ -86,13 +89,14 @@ class EmprestimoServico {
                 body: JSON.stringify(emprestimo),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao atualizar empréstimo: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao atualizar empréstimo: ${response.statusText}`);
             }
             const emprestimoAtualizado = await response.json();
             return emprestimoAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar empréstimo:", error);
-            return error; // Retornando apenas o objeto error
+            return error;
         }
     }
 
@@ -109,13 +113,14 @@ class EmprestimoServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao deletar empréstimo: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao deletar empréstimo: ${response.statusText}`);
             }
             const emprestimoDeletado = await response.json();
             return emprestimoDeletado;
         } catch (error) {
             console.error("Erro ao deletar empréstimo:", error);
-            return error; // Retornando apenas o objeto error
+            return error;
         }
     }
 }

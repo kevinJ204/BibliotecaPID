@@ -16,7 +16,8 @@ class AuthServico {
             });
 
             if (!response.ok) {
-                throw new Error(`Erro ao fazer login: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao fazer login: ${response.statusText}`);
             }
 
             const dados = await response.json();
@@ -46,7 +47,8 @@ class AuthServico {
             });
 
             if (!response.ok) {
-                throw new Error(`Erro ao fazer logout: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao fazer logout: ${response.statusText}`);
             }
 
             return true;
@@ -72,7 +74,8 @@ class AuthServico {
             });
 
             if (!response.ok) {
-                throw new Error(`Erro ao fazer logout: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao fazer logout: ${response.statusText}`);
             }
 
             return true;
@@ -98,7 +101,8 @@ class AuthServico {
             });
 
             if (!response.ok) {
-                throw new Error(`Erro ao fazer logout: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao fazer logout: ${response.statusText}`);
             }
 
             return true;
@@ -123,7 +127,8 @@ class AuthServico {
             });
     
             if (!response.ok) {
-                throw new Error('Erro ao obter usuário logado');
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao obter usuário logado: ${response.statusText}`);
             }
     
             const dados = await response.json();

@@ -15,7 +15,8 @@ class UsuarioServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar usuários: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar usuários: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
@@ -38,7 +39,8 @@ class UsuarioServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar usuário: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar usuário: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
@@ -62,7 +64,8 @@ class UsuarioServico {
                 body: JSON.stringify(usuario),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao adicionar usuário: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao adicionar usuário: ${response.statusText}`);
             }
             const novoUsuario = await response.json();
             return novoUsuario;
@@ -86,7 +89,8 @@ class UsuarioServico {
                 body: JSON.stringify(usuario),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao atualizar usuário: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao atualizar usuário: ${response.statusText}`);
             }
             const usuarioAtualizado = await response.json();
             return usuarioAtualizado;
@@ -109,7 +113,8 @@ class UsuarioServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao deletar usuário: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao deletar usuário: ${response.statusText}`);
             }
             const usuarioDeletado = await response.json();
             return usuarioDeletado;

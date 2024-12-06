@@ -15,14 +15,15 @@ class AutorServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar autores: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar autores: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter autores:", error);
             const dados = { message: error.message };
-            return dados; // Retornando dados com a mensagem de erro
+            return dados; 
         }
     }
 
@@ -38,13 +39,14 @@ class AutorServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar autor: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar autor: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter autor por ID ou Nome:", error);
-            return error; // Retornando apenas o objeto error
+            return error; 
         }
     }
 
@@ -62,13 +64,14 @@ class AutorServico {
                 body: JSON.stringify(autor),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao adicionar autor: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao adicionar autor: ${response.statusText}`);
             }
             const novoAutor = await response.json();
             return novoAutor;
         } catch (error) {
             console.error("Erro ao adicionar autor:", error);
-            return error; // Retornando apenas o objeto error
+            return error; 
         }
     }
 
@@ -86,13 +89,14 @@ class AutorServico {
                 body: JSON.stringify(autor),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao atualizar autor: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao atualizar autor: ${response.statusText}`);
             }
             const autorAtualizado = await response.json();
             return autorAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar autor:", error);
-            return error; // Retornando apenas o objeto error
+            return error; 
         }
     }
 
@@ -109,13 +113,14 @@ class AutorServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao deletar autor: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao deletar autor: ${response.statusText}`);
             }
             const autorDeletado = await response.json();
             return autorDeletado;
         } catch (error) {
             console.error("Erro ao deletar autor:", error);
-            return error; // Retornando apenas o objeto error
+            return error; 
         }
     }
 }

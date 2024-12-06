@@ -133,6 +133,7 @@ const GerenciarTitulos = () => {
                 }
                 fetchTitulos();
                 setNovoTitulo({ id: '', nome: '', genero: { id: 0, genero: '' }, assunto: '', autores: [] });
+                setSelectedAutores([{ id: 0 }]);
                 setModalIsOpen(false);
                 setConfirmationModalIsOpen(true);
             } catch (error) {

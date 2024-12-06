@@ -15,14 +15,15 @@ class AlunoServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar alunos: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar alunos: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter alunos:", error);
             const dados = { message: error.message };
-            return dados; // Retorna o objeto com a mensagem de erro
+            return dados;
         }
     }
 
@@ -38,13 +39,14 @@ class AlunoServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar aluno: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar aluno: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter aluno por ID ou Nome:", error);
-            return error; // Retorna o objeto error
+            return error;
         }
     }
 
@@ -62,13 +64,15 @@ class AlunoServico {
                 body: JSON.stringify(aluno)
             });
             if (!response.ok) {
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao adicionar aluno: ${response.statusText}`);
                 throw new Error(`Erro ao adicionar aluno: ${response.statusText}`);
             }
             const novoAluno = await response.json();
             return novoAluno;
         } catch (error) {
             console.error("Erro ao adicionar aluno:", error);
-            return error; // Retorna o objeto error
+            return error;
         }
     }
 
@@ -86,13 +90,14 @@ class AlunoServico {
                 body: JSON.stringify(aluno)
             });
             if (!response.ok) {
-                throw new Error(`Erro ao atualizar aluno: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao atualizar aluno: ${response.statusText}`);
             }
             const alunoAtualizado = await response.json();
             return alunoAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar aluno:", error);
-            return error; // Retorna o objeto error
+            return error;
         }
     }
 
@@ -109,13 +114,14 @@ class AlunoServico {
                 credentials: 'include'
             });
             if (!response.ok) {
-                throw new Error(`Erro ao deletar aluno: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao deletar aluno: ${response.statusText}`);
             }
             const alunoDeletado = await response.json();
             return alunoDeletado;
         } catch (error) {
             console.error("Erro ao deletar aluno:", error);
-            return error; // Retorna o objeto error
+            return error;
         }
     }
 }

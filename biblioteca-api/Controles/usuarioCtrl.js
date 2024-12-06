@@ -17,14 +17,14 @@ export default class UsuarioCtrl {
                             "status": false,
                             "mensagem": "Email em uso por parte de outro usuário previamente cadastrado!"
                         });
+                    } else {
+                        await usuario.gravar();
+                        resposta.status(201).json({
+                            "status": true,
+                            "mensagem": "Usuário gravado com sucesso!",
+                            "id_usuario": usuario.id
+                        });
                     }
-
-                    await usuario.gravar();
-                    resposta.status(201).json({
-                        "status": true,
-                        "mensagem": "Usuário gravado com sucesso!",
-                        "id_usuario": usuario.id
-                    });
                 } catch (erro) {
                     resposta.status(500).json({
                         "status": false,

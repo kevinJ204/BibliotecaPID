@@ -15,14 +15,15 @@ class GeneroServico {
                 credentials: 'include',
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar gêneros: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar gêneros: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter gêneros:", error);
-            const dados = { message: error.message }; // Criando a constante dados com a mensagem de erro
-            return dados; // Retornando dados com a mensagem de erro
+            const dados = { message: error.message }; 
+            return dados; 
         }
     }
 
@@ -38,13 +39,14 @@ class GeneroServico {
                 credentials: 'include',
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar gênero: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar gênero: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter gênero por ID ou Nome:", error);
-            return error; // Retornando apenas o objeto error
+            return error; 
         }
     }
 
@@ -62,13 +64,14 @@ class GeneroServico {
                 body: JSON.stringify(genero),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao adicionar gênero: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao adicionar gênero: ${response.statusText}`);
             }
             const novoGenero = await response.json();
             return novoGenero;
         } catch (error) {
             console.error("Erro ao adicionar gênero:", error);
-            return error; // Retornando apenas o objeto error
+            return error; 
         }
     }
 
@@ -86,13 +89,14 @@ class GeneroServico {
                 body: JSON.stringify(genero),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao atualizar gênero: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao atualizar gênero: ${response.statusText}`);
             }
             const generoAtualizado = await response.json();
             return generoAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar gênero:", error);
-            return error; // Retornando apenas o objeto error
+            return error; 
         }
     }
 
@@ -109,13 +113,14 @@ class GeneroServico {
                 credentials: 'include',
             });
             if (!response.ok) {
-                throw new Error(`Erro ao deletar gênero: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao deletar gênero: ${response.statusText}`);
             }
-            const generoDeletado = await response.json(); // Capturando o resultado da operação
-            return generoDeletado; // Retornando o resultado
+            const generoDeletado = await response.json(); 
+            return generoDeletado; 
         } catch (error) {
             console.error("Erro ao deletar gênero:", error);
-            return error; // Retornando apenas o objeto error
+            return error;
         }
     }
 }

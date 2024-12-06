@@ -77,8 +77,8 @@ export default class UsuarioDAO {
             );
             listaUsuarios.push(usuario);
         }
-        return listaUsuarios;
         global.poolConexoes.releaseConnection(conexao);
+        return listaUsuarios;
     }
 
     async autenticar(email, senha) {

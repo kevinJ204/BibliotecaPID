@@ -15,14 +15,15 @@ class ExemplarServico {
                 credentials: 'include',
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar exemplares: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar exemplares: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter exemplares:", error);
-            const dados = { message: error.message }; // Criando a constante dados com a mensagem de erro
-            return dados; // Retornando dados com a mensagem de erro
+            const dados = { message: error.message }; 
+            return dados; 
         }
     }
 
@@ -38,13 +39,14 @@ class ExemplarServico {
                 credentials: 'include',
             });
             if (!response.ok) {
-                throw new Error(`Erro ao buscar exemplar: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao buscar exemplar: ${response.statusText}`);
             }
             const dados = await response.json();
             return dados;
         } catch (error) {
             console.error("Erro ao obter exemplar por ID ou Nome:", error);
-            return error; // Retornando apenas o objeto error
+            return error; 
         }
     }
 
@@ -62,13 +64,14 @@ class ExemplarServico {
                 body: JSON.stringify(exemplar),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao adicionar exemplar: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao adicionar exemplar: ${response.statusText}`);
             }
             const novoExemplar = await response.json();
             return novoExemplar;
         } catch (error) {
             console.error("Erro ao adicionar exemplar:", error);
-            return error; // Retornando apenas o objeto error
+            return error;
         }
     }
 
@@ -86,13 +89,14 @@ class ExemplarServico {
                 body: JSON.stringify(exemplar),
             });
             if (!response.ok) {
-                throw new Error(`Erro ao atualizar exemplar: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao atualizar exemplar: ${response.statusText}`);
             }
             const exemplarAtualizado = await response.json();
             return exemplarAtualizado;
         } catch (error) {
             console.error("Erro ao atualizar exemplar:", error);
-            return error; // Retornando apenas o objeto error
+            return error; 
         }
     }
 
@@ -109,13 +113,14 @@ class ExemplarServico {
                 credentials: 'include',
             });
             if (!response.ok) {
-                throw new Error(`Erro ao deletar exemplar: ${response.statusText}`);
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao deletar exemplar: ${response.statusText}`);
             }
             const exemplarDeletado = await response.json();
-            return exemplarDeletado; // Retornando o resultado da operação
+            return exemplarDeletado; 
         } catch (error) {
             console.error("Erro ao deletar exemplar:", error);
-            return error; // Retornando apenas o objeto error
+            return error;
         }
     }
 }
