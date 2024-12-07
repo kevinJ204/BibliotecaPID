@@ -24,7 +24,7 @@ const RedefinirSenha = () => {
             console.log('mandei pro back redefinicao de senha',email)
             const result = await authServico.resetPassword(email);
             if (result && result.status) {
-                navigate('/home');
+                navigate('/');
             } else {
                 setError(result ? result.mensagem : 'Erro ao fazer login. Tente novamente mais tarde.');
             }
@@ -56,7 +56,7 @@ const RedefinirSenha = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    <label htmlFor="new-password">Nova Senha</label>
+                    {/* <label htmlFor="new-password">Nova Senha</label> */}
                    {/*  <input
                         type="password"
                         id="new-password"
@@ -74,7 +74,7 @@ const RedefinirSenha = () => {
                         onChange={(e) => setConfirmNewPassword(e.target.value)}
                         required
                     /> */}
-                    <button type="submit">REDEFINIR</button>
+                    <button type="submit">ENVIAR CÓDIGO</button>
                 </form>
             </div>
         </div>

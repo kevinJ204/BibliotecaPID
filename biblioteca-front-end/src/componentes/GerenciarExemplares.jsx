@@ -27,6 +27,7 @@ const GerenciarExemplares = () => {
     const [titulos, setTitulos] = useState([]);
     const tituloServico = new TituloServico();
     const [baixaConfirmationModalIsOpen, setBaixaConfirmationModalIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const hasFetchedExemplares = useRef(false);
     const hasFetchedTitulos = useRef(false);
@@ -58,16 +59,27 @@ const GerenciarExemplares = () => {
     };
 
     const fetchExemplares = async () => {
+        setIsLoading(true);
+        const startTime = Date.now();
+
         try {
             const dados = await exemplarServico.obterExemplares();
-            if (dados.length > 0 && !dados.message) {
-                setExemplares(dados);
-            } else {
-                setConfirmationMessage(dados.message || 'Nenhum exemplar encontrado.');
-                setConfirmationModalIsOpen(true);
-            }
+            const elapsedTime = Date.now() - startTime;
+            const minimumDelay = 1000;
+            const remainingTime = Math.max(0, minimumDelay - elapsedTime);
+
+            setTimeout(() => {
+                if (dados.length > 0 && !dados.message) {
+                    setExemplares(dados);
+                } else {
+                    setConfirmationMessage(dados.message || 'Nenhum exemplar encontrado.');
+                    setConfirmationModalIsOpen(true);
+                }
+                setIsLoading(false);
+            }, remainingTime);
         } catch (error) {
             alert('Erro ao buscar exemplares: ' + error);
+            setIsLoading(false);
         }
     };
     
@@ -325,33 +337,44 @@ const GerenciarExemplares = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {exemplares.map((exemplar, index) => (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="5" className="loading-container">
+                                    <div className="spinner"></div>
+                                    <p>Carregando Dados de Exemplares...</p>
+                                </td>
+                            </tr>
+                        ) : (
+                            exemplares.map((exemplar, index) => (
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{exemplar.id}</td>
                                     <td className="table-row-text">{exemplar.codigo}</td>
                                     <td className="table-row-text">{exemplar.titulo.nome}</td>
                                     <td className="table-row-text">{exemplar.status}</td>
                                     <td className="table-row-text">
-                                        <button className="edit-button" onClick={() => { handleEditExemplar(index); }}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M16 5L19 8M20.385 6.585C20.7788 6.19115 21.0001 5.65698 21.0001 5.1C21.0001 4.54302 20.7788 4.00885 20.385 3.615C19.9912 3.22115 19.457 2.99989 18.9 2.99989C18.343 2.99989 17.8088 3.22115 17.415 3.615L9 12V15H12L20.385 6.585Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
+                                    <button className="baixa-button" onClick={() => handleBaixaExemplar(index)}>
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M8.97503 19.95C7.70836 19.8167 6.52936 19.4627 5.43802 18.888C4.34669 18.3133 3.40069 17.58 2.60002 16.688C1.79936 15.796 1.17036 14.775 0.713024 13.625C0.255691 12.475 0.0263577 11.2583 0.0250244 9.975C0.0250244 7.39167 0.879357 5.15433 2.58802 3.263C4.29669 1.37167 6.43402 0.284 9.00002 0V2C6.98336 2.28333 5.31669 3.17933 4.00002 4.688C2.68336 6.19667 2.02502 7.959 2.02502 9.975C2.02502 11.991 2.68336 13.7537 4.00002 15.263C5.31669 16.7723 6.97503 17.668 8.97503 17.95V19.95ZM9.97503 15L4.95002 9.95L6.37502 8.525L8.97503 11.125V5H10.975V11.125L13.55 8.55L14.975 10L9.97503 15ZM10.975 19.95V17.95C11.6917 17.85 12.3794 17.6583 13.038 17.375C13.6967 17.0917 14.309 16.7333 14.875 16.3L16.325 17.75C15.5417 18.3667 14.7 18.8627 13.8 19.238C12.9 19.6133 11.9584 19.8507 10.975 19.95ZM14.925 3.65C14.3417 3.21667 13.721 2.85833 13.063 2.575C12.405 2.29167 11.7174 2.1 11 2V0C11.9834 0.1 12.925 0.337667 13.825 0.713C14.725 1.08833 15.5584 1.584 16.325 2.2L14.925 3.65ZM17.725 16.3L16.325 14.875C16.7584 14.3083 17.1084 13.696 17.375 13.038C17.6417 12.38 17.825 11.6923 17.925 10.975H19.975C19.8417 11.9583 19.5917 12.9043 19.225 13.813C18.8584 14.7217 18.3584 15.5507 17.725 16.3ZM17.925 8.975C17.825 8.25833 17.6417 7.571 17.375 6.913C17.1084 6.255 16.7584 5.64233 16.325 5.075L17.725 3.65C18.3584 4.4 18.8667 5.22933 19.25 6.138C19.6334 7.04667 19.875 7.99233 19.975 8.975H17.925Z" fill="black"/>
+                                        </svg>
+                                        </button>
+                                    <button className="edit-button" onClick={() => handleEditExemplar(index)}>
+                                            <span className="edit-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M16 5L19 8M20.385 6.585C20.7788 6.19115 21.0001 5.65698 21.0001 5.1C21.0001 4.54302 20.7788 4.00885 20.385 3.615C19.9912 3.22115 19.457 2.99989 18.9 2.99989C18.343 2.99989 17.8088 3.22115 17.415 3.615L9 12V15H12L20.385 6.585Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </span>
                                         </button>
                                         <button className="delete-button" onClick={() => handleDeleteExemplar(index)}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                                 <path d="M4 7H20M10 11V17M14 11V17M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7M9 7V4C9 3.73478 9.10536 3.48043 9.29289 3.29289C9.48043 3.10536 9.73478 3 10 3H14C14.2652 3 14.5196 3.10536 14.7071 3.29289C14.8946 3.48043 15 3.73478 15 4V7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                             </svg>
                                         </button>
-                                        <button className="baixa-button" onClick={() => handleBaixaExemplar(index)}>
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M8.97503 19.95C7.70836 19.8167 6.52936 19.4627 5.43802 18.888C4.34669 18.3133 3.40069 17.58 2.60002 16.688C1.79936 15.796 1.17036 14.775 0.713024 13.625C0.255691 12.475 0.0263577 11.2583 0.0250244 9.975C0.0250244 7.39167 0.879357 5.15433 2.58802 3.263C4.29669 1.37167 6.43402 0.284 9.00002 0V2C6.98336 2.28333 5.31669 3.17933 4.00002 4.688C2.68336 6.19667 2.02502 7.959 2.02502 9.975C2.02502 11.991 2.68336 13.7537 4.00002 15.263C5.31669 16.7723 6.97503 17.668 8.97503 17.95V19.95ZM9.97503 15L4.95002 9.95L6.37502 8.525L8.97503 11.125V5H10.975V11.125L13.55 8.55L14.975 10L9.97503 15ZM10.975 19.95V17.95C11.6917 17.85 12.3794 17.6583 13.038 17.375C13.6967 17.0917 14.309 16.7333 14.875 16.3L16.325 17.75C15.5417 18.3667 14.7 18.8627 13.8 19.238C12.9 19.6133 11.9584 19.8507 10.975 19.95ZM14.925 3.65C14.3417 3.21667 13.721 2.85833 13.063 2.575C12.405 2.29167 11.7174 2.1 11 2V0C11.9834 0.1 12.925 0.337667 13.825 0.713C14.725 1.08833 15.5584 1.584 16.325 2.2L14.925 3.65ZM17.725 16.3L16.325 14.875C16.7584 14.3083 17.1084 13.696 17.375 13.038C17.6417 12.38 17.825 11.6923 17.925 10.975H19.975C19.8417 11.9583 19.5917 12.9043 19.225 13.813C18.8584 14.7217 18.3584 15.5507 17.725 16.3ZM17.925 8.975C17.825 8.25833 17.6417 7.571 17.375 6.913C17.1084 6.255 16.7584 5.64233 16.325 5.075L17.725 3.65C18.3584 4.4 18.8667 5.22933 19.25 6.138C19.6334 7.04667 19.875 7.99233 19.975 8.975H17.925Z" fill="black"/>
-                                        </svg>
-                                        </button>
                                     </td>
                                 </tr>
-                            ))}
-                        </tbody>
+                            ))
+                        )}
+                    </tbody>
                     </table>
                 </div>
             </div>

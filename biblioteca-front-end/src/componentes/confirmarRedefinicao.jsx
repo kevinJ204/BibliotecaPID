@@ -4,8 +4,8 @@ import logoImage from './Logo.png';
 import './Login.css';
 import AuthServico from '../servicos/AuthServico';
 import { useParams } from 'react-router-dom';
+
 const ConfirmarRedefinirSenha = () => {
-    const [email, setEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
     const [error, setError] = useState('');
@@ -13,8 +13,6 @@ const ConfirmarRedefinirSenha = () => {
     const navigate = useNavigate();
 
     const { token } = useParams();
-
-    console.log("Token:", token);
 
     const handleRedefinirSenha = async (e) => {
         e.preventDefault();
@@ -34,8 +32,9 @@ const ConfirmarRedefinirSenha = () => {
             setTimeout(() => navigate('/'), 2000);
         } catch (error) {
             setError('Erro ao redefinir a senha. Tente novamente mais tarde.');
-        }
-    };
+        }
+    };
+
 
     return (
         <div className="login-page">
@@ -46,22 +45,21 @@ const ConfirmarRedefinirSenha = () => {
                 <form onSubmit={handleRedefinirSenha} className="login-form">
                     {error && <p className="error">{error}</p>}
                     {success && <p className="success">{success}</p>}
-                   {/*  <label htmlFor="email">Email</label>
-                    <input
-                        type="email"
-                        id="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    /> */}
+
                     <label htmlFor="new-password">Nova Senha</label>
                     <input
                         type="password"
                         id="new-password"
                         placeholder="Nova Senha"
                         value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
+                        onChange={(e) => {
+                            setNewPassword(e.target.value);
+                            if (e.target.value.length >= 6 && e.target.value === confirmNewPassword) {
+                                setError('');
+                            } else if (e.target.value.length < 6) {
+                                setError('A senha deve ter pelo menos 6 caracteres.');
+                            }
+                        }}
                         required
                     />
                     <label htmlFor="confirm-new-password">Confirmar Nova Senha</label>
@@ -70,7 +68,12 @@ const ConfirmarRedefinirSenha = () => {
                         id="confirm-new-password"
                         placeholder="Confirmar Nova Senha"
                         value={confirmNewPassword}
-                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        onChange={(e) => {
+                            setConfirmNewPassword(e.target.value);
+                            if (e.target.value === newPassword && newPassword.length >= 6) {
+                                setError('');
+                            }
+                        }}
                         required
                     />
                     <button type="submit">REDEFINIR</button>

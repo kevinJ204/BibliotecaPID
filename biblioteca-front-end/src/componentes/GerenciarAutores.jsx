@@ -17,6 +17,7 @@ const GerenciarAutores = () => {
     const [deleteConfirmationModalIsOpen, setDeleteConfirmationModalIsOpen] = useState(false);
     const [autorADeletar, setAutorADeletar] = useState(null);
     const autorServico = new AutorServico();
+    const [isLoading, setIsLoading] = useState(true);
 
     const hasFetchedAutores = useRef(false);
 
@@ -28,16 +29,27 @@ const GerenciarAutores = () => {
     }, []);
 
     const fetchAutores = async () => {
+        setIsLoading(true);
+        const startTime = Date.now();
+
         try {
             const dados = await autorServico.obterAutores();
-            if (dados.length > 0 && !dados.message) {
-                setAutores(dados);
-            } else {
-                setConfirmationMessage(dados.message || 'Nenhum autor encontrado.');
-                setConfirmationModalIsOpen(true);
-            }
+            const elapsedTime = Date.now() - startTime;
+            const minimumDelay = 1000;
+            const remainingTime = Math.max(0, minimumDelay - elapsedTime);
+
+            setTimeout(() => {
+                if (dados.length > 0 && !dados.message) {
+                    setAutores(dados);
+                } else {
+                    setConfirmationMessage(dados.message || 'Nenhum autor encontrado.');
+                    setConfirmationModalIsOpen(true);
+                }
+                setIsLoading(false);
+            }, remainingTime);
         } catch (error) {
             alert('Erro ao buscar autores: ' + error);
+            setIsLoading(false);
         }
     };
     
@@ -226,12 +238,20 @@ const GerenciarAutores = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {autores.map((autor, index) => (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="3" className="loading-container">
+                                    <div className="spinner"></div>
+                                    <p>Carregando Dados de Autores...</p>
+                                </td>
+                            </tr>
+                        ) : (
+                            autores.map((autor, index) => (
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{autor.id}</td>
                                     <td className="table-row-text">{autor.nome}</td>
                                     <td className="table-row-text">
-                                        <button className="edit-button" onClick={() => handleEditAutor(index)}>
+                                    <button className="edit-button" onClick={() => handleEditAutor(index)}>
                                             <span className="edit-icon">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                                     <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -246,8 +266,9 @@ const GerenciarAutores = () => {
                                         </button>
                                     </td>
                                 </tr>
-                            ))}
-                        </tbody>
+                            ))
+                        )}
+                    </tbody>
                     </table>
                 </div>
             </div>

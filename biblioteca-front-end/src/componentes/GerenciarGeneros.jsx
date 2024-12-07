@@ -17,6 +17,7 @@ const GerenciarGeneros = () => {
     const [deleteConfirmationModalIsOpen, setDeleteConfirmationModalIsOpen] = useState(false);
     const [generoADeletar, setGeneroADeletar] = useState(null);
     const generoServico = new GeneroServico();
+    const [isLoading, setIsLoading] = useState(true); 
 
     const hasFetchedGeneros = useRef(false);
 
@@ -28,18 +29,29 @@ const GerenciarGeneros = () => {
     }, []);
 
     const fetchGeneros = async () => {
+        setIsLoading(true);
+        const startTime = Date.now();
+
         try {
             const dados = await generoServico.obterGeneros();
-            if (dados.length > 0 && !dados.message) {
-                setGeneros(dados);
-            } else {
-                setConfirmationMessage(dados.message || 'Nenhum gênero encontrado.');
-                setConfirmationModalIsOpen(true);
-            }
+            const elapsedTime = Date.now() - startTime;
+            const minimumDelay = 1000;
+            const remainingTime = Math.max(0, minimumDelay - elapsedTime);
+
+            setTimeout(() => {
+                if (dados.length > 0 && !dados.message) {
+                    setGeneros(dados);
+                } else {
+                    setConfirmationMessage(dados.message || 'Nenhum gênero encontrado.');
+                    setConfirmationModalIsOpen(true);
+                }
+                setIsLoading(false);
+            }, remainingTime);
         } catch (error) {
             alert('Erro ao buscar gêneros: ' + error);
+            setIsLoading(false);
         }
-    };    
+    };   
 
     const hasSearchedGenero = useRef(false);
 
@@ -71,7 +83,10 @@ const GerenciarGeneros = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!novoGenero.genero) newErrors.genero = 'Gênero é obrigatório';
+        if (!novoGenero.genero || novoGenero.genero.length <3 ) 
+            {
+                newErrors.genero = 'Gênero é obrigatório';
+            } 
         return newErrors;
     };
 
@@ -226,12 +241,20 @@ const GerenciarGeneros = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {generos.map((genero, index) => (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="3" className="loading-container">
+                                    <div className="spinner"></div>
+                                    <p>Carregando Dados de Gêneros...</p>
+                                </td>
+                            </tr>
+                        ) : (
+                            generos.map((genero, index) => (
                                 <tr key={index} className="table-row">
                                     <td className="table-row-text">{genero.id}</td>
                                     <td className="table-row-text">{genero.genero}</td>
                                     <td className="table-row-text">
-                                        <button className="edit-button" onClick={() => handleEditGenero(index)}>
+                                    <button className="edit-button" onClick={() => handleEditGenero(index)}>
                                             <span className="edit-icon">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                                     <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -246,8 +269,9 @@ const GerenciarGeneros = () => {
                                         </button>
                                     </td>
                                 </tr>
-                            ))}
-                        </tbody>
+                            ))
+                        )}
+                    </tbody>
                     </table>
                 </div>
             </div>
