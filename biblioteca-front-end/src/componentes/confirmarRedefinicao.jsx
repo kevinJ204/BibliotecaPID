@@ -18,9 +18,6 @@ const ConfirmarRedefinirSenha = () => {
 
     const handleRedefinirSenha = async (e) => {
         e.preventDefault();
-
-
-
         try {
             console.log('Enviando dados para o servidor:', { token, newPassword });
 
@@ -32,8 +29,6 @@ const ConfirmarRedefinirSenha = () => {
             } else {
                 setError(result ? result.mensagem : 'Erro ao fazer login. Tente novamente mais tarde.');
             }
-
-
             setSuccess('Senha redefinida com sucesso!');
             setError('');
             setTimeout(() => navigate('/'), 2000);
