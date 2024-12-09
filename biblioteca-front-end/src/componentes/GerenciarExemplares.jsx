@@ -80,6 +80,8 @@ const GerenciarExemplares = () => {
         } catch (error) {
             alert('Erro ao buscar exemplares: ' + error);
             setIsLoading(false);
+        } finally {
+            setConfirmationModalIsOpen(false);
         }
     };
     

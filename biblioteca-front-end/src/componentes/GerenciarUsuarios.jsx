@@ -51,6 +51,8 @@ const GerenciarUsuarios = () => {
     } catch (error) {
         alert('Erro ao buscar usuários: ' + error);
         setIsLoading(false);
+    } finally {
+        setConfirmationModalIsOpen(false);
     }
 };
 

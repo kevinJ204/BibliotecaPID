@@ -51,6 +51,8 @@ const GerenciarAlunos = () => {
         } catch (error) {
             alert('Erro ao buscar alunos: ' + error);
             setIsLoading(false);
+        } finally {
+            setConfirmationModalIsOpen(false);
         }
     };
     

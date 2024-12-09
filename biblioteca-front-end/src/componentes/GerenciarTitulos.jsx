@@ -69,6 +69,8 @@ const GerenciarTitulos = () => {
         } catch (error) {
             alert('Erro ao buscar títulos: ' + error);
             setIsLoading(false);
+        } finally {
+            setConfirmationModalIsOpen(false);
         }
     };
 

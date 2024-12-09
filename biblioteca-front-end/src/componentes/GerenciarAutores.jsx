@@ -50,6 +50,8 @@ const GerenciarAutores = () => {
         } catch (error) {
             alert('Erro ao buscar autores: ' + error);
             setIsLoading(false);
+        } finally {
+            setConfirmationModalIsOpen(false);
         }
     };
     

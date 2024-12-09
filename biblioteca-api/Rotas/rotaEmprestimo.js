@@ -23,6 +23,9 @@ rotaEmprestimo
         empCtrl.atualizar)
     .delete('/:id', 
         MiddlewareAutenticacao.verificarNivelAcesso('emprestimo'), 
-        empCtrl.excluir);
+        empCtrl.excluir)
+    .patch('/devolver/:id', 
+        MiddlewareAutenticacao.verificarNivelAcesso('emprestimo'), 
+        empCtrl.devolver);
 
 export default rotaEmprestimo;

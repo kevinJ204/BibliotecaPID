@@ -58,7 +58,7 @@ export default class AuthCtrl {
         try {
             const token = jwt.sign({ email: req.body.email },
                 process.env.CHAVE_SECRETA,
-                { expiresIn: '1h' } // Token expir  a em 1 hora
+                { expiresIn: '1h' }
             );
             const transporter = NodeMailer.createTransport({
                 host: "sandbox.smtp.mailtrap.io",
@@ -94,28 +94,50 @@ export default class AuthCtrl {
 
     static async handlePassword(req, res) {
         try {
-            const {token, password} = req.body
-
-            const decoded = jwt.verify(token, process.env.CHAVE_SECRETA);
-            if(decoded) {
-                const userEmail = decoded.email;
-
-                const conexao = await conectar();
-                const sql = `UPDATE usuarios SET senha = ? WHERE email = ? `;
-                const [resultados] = await conexao.execute(sql, [password,userEmail]);
-                
-                console.log('confirma usuaruio trocar',userEmail,password)
-
-                return {success: true,  message: 'If your email is registered, a reset link has been sent.' };
+            const { token, password } = req.body;
+            if (!token || !password) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Token and password are required.",
+                });
             }
-          
-          
-
-        } catch(error ) {
-
+            let decoded;
+            try {
+                decoded = jwt.verify(token, process.env.CHAVE_SECRETA);
+            } catch (err) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Invalid or expired token.",
+                });
+            }
+    
+            const userEmail = decoded.email;
+            const conexao = await conectar();
+            const sql = `UPDATE usuarios SET senha = ? WHERE email = ?`;
+            const [resultados] = await conexao.execute(sql, [password, userEmail]);
+    
+            if (resultados.affectedRows === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "User not found.",
+                });
+            }
+    
+            console.log('Password updated for user:', userEmail);
+            return res.status(200).json({
+                success: true,
+                message: "Password updated successfully.",
+            });
+    
+        } catch (error) {
+            console.error("Error in handlePassword:", error.message);
+            return res.status(500).json({
+                success: false,
+                message: "An error occurred while updating the password.",
+            });
         }
     }
-
+    
     
 
     static async obterUsuarioLogado(requisicao, resposta) {
@@ -141,6 +163,5 @@ export default class AuthCtrl {
             });
         }
     }
-    
     
 }

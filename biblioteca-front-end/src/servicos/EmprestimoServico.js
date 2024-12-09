@@ -123,6 +123,32 @@ class EmprestimoServico {
             return error;
         }
     }
+
+    async devolverEmprestimo(id) {
+        try {
+            const token = TokenServico.recuperarToken();  
+            const response = await fetch(`${API_BASE_URL}/emprestimos/devolver/${id}`, {  
+                method: 'PATCH',  
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`  
+                },
+                credentials: 'include'  
+            });
+    
+            if (!response.ok) {  
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao devolver empréstimo: ${response.statusText}`);
+            }
+    
+            const emprestimoDevolvido = await response.json();  
+            return emprestimoDevolvido;
+        } catch (error) {
+            console.error("Erro ao devolver empréstimo:", error);
+            return error;  
+        }
+    }    
 }
 
 export default EmprestimoServico;

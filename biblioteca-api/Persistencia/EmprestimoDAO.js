@@ -148,7 +148,7 @@ export default class EmprestimoDAO {
         } else {
             sql = `SELECT em.* 
                    FROM emprestimos em 
-                   WHERE em.id = ?
+                   WHERE em.id LIKE ?
                    GROUP BY em.id;`;
             termoDePesquisa = '%' + termoDePesquisa + '%';
             [registros] = await conexao.execute(sql, [termoDePesquisa]);
@@ -198,5 +198,36 @@ export default class EmprestimoDAO {
 
         return listaExemplares.map(exemplar => new Exemplar(exemplar.getId(), exemplar.getCodigo(), 
             exemplar.getTitulo(), exemplar.getStatus()));
+    }
+
+    async devolver(emprestimo) {
+        if (emprestimo instanceof Emprestimo) {
+            const conexao = await conectar();
+            try {
+                const sqlAtualizarEmprestimo = `
+                    UPDATE emprestimos 
+                    SET status = 'Inativo' 
+                    WHERE id = ?`;
+                await conexao.execute(sqlAtualizarEmprestimo, [emprestimo.getId()]);
+
+                const sqlConsultaExemplares = `
+                    SELECT exemplar_id 
+                    FROM emprestimos_exemplares 
+                    WHERE emprestimo_id = ?`;
+                const [exemplaresAssociados] = await conexao.execute(sqlConsultaExemplares, [emprestimo.getId()]);
+
+                const daoExemplar = new ExemplarDAO();
+                for (const exemplarAssociado of exemplaresAssociados) {
+                    const exemplar = await daoExemplar.consultar(exemplarAssociado.exemplar_id);
+                    if (exemplar.length > 0) {
+                        const exemplarCompleto = exemplar[0];
+                        exemplarCompleto.setStatus("Disponível");  
+                        await daoExemplar.atualizar(exemplarCompleto);
+                    }
+                }
+            } finally {
+                global.poolConexoes.releaseConnection(conexao);
+            }
+        }
     }
 }

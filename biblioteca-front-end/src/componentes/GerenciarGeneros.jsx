@@ -50,6 +50,8 @@ const GerenciarGeneros = () => {
         } catch (error) {
             alert('Erro ao buscar gêneros: ' + error);
             setIsLoading(false);
+        } finally {
+            setConfirmationModalIsOpen(false);
         }
     };   
 
