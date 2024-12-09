@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import logoImage from './Logo.png';
 import './Usuarios.css';
@@ -31,6 +31,7 @@ const GerenciarEmprestimos = () => {
     const alunoServico = new AlunoServico();
     const exemplarServico = new ExemplarServico();
     const emprestimoServico = new EmprestimoServico();
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
     const hasFetchedEmprestimos = useRef(false);
     const hasFetchedAlunos = useRef(false);
@@ -38,7 +39,33 @@ const GerenciarEmprestimos = () => {
 
     const [isLoading, setIsLoading] = useState(false);
 
+    const sortedEmprestimos = useMemo(() => {
+        if (!sortConfig.key) return emprestimos;
+    
+        return [...emprestimos].sort((a, b) => {
+            const dateA = new Date(a[sortConfig.key]);
+            const dateB = new Date(b[sortConfig.key]);
+    
+            if (sortConfig.direction === 'asc') {
+                return dateA - dateB;
+            } else {
+                return dateB - dateA;
+            }
+        });
+    }, [emprestimos, sortConfig]);    
 
+    const handleSort = (key) => {
+        setSortConfig((prevConfig) => {
+            if (prevConfig.key === key) {
+                return {
+                    key,
+                    direction: prevConfig.direction === 'asc' ? 'desc' : 'asc',
+                };
+            }
+            return { key, direction: 'asc' }; 
+        });
+    };
+    
 
     useEffect(() => {
         if (!hasFetchedEmprestimos.current) {
@@ -452,8 +479,18 @@ const GerenciarEmprestimos = () => {
                                 <th>ID</th>
                                 <th>Nome dos exemplares</th>
                                 <th>Nome do aluno</th>
-                                <th>Data do empréstimo</th>
-                                <th>Data Prazo</th>
+                                <th>
+                                    Data do empréstimo
+                                    <button className="sort-button" onClick={() => handleSort('dataEmprestimo')}>
+                                        Ordenar{sortConfig.key === 'dataEmprestimo' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                    </button>
+                                </th>
+                                <th>
+                                    Data Prazo
+                                    <button className="sort-button" onClick={() => handleSort('dataPrazo')}>
+                                        Ordenar{sortConfig.key === 'dataPrazo' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                    </button>
+                                </th>
                                 <th>Status</th>
                                 <th>Ações</th>
                             </tr>
@@ -467,7 +504,7 @@ const GerenciarEmprestimos = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                emprestimos.map((emprestimo, index) => (
+                                sortedEmprestimos.map((emprestimo, index) => (
                                     <tr key={index} className="table-row">
                                         <td className="table-row-text">{emprestimo.id}</td>
                                         <td className="table-row-text">
