@@ -7,6 +7,7 @@ import AuthServico from '../servicos/AuthServico';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -39,6 +40,7 @@ const Login = () => {
                 </div>
                 <form onSubmit={handleLogin} className="login-form">
                     {error && <p className="error">{error}</p>}
+
                     <label htmlFor="email">Email</label>
                     <input
                         type="email"
@@ -48,20 +50,31 @@ const Login = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
+
                     <label htmlFor="password">Senha</label>
-                    <input
-                        type="password"
-                        id="password"
-                        placeholder="Senha"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
+                    <div className="password-field">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            id="password"
+                            placeholder="Senha"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <span
+                            className="toggle-password"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? '🙈' : '👁️'}
+                        </span>
+                    </div>
+
                     <div>
                         <Link to="/redefinirsenha" className="redefinir-senha-link">
                             Esqueci minha senha
                         </Link>
                     </div>
+
                     <button type="submit">LOGIN</button>
                 </form>
             </div>
