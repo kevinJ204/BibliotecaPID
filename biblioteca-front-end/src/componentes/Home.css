@@ -292,8 +292,8 @@
 
 .square {
     text-decoration: none;
-    width: 278px;
-    height: 278px;
+    width: 200px;
+    height: 200px;
     flex-shrink: 0;
     border-radius: 12px;
     background-image: url('./square.png');
