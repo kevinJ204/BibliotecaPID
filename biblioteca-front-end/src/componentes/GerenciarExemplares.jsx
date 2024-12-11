@@ -72,6 +72,7 @@ const GerenciarExemplares = () => {
                 if (dados.length > 0 && !dados.message) {
                     setExemplares(dados);
                 } else {
+                    setExemplares(dados);
                     setConfirmationMessage(dados.message || 'Nenhum exemplar encontrado.');
                     setConfirmationModalIsOpen(true);
                 }
@@ -80,8 +81,6 @@ const GerenciarExemplares = () => {
         } catch (error) {
             alert('Erro ao buscar exemplares: ' + error);
             setIsLoading(false);
-        } finally {
-            setConfirmationModalIsOpen(false);
         }
     };
     

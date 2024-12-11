@@ -42,6 +42,7 @@ const GerenciarGeneros = () => {
                 if (dados.length > 0 && !dados.message) {
                     setGeneros(dados);
                 } else {
+                    setGeneros(dados);
                     setConfirmationMessage(dados.message || 'Nenhum gênero encontrado.');
                     setConfirmationModalIsOpen(true);
                 }
@@ -50,8 +51,6 @@ const GerenciarGeneros = () => {
         } catch (error) {
             alert('Erro ao buscar gêneros: ' + error);
             setIsLoading(false);
-        } finally {
-            setConfirmationModalIsOpen(false);
         }
     };   
 

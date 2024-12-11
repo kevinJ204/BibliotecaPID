@@ -61,6 +61,7 @@ const GerenciarTitulos = () => {
                 if (dados.length > 0 && !dados.message) {
                     setTitulos(dados);
                 } else {
+                    setTitulos(dados);
                     setConfirmationMessage(dados.message || 'Nenhum título encontrado.');
                     setConfirmationModalIsOpen(true);
                 }
@@ -69,8 +70,6 @@ const GerenciarTitulos = () => {
         } catch (error) {
             alert('Erro ao buscar títulos: ' + error);
             setIsLoading(false);
-        } finally {
-            setConfirmationModalIsOpen(false);
         }
     };
 

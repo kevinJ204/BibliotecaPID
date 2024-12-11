@@ -43,6 +43,8 @@ const GerenciarAlunos = () => {
                 if (dados.length > 0 && !dados.message) {
                     setAlunos(dados);
                 } else {
+                    setAlunos(dados);
+
                     setConfirmationMessage(dados.message || 'Nenhum aluno encontrado.');
                     setConfirmationModalIsOpen(true);
                 }
@@ -51,8 +53,6 @@ const GerenciarAlunos = () => {
         } catch (error) {
             alert('Erro ao buscar alunos: ' + error);
             setIsLoading(false);
-        } finally {
-            setConfirmationModalIsOpen(false);
         }
     };
     

@@ -126,16 +126,16 @@ const GerenciarEmprestimos = () => {
                 if (dados.length > 0 && !dados.message) {
                     setEmprestimos(dados);
                 } else {
+                    setEmprestimos(dados);
                     setConfirmationMessage(dados.message || 'Nenhum empréstimo encontrado.');
                     setConfirmationModalIsOpen(true);
                 }
                 setIsLoading(false);
+                setConfirmationModalIsOpen(false);
             }, remainingTime);
         } catch (error) {
             alert('Erro ao buscar empréstimos: ' + error);
             setIsLoading(false);
-        } finally {
-            setConfirmationModalIsOpen(false);
         }
     };
 

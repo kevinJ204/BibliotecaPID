@@ -42,6 +42,7 @@ const GerenciarAutores = () => {
                 if (dados.length > 0 && !dados.message) {
                     setAutores(dados);
                 } else {
+                    setAutores(dados);
                     setConfirmationMessage(dados.message || 'Nenhum autor encontrado.');
                     setConfirmationModalIsOpen(true);
                 }
@@ -50,8 +51,6 @@ const GerenciarAutores = () => {
         } catch (error) {
             alert('Erro ao buscar autores: ' + error);
             setIsLoading(false);
-        } finally {
-            setConfirmationModalIsOpen(false);
         }
     };
     

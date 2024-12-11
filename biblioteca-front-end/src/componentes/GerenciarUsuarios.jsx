@@ -43,6 +43,7 @@ const GerenciarUsuarios = () => {
                 if (dados.length > 0 && !dados.message) {
                     setUsuarios(dados);
                 } else {
+                    setUsuarios(dados);
                     setConfirmationMessage(dados.message || 'Nenhum usuário encontrado.');
                     setConfirmationModalIsOpen(true);
                 }
@@ -51,8 +52,6 @@ const GerenciarUsuarios = () => {
         } catch (error) {
             alert('Erro ao buscar usuários: ' + error);
             setIsLoading(false);
-        } finally {
-            setConfirmationModalIsOpen(false);
         }
     };
 
