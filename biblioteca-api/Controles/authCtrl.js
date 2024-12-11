@@ -169,19 +169,19 @@ export default class AuthCtrl {
         resposta.type('application/json');
         try {
             const { email } = requisicao.body;
-            console.log('req body ' + email)
+            console.log('req body ' + email);
             if (!email) {
                 return resposta.status(400).json({
                     "status": false,
                     "mensagem": "E-mail não fornecido."
                 });
             }
-
+    
             const usuario = new Usuario(0);
-
+    
             const usuarios = await usuario.consultar(email);
-
-            if (usuarios.lenght > 0) {
+    
+            if (usuarios.length > 0) {
                 return resposta.status(200).json({
                     "status": true,
                     "mensagem": "E-mail encontrado",
