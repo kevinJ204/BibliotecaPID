@@ -57,41 +57,51 @@ export default class AuthCtrl {
 
     static async resetPassword(req, res) {
         try {
-            const token = jwt.sign({ email: req.body.email },
+            const token = jwt.sign(
+                { email: req.body.email },
                 process.env.CHAVE_SECRETA,
                 { expiresIn: '1h' }
             );
+
             const transporter = NodeMailer.createTransport({
-                host: "sandbox.smtp.mailtrap.io",
-                port: 2525,
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true,
                 auth: {
-                  user: "d2d8ef94233039",
-                  pass: "3311a527d499e7"
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.APP_PASS
                 }
             });
-            console.log('tranasporter', token)
+
+            console.log('Transporter configurado com sucesso. Token:', token);
+
             const resetLink = `https://localhost:3000/ConfirmarRedefinicao/${token}`;
-            console.log(resetLink)
+            console.log('Link de redefinição:', resetLink);
+
             const mailOptions = {
-                from: 'noreplay@shangDesign.com',
+                from: process.env.EMAIL_USER,
                 to: req.body.email,
                 subject: 'Password Reset',
                 text: `Você solicitou uma redefinição de senha. Clique no link para redefinir sua senha: ${resetLink}`,
-                html: `<p>Você solicitou uma redefinição de senha. Clique no link para redefinir sua senha:<br><br><a>${resetLink}</a> </p>`
+                html: `<p>Você solicitou uma redefinição de senha. Clique no link para redefinir sua senha:<br><br><a href="${resetLink}">${resetLink}</a></p>`
             };
 
-            transporter.sendMail(mailOptions, function (error) {
-                if (error) {
-                    console.log(error)
-                    return { success: false, message: error };
-                }
+            await transporter.sendMail(mailOptions);
+            console.log('E-mail enviado com sucesso para:', req.body.email);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Se seu e-mail estiver registrado, um link de redefinição foi enviado.'
             });
-            return { success: true, message: 'If your email is registered, a reset link has been sent.' };
-
         } catch (error) {
-
+            console.error('Erro ao enviar o e-mail:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Erro ao enviar o e-mail. Tente novamente mais tarde.'
+            });
         }
     }
+
 
     static async handlePassword(req, res) {
         try {
@@ -176,11 +186,11 @@ export default class AuthCtrl {
                     "mensagem": "E-mail não fornecido."
                 });
             }
-    
+
             const usuario = new Usuario(0);
-    
+
             const usuarios = await usuario.consultar(email);
-    
+
             if (usuarios.length > 0) {
                 return resposta.status(200).json({
                     "status": true,
