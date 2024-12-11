@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import NodeMailer from 'nodemailer'
 import conectar from '../Persistencia/Conexao.js'
 
+
 export default class AuthCtrl {
     static async login(requisicao, resposta) {
         resposta.type('application/json');
@@ -64,11 +65,11 @@ export default class AuthCtrl {
                 host: "sandbox.smtp.mailtrap.io",
                 port: 2525,
                 auth: {
-                  user: "d18b36cbe6401a",
-                  pass: "d09032ab9bdee6"
+                    user: "d18b36cbe6401a",
+                    pass: "d09032ab9bdee6"
                 }
             });
-            console.log('tranasporter',token)
+            console.log('tranasporter', token)
             const resetLink = `https://localhost:3000/ConfirmarRedefinicao/${token}`;
             console.log(resetLink)
             const mailOptions = {
@@ -78,16 +79,16 @@ export default class AuthCtrl {
                 text: `Você solicitou uma redefinição de senha. Clique no link para redefinir sua senha: ${resetLink}`,
                 html: `<p>Você solicitou uma redefinição de senha. Clique no link para redefinir sua senha:<br><br><a>${resetLink}</a> </p>`
             };
-    
-            transporter.sendMail(mailOptions,function(error){
-                if(error) {
+
+            transporter.sendMail(mailOptions, function (error) {
+                if (error) {
                     console.log(error)
-                    return {success: false, message: error };
+                    return { success: false, message: error };
                 }
             });
-            return {success: true,  message: 'If your email is registered, a reset link has been sent.' };
+            return { success: true, message: 'If your email is registered, a reset link has been sent.' };
 
-        } catch(error ) {
+        } catch (error) {
 
         }
     }
@@ -110,25 +111,25 @@ export default class AuthCtrl {
                     message: "Invalid or expired token.",
                 });
             }
-    
+
             const userEmail = decoded.email;
             const conexao = await conectar();
             const sql = `UPDATE usuarios SET senha = ? WHERE email = ?`;
             const [resultados] = await conexao.execute(sql, [password, userEmail]);
-    
+
             if (resultados.affectedRows === 0) {
                 return res.status(404).json({
                     success: false,
                     message: "User not found.",
                 });
             }
-    
+
             console.log('Password updated for user:', userEmail);
             return res.status(200).json({
                 success: true,
                 message: "Password updated successfully.",
             });
-    
+
         } catch (error) {
             console.error("Error in handlePassword:", error.message);
             return res.status(500).json({
@@ -137,17 +138,17 @@ export default class AuthCtrl {
             });
         }
     }
-    
-    
+
+
 
     static async obterUsuarioLogado(requisicao, resposta) {
         resposta.type('application/json');
         try {
-            const usuario = requisicao.session.usuario; 
+            const usuario = requisicao.session.usuario;
             if (usuario) {
                 resposta.status(200).json({
                     "status": true,
-                    "nome": usuario[0].nome, 
+                    "nome": usuario[0].nome,
                     "email": usuario[0].email
                 });
             } else {
@@ -163,5 +164,43 @@ export default class AuthCtrl {
             });
         }
     }
-    
+
+    static async verificarEmail(requisicao, resposta) {
+        resposta.type('application/json');
+
+        
+        try {
+            const { email } = requisicao.body;
+            console.log('req body ' + email)
+            if (!email) {
+                return resposta.status(400).json({
+                    "status": false,
+                    "mensagem": "E-mail não fornecido."
+                });
+            }
+
+            const usuario = new Usuario(0);
+
+            const usuarios = await usuario.consultar(email);
+
+            if (usuarios.lenght > 0) {
+                return resposta.status(200).json({
+                    "status": true,
+                    "mensagem": "E-mail encontrado",
+                    "email": usuarios[0].email
+                });
+            } else {
+                return resposta.status(404).json({
+                    "status": false,
+                    "mensagem": "E-mail não registrado"
+                });
+            }
+        } catch (erro) {
+            console.error("Erro ao verificar e-mail:", erro);
+            return resposta.status(500).json({
+                "status": false,
+                "mensagem": "Erro ao verificar e-mail"
+            });
+        }
+    }
 }

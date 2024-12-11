@@ -17,8 +17,18 @@ const ConfirmarRedefinirSenha = () => {
     const { token } = useParams();
 
     const handleRedefinirSenha = async (e) => {
+        
         e.preventDefault();
         try {
+            if (newPassword !== confirmNewPassword) {
+                setError('As senhas não coincidem. Por favor, verifique e tente novamente.');
+                return;
+            }
+    
+            if (newPassword.length < 6) {
+                setError('A senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
             console.log('Enviando dados para o servidor:', { token, newPassword });
 
             const authServico = new AuthServico();
