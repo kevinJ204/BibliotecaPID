@@ -138,7 +138,36 @@ class AuthServico {
             return null;
         }
     }
+
+    async verificarEmail(email) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/verificar-email`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+                credentials: 'include'
+            });
+    
+            if (!response.ok) {
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.mensagem || `Erro ao verificar e-mail: ${response.statusText}`);
+            }
+    
+            const dados = await response.json();
+            return dados;
+        } catch (error) {
+            console.error('Erro ao verificar e-mail:', error);
+            return { status: false, mensagem: "Erro ao verificar e-mail. Tente novamente mais tarde." };
+        }
+    }
+    
+    
     
 }
+
+
 
 export default AuthServico;
