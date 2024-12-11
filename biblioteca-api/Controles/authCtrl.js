@@ -64,8 +64,8 @@ export default class AuthCtrl {
                 host: "sandbox.smtp.mailtrap.io",
                 port: 2525,
                 auth: {
-                  user: "d18b36cbe6401a",
-                  pass: "d09032ab9bdee6"
+                  user: "d2d8ef94233039",
+                  pass: "3311a527d499e7"
                 }
             });
             console.log('tranasporter',token)

@@ -66,7 +66,6 @@ class AlunoServico {
             if (!response.ok) {
                 const errorResponse = await response.json();
                 throw new Error(errorResponse.mensagem || `Erro ao adicionar aluno: ${response.statusText}`);
-                throw new Error(`Erro ao adicionar aluno: ${response.statusText}`);
             }
             const novoAluno = await response.json();
             return novoAluno;
