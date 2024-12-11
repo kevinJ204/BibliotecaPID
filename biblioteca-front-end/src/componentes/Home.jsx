@@ -78,8 +78,6 @@ const Home = () => {
                 <div className="custom-rectangle">
                     <div className="rectangle-content">
                         <div className="rectangle-title">Bem-vindo, {userNome|| "usuário"}</div>
-                        <div className="rectangle-subtitle">Use a nossa nova função, cadastrar livros.</div>
-                        <Link to="/GerenciarTitulos" className="rectangle-button">CADASTRAR</Link>
                     </div>
                 </div>
 
@@ -101,7 +99,19 @@ const Home = () => {
                             </Link>
                             <Link to="/GerenciarGeneros" className="square">
                                 <div className="square-background"></div>
-                                <div className="square-label">GERENCIAR Gêneros</div>
+                                <div className="square-label">GERENCIAR GÊNEROS</div>
+                            </Link>
+                            <Link to="/GerenciarExemplares" className="square">
+                                <div className="square-background"></div>
+                                <div className="square-label">GERENCIAR EXEMPLARES</div>
+                            </Link>
+                            <Link to="/GerenciarEmprestimos" className="square">
+                                <div className="square-background"></div>
+                                <div className="square-label">GERENCIAR EMPRÉSTIMOS</div>
+                            </Link>
+                            <Link to="/GerenciarAutores" className="square">
+                                <div className="square-background"></div>
+                                <div className="square-label">GERENCIAR AUTORES</div>
                             </Link>
                         </div>
                     </div>
