@@ -15,24 +15,25 @@ const RedefinirSenha = () => {
     const handleRedefinirSenha = async (e) => {
         e.preventDefault();
 
-       
-
         try {
-            console.log('Enviando dados para o servidor:', { email, newPassword });
-            
             const authServico = new AuthServico();
-            console.log('mandei pro back redefinicao de senha',email)
-            const result = await authServico.resetPassword(email);
-            if (result && result.status) {
-                navigate('/');
-            } else {
-                setError(result ? result.mensagem : 'Erro ao fazer login. Tente novamente mais tarde.');
+            
+            const result = await authServico.verificarEmail(email);
+            
+            if (!result || !result.status) {
+                setError('E-mail não registrado. Por favor, verifique e tente novamente.');
+                return;
             }
-    
 
-            setSuccess('Senha redefinida com sucesso!');
-            setError('');
-            setTimeout(() => navigate('/'), 2000);
+            const resetResult = await authServico.resetPassword(email);
+
+            if (resetResult && resetResult.status) {
+                setSuccess('E-mail de redefinição de senha enviado com sucesso!');
+                setError('');
+                setTimeout(() => navigate('/'), 2000);
+            } else {
+                setError(resetResult ? resetResult.mensagem : 'Erro ao enviar e-mail. Tente novamente mais tarde.');
+            }
         } catch (error) {
             setError('Erro ao redefinir a senha. Tente novamente mais tarde.');
         }
@@ -56,24 +57,6 @@ const RedefinirSenha = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    {/* <label htmlFor="new-password">Nova Senha</label> */}
-                   {/*  <input
-                        type="password"
-                        id="new-password"
-                        placeholder="Nova Senha"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        required
-                    />
-                    <label htmlFor="confirm-new-password">Confirmar Nova Senha</label>
-                    <input
-                        type="password"
-                        id="confirm-new-password"
-                        placeholder="Confirmar Nova Senha"
-                        value={confirmNewPassword}
-                        onChange={(e) => setConfirmNewPassword(e.target.value)}
-                        required
-                    /> */}
                     <button type="submit">ENVIAR CÓDIGO</button>
                 </form>
             </div>
