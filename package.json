@@ -1,4 +1,12 @@
 {
+  "name": "biblioteca-pid",
+  "version": "1.0.0",
+  "description": "Sistema de biblioteca PID",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "start:dev": "concurrently \"cd biblioteca-api && npm start\" \"cd biblioteca-front-end && npm start\""
+  },
   "dependencies": {
     "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2"
