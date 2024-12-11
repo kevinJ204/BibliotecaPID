@@ -2,6 +2,7 @@
 
 # certs
 biblioteca-api/certs/chave.key
+biblioteca-api/certs/certificado.crt
 
 # dependencies
 /node_modules
